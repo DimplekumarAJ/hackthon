@@ -3,415 +3,250 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Portal Access & Sign Up — Smart Civic Waste Routing Mysuru</title>
+  <title>Portal Access — Smart Civic Waste Routing Mysuru</title>
   
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"/>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              dark: '#0f172a'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
   
-  <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./assets/styles.css"/>
-
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <style>
-    /* Fullscreen background slider styling */
-    .bg-slide {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transition: opacity 1.2s ease-in-out, transform 6s ease-out;
-      transform: scale(1.04);
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .bg-slide.active {
-      opacity: 1;
-      transform: scale(1);
-    }
-    .glass-card {
-      background: rgba(15, 23, 42, 0.88);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-    }
-    /* Floating toast */
-    .toast-box {
+    .toast-container {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 24px;
+      right: 24px;
       z-index: 999999;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-width: 400px;
     }
-    .toast-item {
-      padding: 12px 16px;
-      border-radius: 12px;
-      color: white;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      animation: slideIn 0.3s ease-out;
+    .toast {
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes slideIn {
+    @keyframes slideInRight {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
+    .bg-mesh {
+      background: radial-gradient(at 0% 0%, rgba(22, 163, 74, 0.25) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.95) 0px, transparent 50%),
+                  radial-gradient(at 50% 50%, rgba(2, 132, 199, 0.2) 0px, transparent 50%),
+                  #090d16;
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex items-center justify-center relative overflow-hidden font-sans">
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased flex items-center justify-center p-0 sm:p-6 lg:p-10">
 
-  <!-- DYNAMIC MYSURU PHOTOS BACKGROUND CAROUSEL -->
-  <div id="bg-slides-container" class="absolute inset-0 pointer-events-none">
-    <div class="bg-slide active" style="background-image: url('./assets/mysuru-palace.jpg');" data-title="Mysore Palace (Daylight)" data-sub="Royal Indo-Saracenic Heritage Architecture"></div>
-    <div class="bg-slide" style="background-image: url('./assets/mysuru-palace-night.jpg');" data-title="Mysore Palace at Night" data-sub="Illuminated with Nearly 100,000 Glowing Bulbs"></div>
-    <div class="bg-slide" style="background-image: url('./assets/chamundi-hill.jpg');" data-title="Chamundi Hill & Temple" data-sub="Panoramic Vista Overlooking Greater Mysuru"></div>
-    <div class="bg-slide" style="background-image: url('./assets/st-philomenas.jpg');" data-title="St. Philomena's Cathedral" data-sub="Towering Neo-Gothic Spires & Grounds"></div>
-  </div>
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
 
-  <!-- Ambient Dark Gradient Scrim -->
-  <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-slate-950/40 pointer-events-none"></div>
-
-  <!-- Toast Notification Stack -->
-  <div id="toast-container" class="toast-box"></div>
-
-  <!-- Top Bar: Back to Home & Active Mysuru Photo Pill -->
-  <header class="absolute top-0 inset-x-0 z-30 flex items-center justify-between p-5 max-w-7xl mx-auto">
-    <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/85 hover:bg-slate-900 text-white text-xs font-semibold backdrop-blur-md border border-white/15 transition-all shadow-lg">
-      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-      Return to Landing Page
-    </a>
-
-    <!-- Active Photo Info Pill with Indicators -->
-    <div class="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/85 backdrop-blur-md border border-white/15 text-white shadow-lg">
-      <span class="size-2 rounded-full bg-amber-400 animate-pulse"></span>
-      <div class="text-left">
-        <span id="active-photo-title" class="block text-xs font-bold leading-tight">Mysore Palace (Daylight)</span>
-        <span id="active-photo-sub" class="block text-[10px] text-slate-400 font-mono leading-tight">Royal Indo-Saracenic Heritage Architecture</span>
-      </div>
-      <div class="flex gap-1.5 ml-2 border-l border-white/20 pl-3">
-        <button onclick="changePhoto(0)" class="photo-dot size-2 rounded-full bg-amber-400 w-4 transition-all"></button>
-        <button onclick="changePhoto(1)" class="photo-dot size-2 rounded-full bg-white/40 transition-all"></button>
-        <button onclick="changePhoto(2)" class="photo-dot size-2 rounded-full bg-white/40 transition-all"></button>
-        <button onclick="changePhoto(3)" class="photo-dot size-2 rounded-full bg-white/40 transition-all"></button>
-      </div>
-    </div>
-  </header>
-
-  <!-- AUTH CONTAINER / VIEWS -->
-  <main class="relative z-20 w-full max-w-xl px-4 py-16">
+  <!-- MAIN SPLIT-SCREEN AUTH CONTAINER -->
+  <div class="w-full max-w-6xl min-h-[620px] bg-white sm:rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
     
-    <!-- VIEW 1: AUTHENTICATION (SIGN IN & SIGN UP) -->
-    <div id="auth-card" class="glass-card rounded-3xl p-7 sm:p-8 text-white shadow-2xl animate-rise">
-      <div class="text-center mb-6">
-        <div class="inline-grid size-12 place-items-center rounded-2xl bg-primary text-white shadow-lg mx-auto mb-2.5">
-          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="6" r="2"></circle>
-            <path d="M8 18h3a3 3 0 0 0 3-3V9a3 3 0 0 1 3-3"></path>
-          </svg>
-        </div>
-        <h1 class="text-2xl font-bold font-display tracking-tight">Smart Civic Waste Routing</h1>
-        <p class="text-xs text-slate-400 font-mono uppercase mt-0.5">Mysuru Civic-Tech Portal</p>
+    <!-- LEFT SIDE: CIVIC BRANDING & HIGHLIGHTS (5 Cols) -->
+    <div class="lg:col-span-5 bg-mesh p-8 sm:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+      
+      <!-- Top Brand Logo -->
+      <div>
+        <a href="index.html" class="inline-flex items-center gap-3 group">
+          <div class="size-11 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition transform">
+            ♻️
+          </div>
+          <div>
+            <span class="block font-bold text-base tracking-tight text-white">Smart Civic Waste Routing</span>
+            <span class="block text-[11px] text-emerald-400 font-mono tracking-wide uppercase">Mysuru Governance Hub</span>
+          </div>
+        </a>
       </div>
 
-      <!-- First User Rule Alert Badge -->
-      <div class="mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs text-amber-200">
-        <span class="text-amber-400 text-base leading-none mt-0.5">✨</span>
-        <div>
-          <strong class="text-amber-300 block mb-0.5">Admin Bootstrap Active:</strong>
-          The <strong>1st person</strong> who creates an account automatically becomes the <strong>System Admin</strong>. Later signups are registered as <strong>Users</strong>. The Admin can add officers and authorities.
+      <!-- Middle Feature Callouts -->
+      <div class="my-8 space-y-5">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
+          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Jurisdiction-Aware Civic Engine
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+          "Citizens report the waste. The system figures out who is responsible."
+        </h2>
+
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Automated municipal routing connecting citizens with Mysuru City Corporation (MCC), Gram Panchayats, and Town Panchayats.
+        </p>
+
+        <!-- Mini Stats Cards -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+            <span class="block text-xl font-bold text-white font-mono">65 Wards</span>
+            <span class="block text-[11px] text-slate-400">MCC Urban Coverage</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+            <span class="block text-xl font-bold text-emerald-400 font-mono">4.2 Hours</span>
+            <span class="block text-[11px] text-slate-400">Average Ward SLA</span>
+          </div>
         </div>
       </div>
 
-      <!-- Current Registration Status Indicator -->
-      <div id="status-pill" class="mb-5 text-center">
-        <!-- Injected dynamically: shows whether admin exists or if 1st spot is open -->
+      <!-- Bottom Return Link -->
+      <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+        <a href="index.html" class="inline-flex items-center gap-1.5 hover:text-white transition font-medium">
+          &larr; Return to Landing Page
+        </a>
+        <span class="font-mono text-[10px]">Mysuru · HackMysuru 2026</span>
       </div>
-
-      <!-- Tab Switcher -->
-      <div class="grid grid-cols-2 p-1 bg-slate-800/80 rounded-xl mb-6 border border-white/5">
-        <button id="tab-signin" onclick="setAuthTab('signin')" class="py-2.5 text-xs font-bold rounded-lg bg-white text-slate-900 shadow transition-all">
-          Sign In
-        </button>
-        <button id="tab-signup" onclick="setAuthTab('signup')" class="py-2.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all">
-          Create Account
-        </button>
-      </div>
-
-      <!-- SIGN IN FORM -->
-      <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Email or Username</label>
-          <input id="login-email" type="text" required placeholder="admin@mysuru.gov.in" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/70 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
-          <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/70 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
-        </div>
-
-        <button type="submit" class="w-full py-3 rounded-xl bg-primary hover:opacity-90 font-bold text-sm text-white shadow-lg transition-all cursor-pointer">
-          Sign In to Portal &rarr;
-        </button>
-
-        <div class="pt-3 border-t border-white/10 text-center">
-          <p class="text-[11px] text-slate-400 font-mono mb-2">New here? Switch to "Create Account" above to register!</p>
-        </div>
-      </form>
-
-      <!-- SIGN UP FORM -->
-      <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-3.5 hidden">
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Your Full Name</label>
-          <input id="reg-name" type="text" required placeholder="e.g. Harsha Vardhan" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/70 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Email Address</label>
-          <input id="reg-email" type="email" required placeholder="your.email@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/70 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Mobile Number</label>
-          <input id="reg-phone" type="tel" placeholder="9845012345" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/70 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-mono"/>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
-          <input id="reg-password" type="password" required placeholder="Create strong password" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/70 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
-        </div>
-
-        <button type="submit" class="w-full py-3 rounded-xl bg-primary hover:opacity-90 font-bold text-sm text-white shadow-lg transition-all cursor-pointer">
-          Create Account & Check Role &rarr;
-        </button>
-      </form>
     </div>
 
-    <!-- VIEW 2: LOGGED IN ADMIN PANEL (WHEN 1ST USER ADMIN LOGS IN) -->
-    <div id="admin-panel" class="glass-card rounded-3xl p-7 sm:p-8 text-white shadow-2xl hidden space-y-6 animate-rise">
-      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+    <!-- RIGHT SIDE: CLEAN MODERN AUTH FORM (7 Cols) -->
+    <div class="lg:col-span-7 p-6 sm:p-12 lg:p-14 flex flex-col justify-center bg-white">
+      
+      <div class="max-w-md w-full mx-auto space-y-6">
+        
+        <!-- Header -->
         <div>
-          <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-bold text-[10px] uppercase">
-            👑 System Super Admin
-          </span>
-          <h2 id="admin-welcome-name" class="text-xl font-bold font-display mt-1">Admin Control Console</h2>
-          <p class="text-xs text-slate-400">You are the 1st registered user with full authority & user creation rights.</p>
+          <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Create Account</h1>
+          <p id="auth-subtitle" class="text-sm text-slate-500 mt-1">Get access to the civic waste reporting and operations portal.</p>
         </div>
-        <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 border border-white/10">
-          Log Out
-        </button>
-      </div>
 
-      <!-- Admin Actions Grid -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-slate-800/60 p-4 rounded-2xl border border-white/5">
-          <p class="text-[10px] uppercase font-mono text-slate-400">Total Registered Users</p>
-          <p id="admin-users-count" class="text-2xl font-extrabold font-display text-white mt-1">1</p>
+        <!-- Custom Tab Switcher -->
+        <div class="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600">
+          <button id="tab-signup" onclick="setAuthTab('signup')" class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer">
+            Create Account
+          </button>
+          <button id="tab-signin" onclick="setAuthTab('signin')" class="py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer">
+            Sign In
+          </button>
         </div>
-        <div class="bg-slate-800/60 p-4 rounded-2xl border border-white/5">
-          <p class="text-[10px] uppercase font-mono text-slate-400">Active Authorities</p>
-          <p class="text-2xl font-extrabold font-display text-emerald-400 mt-1">MCC + 2 GPs</p>
-        </div>
-      </div>
 
-      <!-- Add New User / Authority by Admin -->
-      <div class="bg-slate-800/40 p-5 rounded-2xl border border-white/10 space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300 font-mono flex items-center gap-1.5">
-          <span>➕</span> Add User / Authority Officer (Admin Privileges)
-        </h3>
-        <form onsubmit="handleAdminAddUser(event)" class="space-y-3 text-xs">
-          <div class="grid grid-cols-2 gap-2.5">
-            <input id="add-user-name" type="text" required placeholder="User / Officer Name" class="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white"/>
-            <input id="add-user-email" type="email" required placeholder="Email Address" class="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white"/>
+        <!-- 1. SIGN UP FORM -->
+        <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Your Full Name</label>
+            <input id="reg-name" type="text" required placeholder="e.g. Harsha Vardhan" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
           </div>
-          <div class="grid grid-cols-2 gap-2.5">
-            <select id="add-user-role" class="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white">
-              <option value="User">Role: Citizen / User</option>
-              <option value="MCC Officer">Role: MCC Health Officer</option>
-              <option value="GP Officer">Role: Gram Panchayat Officer</option>
-              <option value="Field Crew">Role: Field Pourakarmika</option>
-              <option value="Admin">Role: Co-Admin</option>
-            </select>
-            <input id="add-user-password" type="password" required placeholder="Password" class="px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white"/>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
+            <input id="reg-email" type="email" required placeholder="your.email@example.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
           </div>
-          <button type="submit" class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow transition-all">
-            Add & Provision Account
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Mobile Number</label>
+              <input id="reg-phone" type="tel" placeholder="9845012345" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Password</label>
+              <input id="reg-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>Register & Continue to Dashboard</span>
+            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </form>
+
+        <!-- 2. SIGN IN FORM -->
+        <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
+            <input id="login-email" type="text" required placeholder="your.email@example.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Password</label>
+            </div>
+            <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>Sign In to Portal</span>
+            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </form>
+
       </div>
 
-      <!-- Users Table -->
-      <div>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono mb-2">Registered Accounts Directory</h3>
-        <div class="overflow-x-auto rounded-xl border border-white/10 max-h-48 overflow-y-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-800 text-slate-400 uppercase font-mono text-[10px]">
-              <tr>
-                <th class="px-3 py-2">Name</th>
-                <th class="px-3 py-2">Email</th>
-                <th class="px-3 py-2">Role</th>
-              </tr>
-            </thead>
-            <tbody id="admin-users-table" class="divide-y divide-white/5 font-medium">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
 
-    <!-- VIEW 3: LOGGED IN REGULAR USER / CITIZEN PORTAL -->
-    <div id="user-panel" class="glass-card rounded-3xl p-7 sm:p-8 text-white shadow-2xl hidden space-y-6 animate-rise">
-      <div class="flex items-center justify-between border-b border-white/10 pb-4">
-        <div>
-          <span class="px-2.5 py-0.5 rounded-full bg-blue-500 text-white font-mono font-bold text-[10px] uppercase">
-            Citizen / User Account
-          </span>
-          <h2 id="user-welcome-name" class="text-xl font-bold font-display mt-1">Citizen Waste Portal</h2>
-          <p class="text-xs text-slate-400">Report municipal waste & track real-time routing across Mysuru.</p>
-        </div>
-        <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 border border-white/10">
-          Log Out
-        </button>
-      </div>
-
-      <!-- Quick Report Form -->
-      <form onsubmit="handleUserSubmitWaste(event)" class="space-y-3.5 text-xs bg-slate-800/40 p-5 rounded-2xl border border-white/10">
-        <h3 class="text-xs font-bold uppercase text-amber-300 font-mono">Lodge Waste Complaint</h3>
-        <div>
-          <label class="block text-[10px] uppercase text-slate-400 mb-1">Waste Category</label>
-          <select id="user-waste-type" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white font-semibold">
-            <option value="Roadside Litter / Blackspot">Roadside Litter / Open Blackspot</option>
-            <option value="Overflowing Dumpster">Overflowing Community Dumpster</option>
-            <option value="Construction & Demolition Debris">Construction & Demolition (C&D) Debris</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] uppercase text-slate-400 mb-1">PIN Code (e.g. 570026)</label>
-            <input id="user-pin" type="text" required value="570026" maxlength="6" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white font-mono font-bold"/>
-          </div>
-          <div>
-            <label class="block text-[10px] uppercase text-slate-400 mb-1">Area / Landmark</label>
-            <input id="user-location" type="text" required placeholder="Near Bogadi Ring Road" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white"/>
-          </div>
-        </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-primary hover:opacity-90 font-bold text-white shadow">
-          Submit Complaint (Automated PIN Routing)
-        </button>
-      </form>
-
-      <!-- My Grievances List -->
-      <div>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono mb-2">My Filed Reports</h3>
-        <div id="user-complaints-list" class="space-y-2 text-xs">
-          <!-- Injected dynamically -->
-        </div>
-      </div>
-    </div>
-  </main>
+  </div>
 
   <script>
-    // --- 1. DYNAMIC MYSURU LANDMARK PHOTOS CAROUSEL ---
-    const slides = document.querySelectorAll('.bg-slide');
-    const dots = document.querySelectorAll('.photo-dot');
-    const photoTitle = document.getElementById('active-photo-title');
-    const photoSub = document.getElementById('active-photo-sub');
-    let currentSlide = 0;
-    let slideTimer;
-
-    function showSlide(index) {
-      slides.forEach((s, i) => {
-        if (i === index) {
-          s.classList.add('active');
-          if (dots[i]) {
-            dots[i].className = 'photo-dot size-2 rounded-full bg-amber-400 w-4 transition-all';
-          }
-        } else {
-          s.classList.remove('active');
-          if (dots[i]) {
-            dots[i].className = 'photo-dot size-2 rounded-full bg-white/40 transition-all';
-          }
-        }
-      });
-      if (photoTitle && slides[index]) {
-        photoTitle.innerText = slides[index].getAttribute('data-title');
-        photoSub.innerText = slides[index].getAttribute('data-sub');
-      }
-      currentSlide = index;
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+    }
+    function saveUsers(u) {
+      localStorage.setItem('civic_registered_users', JSON.stringify(u));
     }
 
-    function changePhoto(index) {
-      clearInterval(slideTimer);
-      showSlide(index);
-      startSlideLoop();
-    }
-
-    function startSlideLoop() {
-      slideTimer = setInterval(() => {
-        const next = (currentSlide + 1) % slides.length;
-        showSlide(next);
-      }, 5000);
-    }
-    startSlideLoop();
-
-    // --- 2. TOAST NOTIFICATIONS ---
-    function showToast(message, type = 'success') {
+    function showToast(msg, type = 'success') {
       const container = document.getElementById('toast-container');
       const item = document.createElement('div');
-      item.className = 'toast-item ' + (type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-rose-600');
-      item.innerHTML = '<span>' + (type === 'success' ? '✓' : type === 'warning' ? '⚠️' : '✕') + '</span> <span>' + message + '</span>';
+      item.className = 'toast px-4 py-3 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2.5 border ' + 
+        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' :
+         type === 'warning' ? 'bg-amber-500 text-white border-amber-400' :
+         'bg-rose-600 text-white border-rose-500');
+      item.innerHTML = '<span>' + (type === 'success' ? '✓' : type === 'warning' ? '⚠️' : '✕') + '</span> <span>' + msg + '</span>';
       container.appendChild(item);
       setTimeout(() => item.remove(), 4000);
     }
 
-    // --- 3. STORAGE & FIRST USER ADMIN LOGIC ---
-    // Rule: 1st person who creates an account becomes Admin. Later ones are Users.
-    function getUsers() {
-      return JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-    }
-    function saveUsers(users) {
-      localStorage.setItem('civic_registered_users', JSON.stringify(users));
-      updateStatusPill();
-    }
-
-    function updateStatusPill() {
-      const pill = document.getElementById('status-pill');
-      const users = getUsers();
-      if (users.length === 0) {
-        pill.innerHTML = '<span class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[11px] border border-amber-500/30">⚡ 0 users registered — The next signup will be System Admin!</span>';
-      } else {
-        const admin = users.find(u => u.role === 'Admin');
-        pill.innerHTML = '<span class="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[11px] border border-emerald-500/30">👑 Admin (' + (admin ? admin.name : 'Configured') + ') active · New signups will be Citizens</span>';
-      }
-    }
-    updateStatusPill();
-
-    // Tab switching (Sign In vs Sign Up)
     function setAuthTab(tab) {
-      const formSignIn = document.getElementById('signin-form');
       const formSignUp = document.getElementById('signup-form');
-      const btnIn = document.getElementById('tab-signin');
-      const btnUp = document.getElementById('tab-signup');
+      const formSignIn = document.getElementById('signin-form');
+      const btnSignUp = document.getElementById('tab-signup');
+      const btnSignIn = document.getElementById('tab-signin');
+      const title = document.getElementById('auth-title');
+      const sub = document.getElementById('auth-subtitle');
 
-      if (tab === 'signin') {
-        formSignIn.classList.remove('hidden');
-        formSignUp.classList.add('hidden');
-        btnIn.className = 'py-2.5 text-xs font-bold rounded-lg bg-white text-slate-900 shadow transition-all';
-        btnUp.className = 'py-2.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all';
-      } else {
+      if (tab === 'signup') {
         formSignUp.classList.remove('hidden');
         formSignIn.classList.add('hidden');
-        btnUp.className = 'py-2.5 text-xs font-bold rounded-lg bg-white text-slate-900 shadow transition-all';
-        btnIn.className = 'py-2.5 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all';
+        btnSignUp.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
+        btnSignIn.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
+        title.innerText = 'Create Account';
+        sub.innerText = 'Get access to the civic waste reporting and operations portal.';
+      } else {
+        formSignIn.classList.remove('hidden');
+        formSignUp.classList.add('hidden');
+        btnSignIn.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
+        btnSignUp.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
+        title.innerText = 'Welcome Back';
+        sub.innerText = 'Sign in to access your authority or citizen dashboard.';
       }
     }
 
-    // SIGN UP: Check if 1st user
     function handleSignUp(e) {
       e.preventDefault();
       const name = document.getElementById('reg-name').value.trim();
@@ -421,13 +256,14 @@
 
       const users = getUsers();
       if (users.find(u => u.email === email)) {
-        showToast('An account with this email already exists.', 'error');
+        showToast('An account with this email already exists. Please sign in.', 'error');
         return;
       }
 
-      // Check if this is the very first user!
+      // Backend logic: 1st person who creates an account becomes Super Admin! Subsequent signups are citizens.
       const isFirst = users.length === 0;
-      const role = isFirst ? 'Admin' : 'User';
+      const role = isFirst ? 'admin' : 'citizen';
+      const authority = isFirst ? 'MCC' : 'Citizen';
 
       const newUser = {
         id: 'u_' + Date.now(),
@@ -436,182 +272,40 @@
         phone,
         password,
         role,
+        authority,
         createdAt: new Date().toISOString()
       };
 
       users.push(newUser);
       saveUsers(users);
-
       sessionStorage.setItem('current_user', JSON.stringify(newUser));
 
-      if (isFirst) {
-        showToast('🎉 Congratulations! You are the 1st user and have become the System Admin!', 'success');
-        openAdminDashboard(newUser);
-      } else {
-        showToast('Account created successfully as Citizen / User!', 'success');
-        openUserDashboard(newUser);
-      }
+      showToast('Account registered successfully! Redirecting...', 'success');
+      
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 600);
     }
 
-    // SIGN IN
     function handleSignIn(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim().toLowerCase();
       const password = document.getElementById('login-password').value;
 
       const users = getUsers();
-      const found = users.find(u => (u.email === email || u.name.toLowerCase() === email) && u.password === password);
+      const user = users.find(u => (u.email === email || u.name.toLowerCase() === email) && u.password === password);
 
-      if (!found) {
-        showToast('Invalid credentials. If you have not created an account yet, click "Create Account".', 'error');
+      if (!user) {
+        showToast('Invalid email or password. Please check your credentials.', 'error');
         return;
       }
 
-      sessionStorage.setItem('current_user', JSON.stringify(found));
-      showToast('Welcome back, ' + found.name + '!', 'success');
+      sessionStorage.setItem('current_user', JSON.stringify(user));
+      showToast('Welcome back, ' + user.name + '!', 'success');
 
-      if (found.role === 'Admin') {
-        openAdminDashboard(found);
-      } else {
-        openUserDashboard(found);
-      }
-    }
-
-    // Log Out
-    function handleLogout() {
-      sessionStorage.removeItem('current_user');
-      document.getElementById('admin-panel').classList.add('hidden');
-      document.getElementById('user-panel').classList.add('hidden');
-      document.getElementById('auth-card').classList.remove('hidden');
-      showToast('Logged out successfully.', 'warning');
-      updateStatusPill();
-    }
-
-    // Open Admin Dashboard
-    function openAdminDashboard(adminUser) {
-      document.getElementById('auth-card').classList.add('hidden');
-      document.getElementById('user-panel').classList.add('hidden');
-      const panel = document.getElementById('admin-panel');
-      panel.classList.remove('hidden');
-
-      document.getElementById('admin-welcome-name').innerText = adminUser.name + ' (Admin)';
-      renderAdminUsers();
-    }
-
-    function renderAdminUsers() {
-      const users = getUsers();
-      document.getElementById('admin-users-count').innerText = users.length;
-      const tbody = document.getElementById('admin-users-table');
-      tbody.innerHTML = '';
-
-      users.forEach(u => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-white/5';
-        tr.innerHTML = `
-          <td class="px-3 py-2 font-bold">${u.name}</td>
-          <td class="px-3 py-2 font-mono text-slate-400">${u.email}</td>
-          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.role === 'Admin' ? 'bg-amber-400 text-slate-950' : 'bg-blue-500 text-white'}">${u.role}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Admin Adds New User
-    function handleAdminAddUser(e) {
-      e.preventDefault();
-      const name = document.getElementById('add-user-name').value.trim();
-      const email = document.getElementById('add-user-email').value.trim().toLowerCase();
-      const role = document.getElementById('add-user-role').value;
-      const password = document.getElementById('add-user-password').value;
-
-      const users = getUsers();
-      if (users.find(u => u.email === email)) {
-        showToast('Email already in use.', 'error');
-        return;
-      }
-
-      users.push({
-        id: 'u_' + Date.now(),
-        name,
-        email,
-        password,
-        role,
-        createdAt: new Date().toISOString()
-      });
-
-      saveUsers(users);
-      showToast('User ' + name + ' added with role: ' + role, 'success');
-      e.target.reset();
-      renderAdminUsers();
-    }
-
-    // Open User Dashboard
-    function openUserDashboard(user) {
-      document.getElementById('auth-card').classList.add('hidden');
-      document.getElementById('admin-panel').classList.add('hidden');
-      const panel = document.getElementById('user-panel');
-      panel.classList.remove('hidden');
-
-      document.getElementById('user-welcome-name').innerText = 'Welcome, ' + user.name;
-      renderUserComplaints();
-    }
-
-    // User Submits Waste Grievance
-    function handleUserSubmitWaste(e) {
-      e.preventDefault();
-      const wasteType = document.getElementById('user-waste-type').value;
-      const pin = document.getElementById('user-pin').value.trim();
-      const loc = document.getElementById('user-location').value.trim();
-
-      const newId = 'MYW-2026-' + Math.floor(1000 + Math.random() * 9000);
-      let auth = 'Mysuru City Corporation (Ward 38 - Bogadi)';
-      if (pin.startsWith('571128')) auth = 'Bogadi Gram Panchayat';
-      else if (pin.startsWith('571311')) auth = 'Kadakola Town Panchayat';
-
-      const complaints = JSON.parse(localStorage.getItem('civic_user_complaints') || '[]');
-      complaints.unshift({
-        id: newId,
-        wasteType,
-        pin,
-        location: loc,
-        authority: auth,
-        status: 'ROUTED',
-        date: new Date().toLocaleDateString()
-      });
-      localStorage.setItem('civic_user_complaints', JSON.stringify(complaints));
-
-      showToast('Complaint ' + newId + ' successfully routed to ' + auth + '!', 'success');
-      e.target.reset();
-      renderUserComplaints();
-    }
-
-    function renderUserComplaints() {
-      const list = document.getElementById('user-complaints-list');
-      const complaints = JSON.parse(localStorage.getItem('civic_user_complaints') || '[]');
-      if (complaints.length === 0) {
-        list.innerHTML = '<p class="text-slate-500 italic">No reports filed yet. Use the form above to lodge a complaint.</p>';
-        return;
-      }
-      list.innerHTML = complaints.map(c => `
-        <div class="p-3 bg-slate-800/60 rounded-xl border border-white/5 flex items-center justify-between">
-          <div>
-            <span class="font-mono text-primary font-bold block">${c.id}</span>
-            <span class="font-bold text-white">${c.wasteType}</span>
-            <span class="text-slate-400 text-[11px] block">${c.location} (PIN ${c.pin}) · ${c.authority}</span>
-          </div>
-          <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold">
-            ${c.status}
-          </span>
-        </div>
-      `).join('');
-    }
-
-    // Check if previously logged in this session
-    const saved = sessionStorage.getItem('current_user');
-    if (saved) {
-      const u = JSON.parse(saved);
-      if (u.role === 'Admin') openAdminDashboard(u);
-      else openUserDashboard(u);
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
     }
   </script>
 </body>
