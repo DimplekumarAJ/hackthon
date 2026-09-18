@@ -342,6 +342,43 @@
           </div>
         </div>
 
+        <!-- ENTITIES MATRIX CONSOLE (MCC / GP / TP / Combined Panel) -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span id="entity-matrix-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono text-[11px] font-bold border border-emerald-200">
+                  🏛️ MCC Urban Panel
+                </span>
+                <span class="text-xs text-slate-500 font-medium">18 Governance Entities & Operational Desks</span>
+              </div>
+              <h3 id="entity-matrix-title" class="text-lg font-bold text-slate-900">MCC Panel — Entities & Field Operations Roster</h3>
+              <p id="entity-matrix-sub" class="text-xs text-slate-500">Official registry of entities under Mysuru City Corporation (MCC) jurisdiction. Click any entity to access its live data table.</p>
+            </div>
+            
+            <!-- Authority Scope Selector Tabs -->
+            <div id="authority-scope-tabs" class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl">
+              <button onclick="setAuthorityScope('all')" id="scope-tab-all" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+                🌐 All Mysuru
+              </button>
+              <button onclick="setAuthorityScope('mcc')" id="scope-tab-mcc" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-emerald-900 shadow-xs">
+                🏛️ MCC Panel
+              </button>
+              <button onclick="setAuthorityScope('gp')" id="scope-tab-gp" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+                🏡 Gram Panchayat
+              </button>
+              <button onclick="setAuthorityScope('tp')" id="scope-tab-tp" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
+                🏭 Town Panchayat
+              </button>
+            </div>
+          </div>
+
+          <!-- 18 ENTITY TILES GRID -->
+          <div id="entities-matrix-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+            <!-- Dynamically populated via renderEntitiesMatrix() -->
+          </div>
+        </div>
+
         <!-- Debris Hotspot Map & Table -->
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
           <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -2077,6 +2114,304 @@
       window.location.href = 'auth.html?tab=signin';
     }
 
+    let currentAuthorityScope = 'mcc';
+
+    function setAuthorityScope(scope) {
+      currentAuthorityScope = scope;
+      ['all', 'mcc', 'gp', 'tp'].forEach(k => {
+        const tab = document.getElementById('scope-tab-' + k);
+        if (tab) {
+          if (k === scope) {
+            tab.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-emerald-950 shadow-xs border border-emerald-200';
+          } else {
+            tab.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+          }
+        }
+      });
+      renderEntitiesMatrix(scope);
+      if (scope !== 'all') {
+        selectDepartment(scope);
+        filterOfficersByDept(scope);
+      } else {
+        filterOfficersByDept('all');
+      }
+    }
+
+    function renderEntitiesMatrix(scope = currentAuthorityScope) {
+      const grid = document.getElementById('entities-matrix-grid');
+      const badge = document.getElementById('entity-matrix-badge');
+      const title = document.getElementById('entity-matrix-title');
+      const sub = document.getElementById('entity-matrix-sub');
+      if (!grid) return;
+
+      const dMcc = departmentsState.mcc || DEFAULT_DEPARTMENTS_CONFIG.mcc;
+      const dGp = departmentsState.gp || DEFAULT_DEPARTMENTS_CONFIG.gp;
+      const dTp = departmentsState.tp || DEFAULT_DEPARTMENTS_CONFIG.tp;
+
+      let authTitle = 'MCC Panel — Entities';
+      let authBadge = '🏛️ MCC Urban Panel';
+      let badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      let scopeSub = 'Official registry of entities under Mysuru City Corporation (MCC) jurisdiction. Click any entity to access its live data table.';
+      
+      let authorityName = 'Mysuru City Corporation (MCC)';
+      let wardsText = '65 Urban Wards (Zone 1 to 9)';
+      let areasText = 'Palace Core, Gokulam, Kuvempunagar, Saraswathipuram';
+      let pinsText = '570001, 570002, 570004, 570008, 570023';
+      let officerName = dMcc.headName || 'MCC Executive Officer';
+      let roleName = 'MCC Admin';
+
+      if (scope === 'gp') {
+        authTitle = 'Gram Panchayat Panel — Entities';
+        authBadge = '🏡 Gram Panchayat Rural Panel';
+        badgeColor = 'bg-amber-100 text-amber-800 border-amber-200';
+        scopeSub = 'Official registry of entities under Bogadi Gram Panchayat rural jurisdiction. Click any entity to access its live data table.';
+        authorityName = dGp.organization || 'Bogadi Gram Panchayat';
+        wardsText = '4 GP Wards (Wards 1-4)';
+        areasText = 'Bogadi Village, Maratikyathanahalli, Belavadi Rural, Rammanahalli';
+        pinsText = dGp.pinCodes || '570026, 571130, 570028';
+        officerName = dGp.headName || 'Gram Panchayat PDO';
+        roleName = 'Panchayat Admin';
+      } else if (scope === 'tp') {
+        authTitle = 'Town Panchayat Panel — Entities';
+        authBadge = '🏭 Town Panchayat Suburban Panel';
+        badgeColor = 'bg-blue-100 text-blue-800 border-blue-200';
+        scopeSub = 'Official registry of entities under Hootagalli Town Panchayat suburban jurisdiction. Click any entity to access its live data table.';
+        authorityName = dTp.organization || 'Hootagalli Town Panchayat (CMC)';
+        wardsText = '8 TP Wards (Wards 1-8)';
+        areasText = 'Hootagalli Town, Belagola KIADB, Koorgalli Industrial Sectors';
+        pinsText = dTp.pinCodes || '570018, 571607, 570016';
+        officerName = dTp.headName || 'Town Panchayat Chief Officer';
+        roleName = 'Town Panchayat Admin';
+      } else if (scope === 'all') {
+        authTitle = 'Mysuru Central Command — All Entities';
+        authBadge = '🌐 Multi-Agency Overview';
+        badgeColor = 'bg-slate-100 text-slate-800 border-slate-300';
+        scopeSub = 'Comprehensive central oversight across MCC Urban, Gram Panchayat Rural, and Town Panchayat Suburban entities.';
+        authorityName = '3 Civic Authorities (MCC + GP + TP)';
+        wardsText = '77 Wards (65 MCC + 4 GP + 8 TP)';
+        areasText = 'Urban Core + Outer Ring Road + Industrial Hubs';
+        pinsText = 'All Mysuru PIN Codes (570001 to 571607)';
+        officerName = 'Super Administrator';
+        roleName = 'Super Admin';
+      }
+
+      if (badge) {
+        badge.innerText = authBadge;
+        badge.className = 'px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold border ' + badgeColor;
+      }
+      if (title) title.innerText = authTitle;
+      if (sub) sub.innerText = scopeSub;
+
+      // 18 Standard Entities
+      const entities = [
+        {
+          id: 'e-authority',
+          icon: scope === 'gp' ? '🏡' : (scope === 'tp' ? '🏭' : '🏛️'),
+          name: scope === 'gp' ? 'GP Authority' : (scope === 'tp' ? 'TP Authority' : (scope === 'all' ? 'All Authorities' : 'MCC Authority')),
+          value: authorityName,
+          sub: roleName + ' · ' + officerName,
+          target: 'authorities',
+          badge: 'Active Profile',
+          badgeColor: 'bg-emerald-50 text-emerald-700'
+        },
+        {
+          id: 'e-wards',
+          icon: '🗺️',
+          name: 'Wards',
+          value: wardsText,
+          sub: 'Jurisdiction Division',
+          target: 'pinmapping',
+          badge: 'Configured',
+          badgeColor: 'bg-blue-50 text-blue-700'
+        },
+        {
+          id: 'e-areas',
+          icon: '📍',
+          name: 'Areas / Localities',
+          value: areasText,
+          sub: 'Geographic Coverage',
+          target: 'pinmapping',
+          badge: 'Active Hubs',
+          badgeColor: 'bg-purple-50 text-purple-700'
+        },
+        {
+          id: 'e-pincodes',
+          icon: '📮',
+          name: 'PIN Codes',
+          value: pinsText,
+          sub: 'Postal Routing Key',
+          target: 'pinmapping',
+          badge: 'Auto-Routed',
+          badgeColor: 'bg-amber-50 text-amber-700'
+        },
+        {
+          id: 'e-citizens',
+          icon: '👥',
+          name: 'Applicants / Citizens',
+          value: 'Live Registered Citizens',
+          sub: 'Verified Portal Accounts',
+          target: 'applications',
+          badge: 'Verified',
+          badgeColor: 'bg-emerald-50 text-emerald-700'
+        },
+        {
+          id: 'e-properties',
+          icon: '🏢',
+          name: 'Properties / Buildings',
+          value: 'Demolition Sites & Plots',
+          sub: 'Tagged with Ward & PIN',
+          target: 'applications',
+          badge: 'Tracked',
+          badgeColor: 'bg-slate-100 text-slate-700'
+        },
+        {
+          id: 'e-applications',
+          icon: '📁',
+          name: 'Applications',
+          value: 'Clearance Requests',
+          sub: 'C&D Debris Pickup',
+          target: 'applications',
+          badge: 'Live Queue',
+          badgeColor: 'bg-teal-50 text-teal-700'
+        },
+        {
+          id: 'e-documents',
+          icon: '📑',
+          name: 'Documents',
+          value: 'Site Photos & NOC Proofs',
+          sub: 'Structural Stability Files',
+          target: 'applications',
+          badge: 'Attached',
+          badgeColor: 'bg-indigo-50 text-indigo-700'
+        },
+        {
+          id: 'e-inspectors',
+          icon: '👷',
+          name: 'Inspectors / Officers',
+          value: officerName,
+          sub: roleName,
+          target: 'inspectors',
+          badge: 'Duty Active',
+          badgeColor: 'bg-emerald-50 text-emerald-700'
+        },
+        {
+          id: 'e-inspections',
+          icon: '🔍',
+          name: 'Inspections',
+          value: 'Field Verification Audits',
+          sub: 'Debris Tonnage Checks',
+          target: 'inspections',
+          badge: 'SLA Tracked',
+          badgeColor: 'bg-amber-50 text-amber-700'
+        },
+        {
+          id: 'e-dem-req',
+          icon: '🏗️',
+          name: 'Demolition Requests',
+          value: 'Building Demolition Intake',
+          sub: 'Urban & Rural Approvals',
+          target: 'demolition_requests',
+          badge: 'Intake Desk',
+          badgeColor: 'bg-orange-50 text-orange-700'
+        },
+        {
+          id: 'e-dem-cases',
+          icon: '⏳',
+          name: 'Demolition Cases',
+          value: 'Active Site Clearance',
+          sub: 'Rubble Haulage & Recycler',
+          target: 'demolition_status',
+          badge: 'Operations',
+          badgeColor: 'bg-rose-50 text-rose-700'
+        },
+        {
+          id: 'e-certificates',
+          icon: '📜',
+          name: 'Certificates',
+          value: 'Green Disposal Certificates',
+          sub: 'Official Digital QR Stamp',
+          target: 'certificates',
+          badge: 'Clearance NOC',
+          badgeColor: 'bg-emerald-50 text-emerald-700'
+        },
+        {
+          id: 'e-water',
+          icon: '💧',
+          name: 'Water Connections',
+          value: '100% Rebate Verification',
+          sub: 'Water Board Reconnection NOC',
+          target: 'utilities',
+          badge: 'Rebate Desk',
+          badgeColor: 'bg-cyan-50 text-cyan-700'
+        },
+        {
+          id: 'e-power',
+          icon: '⚡',
+          name: 'Electricity Connections',
+          value: 'CHESCOM Demolition NOC',
+          sub: 'Power Reconnection Permit',
+          target: 'utilities',
+          badge: 'CHESCOM Link',
+          badgeColor: 'bg-yellow-50 text-yellow-700'
+        },
+        {
+          id: 'e-notifications',
+          icon: '🔔',
+          name: 'Notifications',
+          value: 'SMS & Email Broadcast',
+          sub: 'Karnataka SMS Gateway',
+          target: 'notifications',
+          badge: 'Auto-Dispatch',
+          badgeColor: 'bg-pink-50 text-pink-700'
+        },
+        {
+          id: 'e-reports',
+          icon: '📈',
+          name: 'Reports',
+          value: 'Monthly Analytics & Trends',
+          sub: 'Recycling % & SLA Metrics',
+          target: 'reports',
+          badge: 'Analytics',
+          badgeColor: 'bg-violet-50 text-violet-700'
+        },
+        {
+          id: 'e-users',
+          icon: '👤',
+          name: 'Users / Admins',
+          value: 'System Access Accounts',
+          sub: 'Role-Based Authentication',
+          target: 'users',
+          badge: 'Security',
+          badgeColor: 'bg-slate-100 text-slate-800'
+        }
+      ];
+
+      grid.innerHTML = entities.map(e => `
+        <div onclick="switchView('${e.target}')" class="p-3.5 rounded-2xl border border-slate-200 bg-white hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="size-8 rounded-xl bg-slate-100 group-hover:bg-emerald-50 text-base flex items-center justify-center transition">
+                ${e.icon}
+              </span>
+              <span class="text-[9px] font-bold font-mono px-2 py-0.5 rounded-full border border-slate-200 ${e.badgeColor}">
+                ${e.badge}
+              </span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-900 group-hover:text-emerald-700 transition leading-snug">
+              ${e.name}
+            </h4>
+            <p class="text-[11px] font-semibold text-slate-700 mt-1 line-clamp-2 leading-tight">
+              ${e.value}
+            </p>
+          </div>
+          <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+            <span class="truncate">${e.sub}</span>
+            <span class="text-emerald-600 font-bold group-hover:translate-x-0.5 transition">→</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
     function syncAdminProfile() {
       try {
         const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
@@ -2087,13 +2422,15 @@
           const userName = user.name || 'Officer';
           const userRole = user.authority || user.role || 'Super Admin';
           const userEmail = (user.email || '').toLowerCase();
+          const roleLower = (userRole + ' ' + (user.role || '')).toLowerCase();
 
           if (document.getElementById('admin-name')) document.getElementById('admin-name').innerText = userName;
           if (document.getElementById('admin-role-badge')) document.getElementById('admin-role-badge').innerText = userRole;
 
-          // Department Banner Personalization
-          if (banner) {
-            if (userRole.toLowerCase().includes('panchayat') || userEmail.includes('gp')) {
+          // Department Banner Personalization & Initial Scope
+          if (roleLower.includes('panchayat') || userEmail.includes('gp')) {
+            currentAuthorityScope = 'gp';
+            if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-amber-50 border border-amber-200 text-amber-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                   <div class="flex items-center gap-3">
@@ -2101,7 +2438,7 @@
                       🏡
                     </div>
                     <div>
-                      <h4 class="font-extrabold text-sm text-amber-900">Gram Panchayat Rural Solid & C&D Waste Management Portal</h4>
+                      <h4 class="font-extrabold text-sm text-amber-900">Bogadi Gram Panchayat Rural Solid & C&D Waste Management Portal</h4>
                       <p class="text-xs text-amber-700">Logged in as <strong>${userName}</strong> (${userRole}) · Assigned Jurisdiction: <strong>Bogadi & Rural Wards (PIN 570026, 571130)</strong></p>
                     </div>
                   </div>
@@ -2112,7 +2449,10 @@
                   </div>
                 </div>
               `;
-            } else if (userRole.toLowerCase().includes('town') || userEmail.includes('tp')) {
+            }
+          } else if (roleLower.includes('town') || userEmail.includes('tp')) {
+            currentAuthorityScope = 'tp';
+            if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-blue-50 border border-blue-200 text-blue-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                   <div class="flex items-center gap-3">
@@ -2120,7 +2460,7 @@
                       🏭
                     </div>
                     <div>
-                      <h4 class="font-extrabold text-sm text-blue-900">Town Panchayat Suburban C&D Waste Regulatory Desk</h4>
+                      <h4 class="font-extrabold text-sm text-blue-900">Hootagalli Town Panchayat Suburban C&D Waste Regulatory Desk</h4>
                       <p class="text-xs text-blue-700">Logged in as <strong>${userName}</strong> (${userRole}) · Assigned Jurisdiction: <strong>Hootagalli CMC & Industrial Hubs (PIN 570018, 571607)</strong></p>
                     </div>
                   </div>
@@ -2131,7 +2471,10 @@
                   </div>
                 </div>
               `;
-            } else if (userRole.toLowerCase().includes('mcc') || userEmail.includes('mcc')) {
+            }
+          } else if (roleLower.includes('mcc') || userEmail.includes('mcc')) {
+            currentAuthorityScope = 'mcc';
+            if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                   <div class="flex items-center gap-3">
@@ -2150,7 +2493,10 @@
                   </div>
                 </div>
               `;
-            } else {
+            }
+          } else {
+            currentAuthorityScope = 'all';
+            if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-slate-100 to-emerald-50 border border-emerald-200/80 text-slate-900 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                   <div class="flex items-center gap-3">
@@ -2176,7 +2522,8 @@
     }
 
     syncAdminProfile();
-    selectDepartment('mcc');
+    setAuthorityScope(currentAuthorityScope);
+    selectDepartment(currentAuthorityScope === 'all' ? 'mcc' : currentAuthorityScope);
     renderAuthoritiesTable();
     renderInspectorsTable();
     loadData();
