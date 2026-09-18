@@ -93,7 +93,14 @@ const initialData = {
     defaultDestinationFacility: 'Kumbarakoppal ZWM C&D Plant',
     smsGateway: 'Active (Govt of Karnataka SMS Portal)',
     effectiveJurisdictionShiftMode: 'Dynamic Timestamp Rule'
-  }
+  },
+  registeredUsers: [
+    { id: 'u_admin', name: 'Dr. Ramesh Rao (Super Admin)', email: 'admin@mysuru.gov.in', password: 'admin123', role: 'admin', authority: 'Super Admin', phone: '+91 98450 00001' },
+    { id: 'u_mcc', name: 'Sri. Suresh Kumar', email: 'mcc.officer@mysuru.gov.in', password: 'mcc123', role: 'admin', authority: 'MCC Admin', phone: '+91 98450 00002' },
+    { id: 'u_gp', name: 'Smt. Lakshmi Devi', email: 'gp.officer@mysuru.gov.in', password: 'gp123', role: 'admin', authority: 'Panchayat Admin', phone: '+91 98450 00003' },
+    { id: 'u_tp', name: 'Sri. Venkatesh M', email: 'tp.officer@mysuru.gov.in', password: 'tp123', role: 'admin', authority: 'Town Panchayat Admin', phone: '+91 98450 00004' },
+    { id: 'u_cust', name: 'Ananya Sharma', email: 'customer@gmail.com', password: 'user123', role: 'citizen', authority: 'Customer', phone: '+91 98450 77777' }
+  ]
 };
 
 module.exports = (req, res) => {
@@ -108,6 +115,69 @@ module.exports = (req, res) => {
   if (method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
+    return;
+  }
+
+  const getBody = (cb) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try { cb(JSON.parse(body || '{}')); } catch(e) { cb({}); }
+    });
+  };
+
+  // Auth endpoints
+  if (pathname.includes('/auth/login') && method === 'POST') {
+    getBody(payload => {
+      const email = (payload.email || '').trim().toLowerCase();
+      const password = (payload.password || '').trim();
+      const user = initialData.registeredUsers.find(u => u.email.toLowerCase().trim() === email && u.password.trim() === password);
+      if (user) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, user }));
+      } else {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Invalid email or password. Please check your credentials.' }));
+      }
+    });
+    return;
+  }
+
+  if (pathname.includes('/auth/register') && method === 'POST') {
+    getBody(payload => {
+      const name = (payload.name || '').trim();
+      const email = (payload.email || '').trim().toLowerCase();
+      const phone = (payload.phone || '').trim();
+      const password = (payload.password || '').trim();
+
+      if (initialData.registeredUsers.find(u => u.email.toLowerCase().trim() === email)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Email already exists' }));
+        return;
+      }
+
+      const isFirst = (initialData.registeredUsers.length === 0);
+      const newUser = {
+        id: 'u_' + Date.now(),
+        name: name || 'User',
+        email,
+        phone,
+        password,
+        role: isFirst ? 'admin' : (payload.role || 'citizen'),
+        authority: isFirst ? 'Super Admin' : (payload.authority || 'Customer'),
+        createdAt: new Date().toISOString()
+      };
+
+      initialData.registeredUsers.push(newUser);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, user: newUser }));
+    });
+    return;
+  }
+
+  if (pathname.includes('/auth/users')) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(initialData.registeredUsers.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, authority: u.authority }))));
     return;
   }
 

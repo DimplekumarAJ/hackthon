@@ -150,7 +150,7 @@
         <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
-            <input id="login-email" type="email" required placeholder="name@domain.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+            <input id="login-email" type="text" required placeholder="name@domain.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
           </div>
 
           <div>
@@ -198,29 +198,67 @@
   </div>
 
   <script>
-    // Pre-seeded fallback admin account
-    const DEFAULT_ACCOUNTS = [
+    // Universal Built-in System Accounts (Accessible on every device & browser)
+    const SYSTEM_ACCOUNTS = [
       {
-        id: 'u_admin_default',
+        id: 'u_admin',
         name: 'Dr. Ramesh Rao (Super Admin)',
         email: 'admin@mysuru.gov.in',
         password: 'admin123',
         role: 'admin',
         authority: 'Super Admin',
         phone: '+91 98450 00001'
+      },
+      {
+        id: 'u_mcc',
+        name: 'Sri. Suresh Kumar',
+        email: 'mcc.officer@mysuru.gov.in',
+        password: 'mcc123',
+        role: 'admin',
+        authority: 'MCC Admin',
+        phone: '+91 98450 00002'
+      },
+      {
+        id: 'u_gp',
+        name: 'Smt. Lakshmi Devi',
+        email: 'gp.officer@mysuru.gov.in',
+        password: 'gp123',
+        role: 'admin',
+        authority: 'Panchayat Admin',
+        phone: '+91 98450 00003'
+      },
+      {
+        id: 'u_tp',
+        name: 'Sri. Venkatesh M',
+        email: 'tp.officer@mysuru.gov.in',
+        password: 'tp123',
+        role: 'admin',
+        authority: 'Town Panchayat Admin',
+        phone: '+91 98450 00004'
+      },
+      {
+        id: 'u_cust',
+        name: 'Ananya Sharma',
+        email: 'customer@gmail.com',
+        password: 'user123',
+        role: 'citizen',
+        authority: 'Customer',
+        phone: '+91 98450 77777'
       }
     ];
 
     function getAllUsers() {
       try {
         const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-        const merged = [...stored];
-        if (!merged.find(u => u.email.toLowerCase() === 'admin@mysuru.gov.in')) {
-          merged.push(DEFAULT_ACCOUNTS[0]);
-        }
+        const merged = [...SYSTEM_ACCOUNTS];
+        stored.forEach(su => {
+          if (!merged.find(m => (m.email || '').toLowerCase().trim() === (su.email || '').toLowerCase().trim())) {
+            merged.push(su);
+          }
+        });
         return merged;
       } catch(e) {
-        return DEFAULT_ACCOUNTS;
+        return SYSTEM_ACCOUNTS;
       }
     }
 
@@ -259,21 +297,22 @@
       }
     }
 
-    function handleSignUp(e) {
+    async function handleSignUp(e) {
       e.preventDefault();
       const name = document.getElementById('reg-name').value.trim();
       const email = document.getElementById('reg-email').value.trim().toLowerCase();
       const phone = document.getElementById('reg-phone').value.trim();
       const password = document.getElementById('reg-password').value.trim();
 
-      const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-      if (registered.find(u => u.email.toLowerCase() === email)) {
+      const allUsers = getAllUsers();
+      if (allUsers.find(u => (u.email || '').toLowerCase().trim() === email)) {
         showToast('An account with this email already exists. Please sign in.', 'error');
         return;
       }
 
       // FIRST PERSON to create account becomes Super Admin!
       // All subsequent people become Customer / Citizen!
+      const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
       const isFirstUser = (registered.length === 0);
       const assignedRole = isFirstUser ? 'admin' : 'citizen';
       const assignedAuthority = isFirstUser ? 'Super Admin' : 'Customer';
@@ -296,6 +335,15 @@
         sessionStorage.setItem('current_user', JSON.stringify(newUser));
       } catch(e) {}
 
+      // Sync to backend server
+      try {
+        fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newUser)
+        }).catch(() => {});
+      } catch(e) {}
+
       if (isFirstUser) {
         showToast('First account registered as Super Admin! Opening Admin Console...', 'success');
         setTimeout(() => {
@@ -309,16 +357,36 @@
       }
     }
 
-    function handleSignIn(e) {
+    async function handleSignIn(e) {
       e.preventDefault();
       const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
       const passwordInput = document.getElementById('login-password').value.trim();
 
+      let user = null;
+
+      // 1. Check local & universal accounts (Instant on all laptops)
       const allUsers = getAllUsers();
-      const user = allUsers.find(u => 
-        u.email.toLowerCase() === emailInput && 
-        u.password === passwordInput
+      user = allUsers.find(u => 
+        (u.email || '').toLowerCase().trim() === emailInput && 
+        (u.password || '').trim() === passwordInput
       );
+
+      // 2. If not matched, try server API
+      if (!user) {
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailInput, password: passwordInput })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.user) {
+              user = data.user;
+            }
+          }
+        } catch(err) {}
+      }
 
       // If fake / invalid email or password
       if (!user) {
@@ -336,7 +404,7 @@
 
       setTimeout(() => {
         const role = (user.role || '').toLowerCase();
-        // Super Admin opens Admin Governance Console (dashboard.html)
+        // Super Admin & Officers open Admin Governance Console (dashboard.html)
         if (role === 'admin' || role === 'super_admin' || role.includes('officer') || role.includes('member') || role.includes('inspector')) {
           window.location.href = 'dashboard.html';
         } else {
