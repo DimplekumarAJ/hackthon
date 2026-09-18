@@ -103,13 +103,64 @@ const initialData = {
   ]
 };
 
-module.exports = (req, res) => {
+const https = require('https');
+
+const CLOUD_OBJECT_ID = 'ff808181a09d98f701a0b5665eda376f';
+
+function fetchCloudUsers() {
+  return new Promise((resolve) => {
+    https.get('https://api.restful-api.dev/objects/' + CLOUD_OBJECT_ID, { headers: { 'User-Agent': 'NodeJS' } }, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          if (parsed && parsed.data && Array.isArray(parsed.data.users)) {
+            resolve(parsed.data.users);
+            return;
+          }
+        } catch(e) {}
+        resolve([]);
+      });
+    }).on('error', () => resolve([]));
+  });
+}
+
+function persistCloudUsers(users) {
+  return new Promise((resolve) => {
+    const payload = JSON.stringify({ data: { users } });
+    const req = https.request('https://api.restful-api.dev/objects/' + CLOUD_OBJECT_ID, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'NodeJS'
+      }
+    }, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => resolve(true));
+    });
+    req.on('error', () => resolve(false));
+    req.write(payload);
+    req.end();
+  });
+}
+
+const SYSTEM_ACCOUNTS = [
+  { id: 'u_admin', name: 'Dr. Ramesh Rao (Super Admin)', email: 'admin@mysuru.gov.in', password: 'admin123', role: 'admin', authority: 'Super Admin', phone: '+91 98450 00001' },
+  { id: 'u_mcc', name: 'Sri. Suresh Kumar', email: 'mcc.officer@mysuru.gov.in', password: 'mcc123', role: 'admin', authority: 'MCC Admin', phone: '+91 98450 00002' },
+  { id: 'u_gp', name: 'Smt. Lakshmi Devi', email: 'gp.officer@mysuru.gov.in', password: 'gp123', role: 'admin', authority: 'Panchayat Admin', phone: '+91 98450 00003' },
+  { id: 'u_tp', name: 'Sri. Venkatesh M', email: 'tp.officer@mysuru.gov.in', password: 'tp123', role: 'admin', authority: 'Town Panchayat Admin', phone: '+91 98450 00004' },
+  { id: 'u_cust', name: 'Ananya Sharma', email: 'customer@gmail.com', password: 'user123', role: 'citizen', authority: 'Customer', phone: '+91 98450 77777' }
+];
+
+module.exports = async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
   const method = req.method;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (method === 'OPTIONS') {
@@ -128,10 +179,26 @@ module.exports = (req, res) => {
 
   // Auth endpoints
   if (pathname.includes('/auth/login') && method === 'POST') {
-    getBody(payload => {
+    getBody(async payload => {
       const email = (payload.email || '').trim().toLowerCase();
       const password = (payload.password || '').trim();
-      const user = initialData.registeredUsers.find(u => u.email.toLowerCase().trim() === email && u.password.trim() === password);
+
+      // 1. Check built-in accounts first
+      let user = SYSTEM_ACCOUNTS.find(u => u.email.toLowerCase().trim() === email && u.password.trim() === password);
+
+      // 2. Check memory cache
+      if (!user) {
+        user = (initialData.registeredUsers || []).find(u => u.email.toLowerCase().trim() === email && u.password.trim() === password);
+      }
+
+      // 3. Check cloud store
+      if (!user) {
+        try {
+          const cloudUsers = await fetchCloudUsers();
+          user = cloudUsers.find(u => (u.email || '').toLowerCase().trim() === email && (u.password || '').trim() === password);
+        } catch(e) {}
+      }
+
       if (user) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, user }));
@@ -144,19 +211,34 @@ module.exports = (req, res) => {
   }
 
   if (pathname.includes('/auth/register') && method === 'POST') {
-    getBody(payload => {
+    getBody(async payload => {
       const name = (payload.name || '').trim();
       const email = (payload.email || '').trim().toLowerCase();
       const phone = (payload.phone || '').trim();
       const password = (payload.password || '').trim();
 
-      if (initialData.registeredUsers.find(u => u.email.toLowerCase().trim() === email)) {
+      // Fetch cloud users for cross-device consistency
+      let cloudUsers = [];
+      try {
+        cloudUsers = await fetchCloudUsers();
+      } catch(e) {}
+
+      const allRegistered = [...(initialData.registeredUsers || [])];
+      cloudUsers.forEach(cu => {
+        if (!allRegistered.find(r => r.email.toLowerCase() === cu.email.toLowerCase())) {
+          allRegistered.push(cu);
+        }
+      });
+
+      if (allRegistered.find(u => u.email.toLowerCase().trim() === email) || SYSTEM_ACCOUNTS.find(u => u.email.toLowerCase().trim() === email)) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Email already exists' }));
         return;
       }
 
-      const isFirst = (initialData.registeredUsers.length === 0);
+      // First registered non-system user becomes Super Admin; subsequent become Customers
+      const nonSystemCount = allRegistered.filter(u => !SYSTEM_ACCOUNTS.find(sa => sa.email.toLowerCase() === u.email.toLowerCase())).length;
+      const isFirst = (nonSystemCount === 0);
       const newUser = {
         id: 'u_' + Date.now(),
         name: name || 'User',
@@ -169,6 +251,11 @@ module.exports = (req, res) => {
       };
 
       initialData.registeredUsers.push(newUser);
+      cloudUsers.push(newUser);
+
+      // Persist to cloud store asynchronously
+      persistCloudUsers(cloudUsers).catch(() => {});
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, user: newUser }));
     });
@@ -176,8 +263,24 @@ module.exports = (req, res) => {
   }
 
   if (pathname.includes('/auth/users')) {
+    let cloudUsers = [];
+    try {
+      cloudUsers = await fetchCloudUsers();
+    } catch(e) {}
+    const combined = [...SYSTEM_ACCOUNTS];
+    cloudUsers.forEach(u => {
+      if (!combined.find(c => c.email.toLowerCase() === u.email.toLowerCase())) {
+        combined.push(u);
+      }
+    });
+    (initialData.registeredUsers || []).forEach(u => {
+      if (!combined.find(c => c.email.toLowerCase() === u.email.toLowerCase())) {
+        combined.push(u);
+      }
+    });
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(initialData.registeredUsers.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, authority: u.authority }))));
+    res.end(JSON.stringify(combined.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, authority: u.authority }))));
     return;
   }
 

@@ -247,6 +247,25 @@
       }
     ];
 
+    async function syncUsersFromCloud() {
+      try {
+        const res = await fetch('/api/auth/users');
+        if (res.ok) {
+          const serverUsers = await res.json();
+          if (Array.isArray(serverUsers) && serverUsers.length > 0) {
+            const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+            serverUsers.forEach(su => {
+              if (!stored.find(m => (m.email || '').toLowerCase().trim() === (su.email || '').toLowerCase().trim())) {
+                stored.push(su);
+              }
+            });
+            localStorage.setItem('civic_registered_users', JSON.stringify(stored));
+          }
+        }
+      } catch(e) {}
+    }
+    syncUsersFromCloud();
+
     function getAllUsers() {
       try {
         const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
@@ -304,47 +323,52 @@
       const phone = document.getElementById('reg-phone').value.trim();
       const password = document.getElementById('reg-password').value.trim();
 
-      const allUsers = getAllUsers();
-      if (allUsers.find(u => (u.email || '').toLowerCase().trim() === email)) {
-        showToast('An account with this email already exists. Please sign in.', 'error');
-        return;
-      }
-
-      // FIRST PERSON to create account becomes Super Admin!
-      // All subsequent people become Customer / Citizen!
-      const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-      const isFirstUser = (registered.length === 0);
-      const assignedRole = isFirstUser ? 'admin' : 'citizen';
-      const assignedAuthority = isFirstUser ? 'Super Admin' : 'Customer';
-
-      const newUser = {
-        id: 'u_' + Date.now(),
-        name,
-        email,
-        phone,
-        password,
-        role: assignedRole,
-        authority: assignedAuthority,
-        createdAt: new Date().toISOString()
-      };
-
-      registered.push(newUser);
+      let user = null;
       try {
-        localStorage.setItem('civic_registered_users', JSON.stringify(registered));
-        localStorage.setItem('current_user', JSON.stringify(newUser));
-        sessionStorage.setItem('current_user', JSON.stringify(newUser));
-      } catch(e) {}
-
-      // Sync to backend server
-      try {
-        fetch('/api/auth/register', {
+        const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newUser)
-        }).catch(() => {});
+          body: JSON.stringify({ name, email, phone, password })
+        });
+        const data = await res.json();
+        if (!data.success) {
+          showToast(data.message || 'Registration failed. Email might already exist.', 'error');
+          return;
+        }
+        user = data.user;
+      } catch(err) {
+        // Local fallback
+        const allUsers = getAllUsers();
+        if (allUsers.find(u => (u.email || '').toLowerCase().trim() === email)) {
+          showToast('An account with this email already exists. Please sign in.', 'error');
+          return;
+        }
+        const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+        const isFirstUser = (registered.length === 0);
+        user = {
+          id: 'u_' + Date.now(),
+          name,
+          email,
+          phone,
+          password,
+          role: isFirstUser ? 'admin' : 'citizen',
+          authority: isFirstUser ? 'Super Admin' : 'Customer',
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      // Save user session in localStorage and sessionStorage
+      try {
+        const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+        if (!registered.find(r => (r.email || '').toLowerCase().trim() === user.email.toLowerCase().trim())) {
+          registered.push(user);
+          localStorage.setItem('civic_registered_users', JSON.stringify(registered));
+        }
+        localStorage.setItem('current_user', JSON.stringify(user));
+        sessionStorage.setItem('current_user', JSON.stringify(user));
       } catch(e) {}
 
-      if (isFirstUser) {
+      if (user.role === 'admin' || user.authority === 'Super Admin') {
         showToast('First account registered as Super Admin! Opening Admin Console...', 'success');
         setTimeout(() => {
           window.location.href = 'dashboard.html';
@@ -364,14 +388,14 @@
 
       let user = null;
 
-      // 1. Check local & universal accounts (Instant on all laptops)
+      // 1. Check local & built-in accounts (Instant)
       const allUsers = getAllUsers();
       user = allUsers.find(u => 
         (u.email || '').toLowerCase().trim() === emailInput && 
         (u.password || '').trim() === passwordInput
       );
 
-      // 2. If not matched, try server API
+      // 2. If not matched locally, query server / cloud backend
       if (!user) {
         try {
           const res = await fetch('/api/auth/login', {
@@ -383,6 +407,11 @@
             const data = await res.json();
             if (data.success && data.user) {
               user = data.user;
+              const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+              if (!registered.find(r => (r.email || '').toLowerCase().trim() === user.email.toLowerCase().trim())) {
+                registered.push(user);
+                localStorage.setItem('civic_registered_users', JSON.stringify(registered));
+              }
             }
           }
         } catch(err) {}

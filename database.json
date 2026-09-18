@@ -419,5 +419,17 @@
     "defaultDestinationFacility": "Kumbarakoppal ZWM C&D Plant",
     "smsGateway": "Active (Govt of Karnataka SMS Portal)",
     "effectiveJurisdictionShiftMode": "Dynamic Timestamp Rule"
-  }
+  },
+  "registeredUsers": [
+    {
+      "id": "u_1789749900645",
+      "name": "Device Tester",
+      "email": "cross_device_1789749900463@gmail.com",
+      "phone": "9845011111",
+      "password": "password123",
+      "role": "citizen",
+      "authority": "Customer",
+      "createdAt": "2026-09-18T16:45:00.645Z"
+    }
+  ]
 }
