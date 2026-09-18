@@ -1053,9 +1053,17 @@
               <tr class="hover:bg-slate-50">
                 <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.id}</td>
                 <td class="px-4 py-3"><strong>${a.applicantName}</strong><br><span class="text-slate-400 text-[11px] font-mono">${a.phone}</span></td>
-                <td class="px-4 py-3 text-slate-700">${a.address}<br><span class="text-slate-400 text-[10px] font-mono">PIN ${a.pin} · ${a.ward}</span></td>
-                <td class="px-4 py-3 text-slate-600">${a.propertyDetails}</td>
-                <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${a.documents}</td>
+                <td class="px-4 py-3 text-slate-700">
+                  ${a.address}<br>
+                  <span class="text-slate-400 text-[10px] font-mono">PIN ${a.pin || a.pincode} · ${a.ward || ''}</span>
+                  ${a.gpsLocation ? `
+                    <br><a href="${a.mapUrl || ('https://www.google.com/maps?q=' + (a.lat || 12.2958) + ',' + (a.lng || 76.6394))}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700 hover:text-emerald-900 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 mt-0.5 hover:underline">
+                      <span>📍 ${a.gpsLocation}</span> <span>↗</span>
+                    </a>
+                  ` : ''}
+                </td>
+                <td class="px-4 py-3 text-slate-600">${a.propertyDetails || a.debrisType || 'Debris Clearance'}</td>
+                <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${a.documents || (a.photo ? '📸 Site Photo Attached' : 'Standard')}</td>
                 <td class="px-4 py-3"><span class="badge-status ${a.status === 'Approved' ? 'badge-approved' : 'badge-pending'}">${a.status}</span></td>
               </tr>
             `).join('');

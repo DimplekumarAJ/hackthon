@@ -161,6 +161,21 @@
             <span>⚡</span> <span id="route-preview-text" class="text-[11px] font-bold">PIN 570001 &rarr; Mysuru Municipal Corporation (MCC Urban)</span>
           </div>
 
+          <!-- Exact Customer Live GPS Tracker -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-bold text-slate-700 text-xs">📍 Customer Live GPS Coordinates</label>
+              <button type="button" onclick="autoDetectCustomerGPS()" class="text-[10px] text-emerald-600 hover:text-emerald-700 font-bold underline cursor-pointer flex items-center gap-1">
+                <span>🔄 Auto-Detect Live GPS</span>
+              </button>
+            </div>
+            <div class="relative">
+              <input id="req-gps" type="text" readonly placeholder="Fetching live GPS coordinates..." class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/50 border border-emerald-300 font-mono text-xs font-bold text-emerald-950 focus:bg-white focus:outline-none"/>
+              <span id="gps-status-badge" class="absolute right-3 top-2.5 text-[10px] font-mono font-bold text-emerald-700">● Live GPS</span>
+            </div>
+            <span class="text-[10px] text-slate-500 mt-1 block">Exact GPS coordinates will automatically transmit to your assigned Inspector & Officer.</span>
+          </div>
+
           <div>
             <label class="block font-bold text-slate-700 mb-1">Property Site Address / Landmark</label>
             <input id="req-address" type="text" required placeholder="e.g. Site #45, Near Devaraja Market North Gate" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"/>
@@ -253,6 +268,46 @@
       }
     }
 
+    let customerLiveCoords = { lat: 12.2958, lng: 76.6394, gpsText: '12.2958° N, 76.6394° E' };
+
+    function autoDetectCustomerGPS() {
+      const gpsInput = document.getElementById('req-gps');
+      const badge = document.getElementById('gps-status-badge');
+      if (badge) badge.innerText = '⌛ Locating...';
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const gpsStr = `${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E`;
+            customerLiveCoords = { lat, lng, gpsText: gpsStr };
+            if (gpsInput) gpsInput.value = gpsStr;
+            if (badge) badge.innerText = '✓ Live GPS Acquired';
+            showToast('Live GPS captured: ' + gpsStr, 'success');
+          },
+          err => {
+            // Fallback default based on PIN
+            const pin = (document.getElementById('req-pin').value || '570001').trim();
+            let fallbackLat = 12.3021, fallbackLng = 76.6450;
+            if (pin === '570026') { fallbackLat = 12.2850; fallbackLng = 76.5920; }
+            else if (pin === '570018') { fallbackLat = 12.3410; fallbackLng = 76.5890; }
+            
+            const gpsStr = `${fallbackLat.toFixed(4)}° N, ${fallbackLng.toFixed(4)}° E (Mysuru Zone)`;
+            customerLiveCoords = { lat: fallbackLat, lng: fallbackLng, gpsText: gpsStr };
+            if (gpsInput) gpsInput.value = gpsStr;
+            if (badge) badge.innerText = '● GPS Ready';
+          },
+          { timeout: 7000, enableHighAccuracy: true }
+        );
+      } else {
+        const pin = (document.getElementById('req-pin').value || '570001').trim();
+        const gpsStr = '12.2958° N, 76.6394° E (Mysuru)';
+        customerLiveCoords = { lat: 12.2958, lng: 76.6394, gpsText: gpsStr };
+        if (gpsInput) gpsInput.value = gpsStr;
+      }
+    }
+
     function previewAuthorityRoute() {
       const pin = document.getElementById('req-pin').value.trim();
       const text = document.getElementById('route-preview-text');
@@ -266,6 +321,7 @@
       } else {
         text.innerText = 'PIN ' + pin + ' ➔ Greater Mysuru Central Jurisdiction Desk';
       }
+      autoDetectCustomerGPS();
     }
 
     function handleCustomerSubmit(e) {
@@ -276,6 +332,11 @@
       const qty = document.getElementById('req-qty').value;
       const address = document.getElementById('req-address').value.trim();
       const notes = document.getElementById('req-notes').value.trim();
+      const gpsInput = document.getElementById('req-gps');
+      const gpsLocation = (gpsInput && gpsInput.value) ? gpsInput.value : customerLiveCoords.gpsText;
+      const lat = customerLiveCoords.lat || 12.2958;
+      const lng = customerLiveCoords.lng || 76.6394;
+      const mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
 
       // Match designated Inspector for this PIN code
       let allUsers = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
@@ -331,6 +392,10 @@
           pincode: pin,
           qty,
           address,
+          gpsLocation,
+          lat,
+          lng,
+          mapUrl,
           authority,
           authorityKey,
           notes,
