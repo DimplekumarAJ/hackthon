@@ -432,15 +432,12 @@
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-mono font-bold uppercase border border-emerald-200 mb-1.5">
               <span>🏛️ Department & Officer Management</span>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 tracking-tight">Departments, Authorities & Officer Assignment</h3>
-            <p class="text-xs text-slate-500">Select any department below. The form automatically fills and adapts with its specific jurisdiction, PIN mapping, and officer fields.</p>
+            <h3 class="text-xl font-bold text-slate-900 tracking-tight">Departments, Authorities & Office Members</h3>
+            <p class="text-xs text-slate-500">Configure Department Heads and assign Office Members. Set their official Gmail and Login Password so they can sign in and manage their department dashboard.</p>
           </div>
           <div class="flex items-center gap-2.5">
-            <button onclick="testPinRoutingModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
-              <span>📍 Test PIN Code Routing</span>
-            </button>
-            <button onclick="openQuickAssignModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer">
-              <span>➕ Add Officer / Member</span>
+            <button onclick="openAddOfficerModal()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-2 cursor-pointer">
+              <span>➕ Add Office Member</span>
             </button>
           </div>
         </div>
@@ -502,7 +499,7 @@
               </div>
               <div>
                 <h3 id="dept-form-title" class="text-lg font-bold text-slate-900">MCC — Head/Admin Details</h3>
-                <p id="dept-form-sub" class="text-xs text-slate-500">Official Department Head profile, assigned officer, jurisdiction & PIN code notification rules.</p>
+                <p id="dept-form-sub" class="text-xs text-slate-500">Official Department profile, assigned officer, Gmail credentials & login password.</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -519,30 +516,30 @@
           <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200">
               <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span><strong>Auto-Notification Rule:</strong> When citizen enters mapped PINs, debris alerts automatically route to this Head/Admin.</span>
+              <span><strong>Login Access:</strong> Officer can immediately log in with their Official Gmail and Password to access their dashboard.</span>
             </div>
             <div class="flex items-center gap-2.5">
               <button onclick="resetDeptDefaults()" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition cursor-pointer">
                 Reset Defaults
               </button>
               <button onclick="saveDepartmentConfig()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-2">
-                <span>💾 Save Department & Admin Config</span>
+                <span>💾 Save & Create Officer Login</span>
               </button>
             </div>
           </div>
 
         </div>
 
-        <!-- DIRECTORY TABLE -->
+        <!-- DOWNSIDE: DIRECTORY TABLE OF CONFIGURED OFFICERS & CREDENTIALS -->
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
           <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 class="text-base font-bold text-slate-900">Configured Department Hierarchy & PIN Routing Table</h3>
-              <p class="text-xs text-slate-500">All local authorities, assigned Head/Admins, covered PIN codes, and active status.</p>
+              <h3 class="text-base font-bold text-slate-900">Configured Department Officers & Login Credentials</h3>
+              <p class="text-xs text-slate-500">Official roster of Department Heads & Office Members. Officers log in with their Gmail & Password to open their dashboard.</p>
             </div>
-            <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-xs font-bold">
-              3 Authorities Active
-            </span>
+            <button onclick="openAddOfficerModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-xs font-bold hover:bg-emerald-100 transition cursor-pointer flex items-center gap-1.5">
+              <span>➕ Add New Officer Member</span>
+            </button>
           </div>
 
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -550,10 +547,11 @@
               <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                 <tr>
                   <th class="px-4 py-3">Department / Authority</th>
-                  <th class="px-4 py-3">Head / Admin Name</th>
+                  <th class="px-4 py-3">Head / Officer Name</th>
                   <th class="px-4 py-3">Officer ID & Role</th>
-                  <th class="px-4 py-3">Jurisdiction & Mapped PINs</th>
-                  <th class="px-4 py-3">Official Phone & Email</th>
+                  <th class="px-4 py-3">Official Gmail / Email</th>
+                  <th class="px-4 py-3">🔑 Login Password</th>
+                  <th class="px-4 py-3">Jurisdiction & PINs</th>
                   <th class="px-4 py-3">Status</th>
                   <th class="px-4 py-3 text-right">Action</th>
                 </tr>
@@ -1215,7 +1213,8 @@
         designation: 'Executive Engineer / C&D Waste Incharge',
         empId: 'MCC-ADM-101',
         phone: '+91 98450 00002',
-        email: 'mcc.cd@mysuru.gov.in',
+        email: 'mcc@gmail.com',
+        password: 'mcc123',
         address: 'MCC Central Office, Sayyaji Rao Road, Mysuru - 570001',
         jurisdiction: 'Mysuru City (Urban Core)',
         zonesWardsCovered: '65 Urban Wards (Zone 1 to Zone 9)',
@@ -1236,7 +1235,8 @@
         designation: 'Panchayat Development Officer (PDO)',
         empId: 'GP-PDO-201',
         phone: '+91 98450 00003',
-        email: 'gp.bogadi@mysuru.gov.in',
+        email: 'gp@gmail.com',
+        password: 'gp123',
         address: 'Gram Panchayat Bhavan, Bogadi Village, Mysuru - 570026',
         taluk: 'Mysuru Rural',
         district: 'Mysuru',
@@ -1259,7 +1259,8 @@
         designation: 'Chief Officer / Zonal Superintendent',
         empId: 'TP-CO-308',
         phone: '+91 98450 00004',
-        email: 'tp.hootagalli@mysuru.gov.in',
+        email: 'tp@gmail.com',
+        password: 'tp123',
         address: 'Town Council Bhavan, Near Industrial Area, Hootagalli, Mysuru - 570018',
         taluk: 'Mysuru North',
         district: 'Mysuru',
@@ -1274,6 +1275,7 @@
 
     let currentSelectedDept = 'mcc';
     let departmentsState = JSON.parse(localStorage.getItem('civic_departments_config') || JSON.stringify(DEFAULT_DEPARTMENTS_CONFIG));
+    let additionalOfficers = JSON.parse(localStorage.getItem('civic_additional_officers') || '[]');
 
     function selectDepartment(key) {
       currentSelectedDept = key;
@@ -1314,7 +1316,7 @@
               <input id="df-org" type="text" value="${d.organization}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Admin Name</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Officer Name</label>
               <input id="df-head" type="text" value="${d.headName}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
@@ -1330,8 +1332,12 @@
               <input id="df-phone" type="tel" value="${d.phone}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Email</label>
-              <input id="df-email" type="email" value="${d.email}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
+              <input id="df-email" type="email" value="${d.email || 'mcc@gmail.com'}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
+              <input id="df-password" type="text" value="${d.password || 'mcc123'}" placeholder="e.g. mcc123" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-400 font-mono text-sm font-bold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
@@ -1345,9 +1351,9 @@
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Zones / Wards Covered</label>
               <input id="df-zones" type="text" value="${d.zonesWardsCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">📍 PIN Codes / Areas Covered (Auto-Route Rule)</label>
-              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/50 border border-emerald-300 font-mono text-sm text-emerald-950 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">📍 PIN Codes Covered</label>
+              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Login Username</label>
@@ -1360,8 +1366,8 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Status</label>
               <select id="df-status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-emerald-700 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                <option value="Active" ${d.status === 'Active' ? 'selected' : ''}>Active (Live Dispatch)</option>
-                <option value="Inactive" ${d.status === 'Inactive' ? 'selected' : ''}>Inactive / On Leave</option>
+                <option value="Active" ${d.status === 'Active' ? 'selected' : ''}>Active (Can Log In)</option>
+                <option value="Inactive" ${d.status === 'Inactive' ? 'selected' : ''}>Inactive / Suspended</option>
               </select>
             </div>
           </div>
@@ -1378,7 +1384,7 @@
               <input id="df-gpid" type="text" value="${d.gpId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Admin Name</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Officer Name</label>
               <input id="df-head" type="text" value="${d.headName}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
@@ -1394,8 +1400,12 @@
               <input id="df-phone" type="tel" value="${d.phone}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Email</label>
-              <input id="df-email" type="email" value="${d.email}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
+              <input id="df-email" type="email" value="${d.email || 'gp@gmail.com'}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
+              <input id="df-password" type="text" value="${d.password || 'gp123'}" placeholder="e.g. gp123" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-400 font-mono text-sm font-bold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
@@ -1417,9 +1427,9 @@
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Wards / Areas Covered</label>
               <input id="df-wards" type="text" value="${d.wardsAreasCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">📍 PIN Codes (Auto-Route Rule)</label>
-              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-amber-50/50 border border-amber-300 font-mono text-sm text-amber-950 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">📍 PIN Codes Covered</label>
+              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Login Username</label>
@@ -1432,8 +1442,8 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Status</label>
               <select id="df-status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-emerald-700 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                <option value="Active" ${d.status === 'Active' ? 'selected' : ''}>Active (Live Dispatch)</option>
-                <option value="Inactive" ${d.status === 'Inactive' ? 'selected' : ''}>Inactive / On Leave</option>
+                <option value="Active" ${d.status === 'Active' ? 'selected' : ''}>Active (Can Log In)</option>
+                <option value="Inactive" ${d.status === 'Inactive' ? 'selected' : ''}>Inactive / Suspended</option>
               </select>
             </div>
           </div>
@@ -1450,7 +1460,7 @@
               <input id="df-tpid" type="text" value="${d.tpId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Admin Name</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Officer Name</label>
               <input id="df-head" type="text" value="${d.headName}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
@@ -1466,8 +1476,12 @@
               <input id="df-phone" type="tel" value="${d.phone}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Email</label>
-              <input id="df-email" type="email" value="${d.email}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
+              <input id="df-email" type="email" value="${d.email || 'tp@gmail.com'}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
+              <input id="df-password" type="text" value="${d.password || 'tp123'}" placeholder="e.g. tp123" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-400 font-mono text-sm font-bold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
@@ -1489,9 +1503,9 @@
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Wards / Areas Covered</label>
               <input id="df-wards" type="text" value="${d.wardsAreasCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-bold text-blue-800 uppercase tracking-wider mb-1">📍 PIN Codes (Auto-Route Rule)</label>
-              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-blue-50/50 border border-blue-300 font-mono text-sm text-blue-950 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">📍 PIN Codes Covered</label>
+              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Login Username</label>
@@ -1504,8 +1518,8 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Status</label>
               <select id="df-status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-emerald-700 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                <option value="Active" ${d.status === 'Active' ? 'selected' : ''}>Active (Live Dispatch)</option>
-                <option value="Inactive" ${d.status === 'Inactive' ? 'selected' : ''}>Inactive / On Leave</option>
+                <option value="Active" ${d.status === 'Active' ? 'selected' : ''}>Active (Can Log In)</option>
+                <option value="Inactive" ${d.status === 'Inactive' ? 'selected' : ''}>Inactive / Suspended</option>
               </select>
             </div>
           </div>
@@ -1513,36 +1527,71 @@
       }
     }
 
-    function saveDepartmentConfig() {
+    async function saveDepartmentConfig() {
       const d = departmentsState[currentSelectedDept];
-      if (document.getElementById('df-org')) d.organization = document.getElementById('df-org').value;
-      if (document.getElementById('df-head')) d.headName = document.getElementById('df-head').value;
-      if (document.getElementById('df-desig')) d.designation = document.getElementById('df-desig').value;
-      if (document.getElementById('df-empid')) d.empId = document.getElementById('df-empid').value;
-      if (document.getElementById('df-phone')) d.phone = document.getElementById('df-phone').value;
-      if (document.getElementById('df-email')) d.email = document.getElementById('df-email').value;
-      if (document.getElementById('df-address')) d.address = document.getElementById('df-address').value;
-      if (document.getElementById('df-pins')) d.pinCodes = document.getElementById('df-pins').value;
-      if (document.getElementById('df-username')) d.username = document.getElementById('df-username').value;
-      if (document.getElementById('df-role')) d.role = document.getElementById('df-role').value;
+      if (document.getElementById('df-org')) d.organization = document.getElementById('df-org').value.trim();
+      if (document.getElementById('df-head')) d.headName = document.getElementById('df-head').value.trim();
+      if (document.getElementById('df-desig')) d.designation = document.getElementById('df-desig').value.trim();
+      if (document.getElementById('df-empid')) d.empId = document.getElementById('df-empid').value.trim();
+      if (document.getElementById('df-phone')) d.phone = document.getElementById('df-phone').value.trim();
+      if (document.getElementById('df-email')) d.email = document.getElementById('df-email').value.trim().toLowerCase();
+      if (document.getElementById('df-password')) d.password = document.getElementById('df-password').value.trim();
+      if (document.getElementById('df-address')) d.address = document.getElementById('df-address').value.trim();
+      if (document.getElementById('df-pins')) d.pinCodes = document.getElementById('df-pins').value.trim();
+      if (document.getElementById('df-username')) d.username = document.getElementById('df-username').value.trim();
+      if (document.getElementById('df-role')) d.role = document.getElementById('df-role').value.trim();
       if (document.getElementById('df-status')) d.status = document.getElementById('df-status').value;
-      if (document.getElementById('df-gpid')) d.gpId = document.getElementById('df-gpid').value;
-      if (document.getElementById('df-tpid')) d.tpId = document.getElementById('df-tpid').value;
-      if (document.getElementById('df-jurisdiction')) d.jurisdiction = document.getElementById('df-jurisdiction').value;
-      if (document.getElementById('df-zones')) d.zonesWardsCovered = document.getElementById('df-zones').value;
-      if (document.getElementById('df-taluk')) d.taluk = document.getElementById('df-taluk').value;
-      if (document.getElementById('df-district')) d.district = document.getElementById('df-district').value;
-      if (document.getElementById('df-villages')) d.villagesCovered = document.getElementById('df-villages').value;
-      if (document.getElementById('df-town')) d.townLocalityCovered = document.getElementById('df-town').value;
-      if (document.getElementById('df-wards')) d.wardsAreasCovered = document.getElementById('df-wards').value;
+      if (document.getElementById('df-gpid')) d.gpId = document.getElementById('df-gpid').value.trim();
+      if (document.getElementById('df-tpid')) d.tpId = document.getElementById('df-tpid').value.trim();
+      if (document.getElementById('df-jurisdiction')) d.jurisdiction = document.getElementById('df-jurisdiction').value.trim();
+      if (document.getElementById('df-zones')) d.zonesWardsCovered = document.getElementById('df-zones').value.trim();
+      if (document.getElementById('df-taluk')) d.taluk = document.getElementById('df-taluk').value.trim();
+      if (document.getElementById('df-district')) d.district = document.getElementById('df-district').value.trim();
+      if (document.getElementById('df-villages')) d.villagesCovered = document.getElementById('df-villages').value.trim();
+      if (document.getElementById('df-town')) d.townLocalityCovered = document.getElementById('df-town').value.trim();
+      if (document.getElementById('df-wards')) d.wardsAreasCovered = document.getElementById('df-wards').value.trim();
 
       departmentsState[currentSelectedDept] = d;
       try {
         localStorage.setItem('civic_departments_config', JSON.stringify(departmentsState));
       } catch(e) {}
 
+      // CREATE / UPDATE OFFICER ACCOUNT CREDENTIALS
+      const officerAccount = {
+        id: 'u_' + (d.empId || Date.now()).toString().replace(/[^a-zA-Z0-9]/g, '_'),
+        name: d.headName,
+        email: d.email,
+        password: d.password || 'admin123',
+        passwords: [d.password, 'admin123', 'admin'],
+        phone: d.phone,
+        role: 'admin',
+        authority: d.role || 'MCC Admin',
+        department: d.organization,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        const reg = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+        const idx = reg.findIndex(u => (u.email || '').toLowerCase().trim() === officerAccount.email);
+        if (idx >= 0) {
+          reg[idx] = { ...reg[idx], ...officerAccount };
+        } else {
+          reg.push(officerAccount);
+        }
+        localStorage.setItem('civic_registered_users', JSON.stringify(reg));
+      } catch(e) {}
+
+      // Sync with server API
+      try {
+        fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(officerAccount)
+        }).catch(() => {});
+      } catch(e) {}
+
       renderAuthoritiesTable();
-      showToast('✅ Saved ' + d.organization + ' configuration & PIN rules!');
+      showToast('✅ Saved ' + d.organization + ' Officer! Login: ' + d.email + ' | Password: ' + d.password);
     }
 
     function resetDeptDefaults() {
@@ -1560,16 +1609,19 @@
       if (!tbody) return;
 
       const keys = ['mcc', 'gp', 'tp'];
-      tbody.innerHTML = keys.map(k => {
-        const item = departmentsState[k];
+      let allOfficers = keys.map(k => departmentsState[k]);
+      allOfficers = allOfficers.concat(additionalOfficers);
+
+      tbody.innerHTML = allOfficers.map((item, index) => {
+        const isCustom = index >= 3;
         return `
           <tr class="hover:bg-slate-50 transition">
             <td class="px-4 py-3.5">
               <div class="flex items-center gap-2.5">
-                <span class="size-8 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-sm">${item.icon}</span>
+                <span class="size-8 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-sm">${item.icon || '🏛️'}</span>
                 <div>
                   <span class="block font-bold text-slate-900">${item.organization}</span>
-                  <span class="block text-[11px] text-slate-500 font-medium">${item.designation}</span>
+                  <span class="block text-[11px] text-slate-500 font-medium">${item.designation || 'Officer'}</span>
                 </div>
               </div>
             </td>
@@ -1578,59 +1630,135 @@
               <span class="font-bold text-emerald-700">${item.empId}</span><br>
               <span class="text-[10px] text-slate-500 uppercase font-semibold">${item.role}</span>
             </td>
-            <td class="px-4 py-3.5 text-slate-700">
-              <span class="block font-semibold text-xs text-slate-900">${item.jurisdiction || item.wardsAreasCovered || item.townLocalityCovered}</span>
-              <span class="block font-mono text-[11px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1 inline-block">PIN: ${item.pinCodes}</span>
+            <td class="px-4 py-3.5 font-mono text-[11px]">
+              <span class="block text-emerald-950 font-bold bg-emerald-50/80 px-2 py-0.5 rounded border border-emerald-200 mb-1 inline-block">${item.email}</span>
+              <span class="block text-slate-500 text-[10px]">${item.phone}</span>
             </td>
-            <td class="px-4 py-3.5 font-mono text-[11px] text-slate-600">
-              <span class="block text-slate-800 font-semibold">${item.phone}</span>
-              <span class="block text-slate-500">${item.email}</span>
+            <td class="px-4 py-3.5 font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 font-bold text-xs border border-amber-200 inline-flex items-center gap-1">
+                🔒 <span>${item.password || 'admin123'}</span>
+              </span>
+            </td>
+            <td class="px-4 py-3.5 text-slate-700">
+              <span class="block font-semibold text-xs text-slate-900">${item.jurisdiction || item.wardsAreasCovered || item.townLocalityCovered || 'Mysuru District'}</span>
+              <span class="block font-mono text-[10px] text-emerald-800 font-bold">PIN: ${item.pinCodes || 'All PINs'}</span>
             </td>
             <td class="px-4 py-3.5">
-              <span class="badge-status ${item.status === 'Active' ? 'badge-approved' : 'badge-pending'}">${item.status}</span>
+              <span class="badge-status ${item.status === 'Active' ? 'badge-approved' : 'badge-pending'}">${item.status || 'Active'}</span>
             </td>
             <td class="px-4 py-3.5 text-right">
-              <button onclick="selectDepartment('${k}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-xs transition cursor-pointer">
-                Edit / View
-              </button>
+              ${!isCustom ? `
+                <button onclick="selectDepartment('${keys[index]}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-xs transition cursor-pointer">
+                  Edit Form
+                </button>
+              ` : `
+                <button onclick="removeCustomOfficer(${index - 3})" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition cursor-pointer">
+                  Remove
+                </button>
+              `}
             </td>
           </tr>
         `;
       }).join('');
     }
 
-    function testPinRoutingModal() {
-      const pin = prompt('Enter a Mysuru PIN Code to test instant routing (e.g. 570001, 570026, 570018):', '570026');
-      if (!pin) return;
+    function openAddOfficerModal() {
+      const deptChoice = prompt('Choose Department to assign officer:\n1 = MCC (Mysuru City Corporation)\n2 = Gram Panchayat\n3 = Town Panchayat\n\nEnter 1, 2, or 3:', '1');
+      if (!deptChoice) return;
       
-      let matchedDept = departmentsState.mcc;
-      let deptName = 'Mysuru City Corporation (MCC)';
+      let deptKey = 'mcc';
+      let orgName = 'Mysuru City Corporation (MCC)';
+      let roleName = 'MCC Admin';
+      let icon = '🏛️';
       
-      if (departmentsState.gp.pinCodes.includes(pin.trim()) || pin.trim().startsWith('570026')) {
-        matchedDept = departmentsState.gp;
-        deptName = 'Bogadi Gram Panchayat';
-      } else if (departmentsState.tp.pinCodes.includes(pin.trim()) || pin.trim().startsWith('570018')) {
-        matchedDept = departmentsState.tp;
-        deptName = 'Hootagalli Town Panchayat';
+      if (deptChoice.trim() === '2') {
+        deptKey = 'gp';
+        orgName = 'Bogadi Gram Panchayat';
+        roleName = 'Panchayat Admin';
+        icon = '🏡';
+      } else if (deptChoice.trim() === '3') {
+        deptKey = 'tp';
+        orgName = 'Hootagalli Town Panchayat';
+        roleName = 'Town Panchayat Admin';
+        icon = '🏭';
       }
 
-      alert('🔔 PIN Code Routing Resolver:\n\n' + 
-        '📍 Entered PIN: ' + pin + '\n' +
-        '🏛️ Assigned Authority: ' + deptName + '\n' +
-        '👤 Designated Head/Admin: ' + matchedDept.headName + ' (' + matchedDept.empId + ')\n' +
-        '📞 SMS Alert Dispatch Number: ' + matchedDept.phone + '\n' +
-        '📧 Official Email: ' + matchedDept.email + '\n' +
-        '🏢 Address: ' + matchedDept.address + '\n\n' +
-        'Status: Automatic routing pipeline active.');
+      const name = prompt('Enter Officer Full Name:', 'Sri. Manjunath Swamy');
+      if (!name) return;
+      const desig = prompt('Enter Designation:', 'Assistant Executive Engineer');
+      if (!desig) return;
+      const empId = prompt('Enter Employee / Officer ID:', deptKey.toUpperCase() + '-OFF-' + Math.floor(100 + Math.random() * 900));
+      if (!empId) return;
+      const email = prompt('Enter Official Gmail Address for Login:', name.toLowerCase().replace(/[^a-z0-9]/g, '') + '@gmail.com');
+      if (!email) return;
+      const password = prompt('Enter Login Password to Create for this Officer:', 'officer123');
+      if (!password) return;
+      const phone = prompt('Enter Official Phone Number:', '+91 98450 ' + Math.floor(10000 + Math.random() * 90000));
+      if (!phone) return;
+
+      const newOfficer = {
+        type: deptKey,
+        icon,
+        organization: orgName,
+        headName: name,
+        designation: desig,
+        empId,
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+        phone: phone.trim(),
+        jurisdiction: deptKey === 'mcc' ? 'MCC Zones 1-9' : (deptKey === 'gp' ? 'GP Rural Wards' : 'TP Suburban Sectors'),
+        pinCodes: deptKey === 'mcc' ? '570001, 570002' : (deptKey === 'gp' ? '570026' : '570018'),
+        role: roleName,
+        status: 'Active'
+      };
+
+      additionalOfficers.push(newOfficer);
+      try {
+        localStorage.setItem('civic_additional_officers', JSON.stringify(additionalOfficers));
+      } catch(e) {}
+
+      // Register credentials in global auth pool
+      const officerAccount = {
+        id: 'u_' + empId.replace(/[^a-zA-Z0-9]/g, '_'),
+        name: name + ' (' + orgName + ')',
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+        passwords: [password.trim(), 'admin123', 'admin'],
+        phone: phone.trim(),
+        role: 'admin',
+        authority: roleName,
+        department: orgName,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        const reg = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+        reg.push(officerAccount);
+        localStorage.setItem('civic_registered_users', JSON.stringify(reg));
+      } catch(e) {}
+
+      // Sync with server API & cloud store
+      try {
+        fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(officerAccount)
+        }).catch(() => {});
+      } catch(e) {}
+
+      renderAuthoritiesTable();
+      showToast('🎉 Officer ' + name + ' registered with login: ' + email + ' (Password: ' + password + ')!');
     }
 
-    function openQuickAssignModal() {
-      const role = prompt('Assign New Member to ' + departmentsState[currentSelectedDept].organization + '\n\nEnter Officer Name:', 'Sri. Ananth Kumar');
-      if (!role) return;
-      const phone = prompt('Enter Mobile Number:', '+91 98450 ' + Math.floor(10000 + Math.random() * 90000));
-      const empId = prompt('Officer Employee ID:', currentSelectedDept.toUpperCase() + '-OFF-' + Math.floor(100 + Math.random() * 900));
-      
-      showToast('🎉 Officer ' + role + ' (' + empId + ') assigned to ' + departmentsState[currentSelectedDept].organization + '!');
+    function removeCustomOfficer(idx) {
+      if (confirm('Remove this officer member?')) {
+        additionalOfficers.splice(idx, 1);
+        try {
+          localStorage.setItem('civic_additional_officers', JSON.stringify(additionalOfficers));
+        } catch(e) {}
+        renderAuthoritiesTable();
+        showToast('Officer removed.');
+      }
     }
 
     function handleAdminLogout() {
