@@ -277,10 +277,6 @@
       const address = document.getElementById('req-address').value.trim();
       const notes = document.getElementById('req-notes').value.trim();
 
-      let authority = 'MCC Urban C&D Cell';
-      if (pin.startsWith('570026')) authority = 'Bogadi Gram Panchayat';
-      else if (pin.startsWith('570018')) authority = 'Hootagalli Town Panchayat';
-
       // Match designated Inspector for this PIN code
       let allUsers = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
       let customInspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
@@ -296,62 +292,79 @@
         return insPin === pin || insPin.includes(pin);
       });
 
-      const assignedInspectorEmail = matchedInspector ? matchedInspector.email : (pin.startsWith('570026') ? 'nanjappa.gp@gmail.com' : (pin.startsWith('570018') ? 'anand.tp@gmail.com' : 'inspector.mcc@gmail.com'));
-      const assignedInspectorName = matchedInspector ? matchedInspector.name : (pin.startsWith('570026') ? 'S. Nanjappa' : (pin.startsWith('570018') ? 'M. Anand' : 'Rajesh Kumar'));
+      let authorityKey = 'mcc';
+      let authority = 'MCC Urban C&D Cell';
 
-      const newId = 'CD-REQ-' + Math.floor(1000 + Math.random() * 9000);
-      const newReq = {
-        id: newId,
-        applicantName: user.name || 'Citizen',
-        phone: user.phone || '+91 98450 12345',
-        material,
-        pin,
-        pincode: pin,
-        qty,
-        address,
-        authority,
-        notes,
-        status: 'DISPATCHED_IN_PROGRESS',
-        assignedInspectorEmail,
-        assignedInspectorName,
-        date: new Date().toLocaleDateString(),
-        createdAt: new Date().toISOString()
-      };
+      if (pin.startsWith('570026') || pin.startsWith('571130') || pin.startsWith('570028') || pin.startsWith('571311') || (matchedInspector && (matchedInspector.department === 'gp' || (matchedInspector.authority || '').toLowerCase().includes('panchayat')))) {
+        authorityKey = 'gp';
+        authority = 'Bogadi Gram Panchayat';
+      } else if (pin.startsWith('570018') || pin.startsWith('570017') || pin.startsWith('570027') || (matchedInspector && (matchedInspector.department === 'tp' || (matchedInspector.authority || '').toLowerCase().includes('town')))) {
+        authorityKey = 'tp';
+        authority = 'Hootagalli Town Panchayat';
+      } else if (matchedInspector && matchedInspector.department) {
+        authorityKey = matchedInspector.department;
+        authority = authorityKey === 'gp' ? 'Bogadi Gram Panchayat' : (authorityKey === 'tp' ? 'Hootagalli Town Panchayat' : 'MCC Urban C&D Cell');
+      }
 
-      const requests = JSON.parse(localStorage.getItem('cust_my_requests') || '[]');
-      requests.unshift(newReq);
-      localStorage.setItem('cust_my_requests', JSON.stringify(requests));
+      const assignedInspectorEmail = matchedInspector ? matchedInspector.email : (authorityKey === 'gp' ? 'nanjappa.gp@gmail.com' : (authorityKey === 'tp' ? 'anand.tp@gmail.com' : 'inspector.mcc@gmail.com'));
+      const assignedInspectorName = matchedInspector ? matchedInspector.name : (authorityKey === 'gp' ? 'S. Nanjappa' : (authorityKey === 'tp' ? 'M. Anand' : 'Rajesh Kumar'));
 
-      // Global applications list sync
-      const globalApps = JSON.parse(localStorage.getItem('civic_applications') || '[]');
-      globalApps.unshift({
-        id: newId,
-        applicantName: user.name || 'Citizen',
-        phone: user.phone || '+91 98450 12345',
-        address,
-        pin,
-        pincode: pin,
-        propertyType: material + ' (' + qty + ')',
-        status: 'Pending Field Verification',
-        assignedInspectorEmail,
-        assignedInspectorName,
-        tonnage: qty.includes('Tractor') ? '4' : (qty.includes('Tipper') ? '12' : '35'),
-        createdAt: new Date().toISOString()
-      });
-      localStorage.setItem('civic_applications', JSON.stringify(globalApps));
+      const photoInput = document.getElementById('req-photo');
+      if (photoInput && photoInput.files && photoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          saveAndDispatchApplication(evt.target.result);
+        };
+        reader.readAsDataURL(photoInput.files[0]);
+      } else {
+        saveAndDispatchApplication(null);
+      }
 
-      // Submit to backend API
-      fetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReq)
-      }).catch(() => {});
+      function saveAndDispatchApplication(photoData) {
+        const newId = 'CD-REQ-' + Math.floor(1000 + Math.random() * 9000);
+        const newReq = {
+          id: newId,
+          applicantName: user.name || 'Citizen',
+          phone: user.phone || '+91 98450 12345',
+          material,
+          pin,
+          pincode: pin,
+          qty,
+          address,
+          authority,
+          authorityKey,
+          notes,
+          photo: photoData,
+          status: 'Pending Field Verification',
+          assignedInspectorEmail,
+          assignedInspectorName,
+          tonnage: qty.includes('Tractor') ? '4' : (qty.includes('Tipper') ? '12' : '35'),
+          date: new Date().toLocaleDateString(),
+          createdAt: new Date().toISOString()
+        };
 
-      showToast('🎉 Request ' + newId + ' logged! Auto-routed to Inspector ' + assignedInspectorName + ' (PIN: ' + pin + ')');
-      e.target.reset();
-      document.getElementById('req-pin').value = '570001';
-      previewAuthorityRoute();
-      renderCustomerRequests();
+        const requests = JSON.parse(localStorage.getItem('cust_my_requests') || '[]');
+        requests.unshift(newReq);
+        localStorage.setItem('cust_my_requests', JSON.stringify(requests));
+
+        // Global applications list sync
+        const globalApps = JSON.parse(localStorage.getItem('civic_applications') || '[]');
+        globalApps.unshift(newReq);
+        localStorage.setItem('civic_applications', JSON.stringify(globalApps));
+
+        // Submit to backend API
+        fetch('/api/applications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newReq)
+        }).catch(() => {});
+
+        showToast('🎉 Request ' + newId + ' logged! Auto-routed to ' + authority + ' -> Inspector ' + assignedInspectorName + ' (PIN: ' + pin + ')');
+        e.target.reset();
+        document.getElementById('req-pin').value = '570001';
+        previewAuthorityRoute();
+        renderCustomerRequests();
+      }
     }
 
     function renderCustomerRequests() {

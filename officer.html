@@ -155,17 +155,13 @@
         </div>
       </div>
 
-      <!-- Authority Switcher -->
-      <div class="mt-3.5 bg-slate-900/90 p-1.5 rounded-xl flex items-center gap-1 border border-slate-700/60">
-        <button onclick="changeOfficerAuthority('mcc')" id="tab-scope-mcc" class="flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center bg-emerald-600 text-white shadow-xs">
-          MCC
-        </button>
-        <button onclick="changeOfficerAuthority('gp')" id="tab-scope-gp" class="flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center text-slate-400 hover:text-white">
-          GP (Rural)
-        </button>
-        <button onclick="changeOfficerAuthority('tp')" id="tab-scope-tp" class="flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center text-slate-400 hover:text-white">
-          TP (Town)
-        </button>
+      <!-- Locked Authority Badge (Strict Dashboard Isolation) -->
+      <div class="mt-3 bg-slate-900/90 px-3 py-2 rounded-xl flex items-center justify-between border border-slate-700/60">
+        <div class="flex items-center gap-2">
+          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="brand-dept-scope-text" class="text-[11px] font-bold text-slate-200 uppercase tracking-wide">MCC Urban Console</span>
+        </div>
+        <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Locked</span>
       </div>
     </div>
 
@@ -509,6 +505,7 @@
                   <th class="px-4 py-3">Application ID</th>
                   <th class="px-4 py-3">Applicant Details</th>
                   <th class="px-4 py-3">Site Location & PIN</th>
+                  <th class="px-4 py-3">Site Photo</th>
                   <th class="px-4 py-3">Estimated Tonnage</th>
                   <th class="px-4 py-3">Status</th>
                   <th class="px-4 py-3">Action</th>
@@ -933,10 +930,11 @@
           currentUser = JSON.parse(saved);
           const email = (currentUser.email || '').toLowerCase();
           const auth = (currentUser.authority || '').toLowerCase();
+          const role = (currentUser.role || '').toLowerCase();
 
-          if (email.includes('gp') || auth.includes('panchayat')) {
+          if (email === 'gp@gmail.com' || email.includes('gp.') || auth.includes('panchayat') || role.includes('gp')) {
             currentAuthorityKey = 'gp';
-          } else if (email.includes('tp') || auth.includes('town')) {
+          } else if (email === 'tp@gmail.com' || email.includes('tp.') || auth.includes('town') || role.includes('tp')) {
             currentAuthorityKey = 'tp';
           } else {
             currentAuthorityKey = 'mcc';
@@ -971,28 +969,14 @@
       renderAllTables();
     }
 
-    function changeOfficerAuthority(key) {
-      currentAuthorityKey = key;
-      ['mcc', 'gp', 'tp'].forEach(k => {
-        const btn = document.getElementById('tab-scope-' + k);
-        if (k === key) {
-          btn.className = 'flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center bg-emerald-600 text-white shadow-xs';
-        } else {
-          btn.className = 'flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center text-slate-400 hover:text-white';
-        }
-      });
-
-      renderCurrentAuthorityUI();
-      renderAllTables();
-      showToast('Switched view to ' + DEFAULT_DEPARTMENTS[key].name, 'success');
-    }
-
     function renderCurrentAuthorityUI() {
       const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
       
       document.getElementById('brand-icon').innerText = dept.icon;
       document.getElementById('brand-title').innerText = dept.tag;
       document.getElementById('brand-dept-tag').innerText = dept.jurisdiction || dept.name;
+      const scopeText = document.getElementById('brand-dept-scope-text');
+      if (scopeText) scopeText.innerText = dept.tag;
       document.getElementById('nav-auth-title').innerText = dept.name.split('(')[0].trim() + ' Profile';
 
       document.getElementById('header-icon').innerText = dept.icon;
@@ -1080,14 +1064,27 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Strict Authority Isolation: Only show applications belonging to this officer's authority
     function getAuthorityApplications() {
       const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
-      const deptPins = (dept.pinCodes || '').split(',').map(p => p.trim());
+      const deptPins = (dept.pinCodes || '').split(',').map(p => p.trim()).filter(Boolean);
 
       return applicationsList.filter(app => {
-        if (!app.pincode && !app.pin) return true;
-        const appPin = (app.pincode || app.pin || '').trim();
-        return deptPins.includes(appPin) || currentAuthorityKey === 'mcc';
+        // 1. If explicit authorityKey matches
+        if (app.authorityKey) {
+          return app.authorityKey.toLowerCase() === currentAuthorityKey.toLowerCase();
+        }
+        // 2. If authority string matches
+        const authStr = (app.authority || '').toLowerCase();
+        if (currentAuthorityKey === 'gp' && (authStr.includes('panchayat') || authStr.includes('rural') || authStr.includes('bogadi'))) return true;
+        if (currentAuthorityKey === 'tp' && (authStr.includes('town') || authStr.includes('hootagalli'))) return true;
+        if (currentAuthorityKey === 'mcc' && (authStr.includes('mcc') || authStr.includes('mysuru urban') || authStr.includes('city'))) return true;
+
+        // 3. Fallback PIN code check
+        const appPin = String(app.pincode || app.pin || '').trim();
+        if (appPin && deptPins.includes(appPin)) return true;
+
+        return false;
       });
     }
 
@@ -1270,6 +1267,39 @@
       `).join('');
     }
 
+    function viewPhoto(appId) {
+      const app = applicationsList.find(a => a.id === appId);
+      if (!app || !app.photo) return;
+      const modalContainer = document.getElementById('modal-container');
+      const backdrop = document.getElementById('modal-backdrop');
+
+      modalContainer.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <span>📸</span> Customer Uploaded Site Evidence
+            </h3>
+            <p class="text-xs text-slate-500 font-mono">App ID: ${app.id} · PIN: ${app.pincode || app.pin || ''} · ${app.applicantName || 'Citizen'}</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">&times;</button>
+        </div>
+        <div class="space-y-3">
+          <div class="rounded-2xl overflow-hidden border border-slate-200 max-h-96 flex items-center justify-center bg-slate-950">
+            <img src="${app.photo}" alt="Site Photo" class="max-h-96 w-auto object-contain"/>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1 text-slate-700">
+            <p><span class="font-bold">Premise Address:</span> ${app.address || 'Mysuru Site'}</p>
+            <p><span class="font-bold">Debris Material / Waste:</span> ${app.material || 'Demolition Waste'}</p>
+            <p><span class="font-bold">Assigned Inspector:</span> ${app.assignedInspectorName || 'Pending'} (${app.assignedInspectorEmail || 'N/A'})</p>
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end">
+          <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer">Close Preview</button>
+        </div>
+      `;
+      backdrop.classList.remove('hidden');
+    }
+
     function renderApplicationsTable() {
       const tbody = document.getElementById('table-applications');
       const apps = getAuthorityApplications();
@@ -1277,7 +1307,7 @@
       if (apps.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+            <td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium">
               No clearance applications submitted for ${DEFAULT_DEPARTMENTS[currentAuthorityKey].name} yet.
             </td>
           </tr>
@@ -1285,30 +1315,42 @@
         return;
       }
 
-      tbody.innerHTML = apps.map(a => `
-        <tr class="hover:bg-slate-50/80 transition">
-          <td class="px-4 py-3 font-mono font-bold text-emerald-800">${a.id}</td>
-          <td class="px-4 py-3">
-            <span class="font-bold text-slate-900 block">${a.applicantName || 'Citizen'}</span>
-            <span class="font-mono text-slate-500 text-[11px] block">${a.phone || ''}</span>
-          </td>
-          <td class="px-4 py-3">
-            <span class="text-slate-800 block">${a.address || 'Mysuru'}</span>
-            <span class="font-mono text-emerald-700 text-[11px] font-bold block">PIN: ${a.pincode || a.pin || '570001'}</span>
-          </td>
-          <td class="px-4 py-3 font-mono font-bold text-slate-900">${a.tonnage || 10} MT</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
-              ${a.status || 'Pending Review'}
-            </span>
-          </td>
-          <td class="px-4 py-3">
-            <button onclick="approveApplication('${a.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition cursor-pointer">
-              ✓ Approve
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = apps.map(a => {
+        const photoHtml = a.photo ? `
+          <button onclick="viewPhoto('${a.id}')" class="group relative block size-12 rounded-xl overflow-hidden border border-emerald-300 shadow-xs hover:ring-2 hover:ring-emerald-500 transition cursor-pointer">
+            <img src="${a.photo}" alt="Site Photo" class="w-full h-full object-cover group-hover:scale-110 transition duration-300"/>
+            <span class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">🔍</span>
+          </button>
+        ` : `<span class="text-[11px] text-slate-400 font-mono italic">No photo</span>`;
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3 font-mono font-bold text-emerald-800">${a.id}</td>
+            <td class="px-4 py-3">
+              <span class="font-bold text-slate-900 block">${a.applicantName || 'Citizen'}</span>
+              <span class="font-mono text-slate-500 text-[11px] block">${a.phone || ''}</span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-slate-800 block">${a.address || 'Mysuru'}</span>
+              <span class="font-mono text-emerald-700 text-[11px] font-bold block">PIN: ${a.pincode || a.pin || '570001'}</span>
+            </td>
+            <td class="px-4 py-3">
+              ${photoHtml}
+            </td>
+            <td class="px-4 py-3 font-mono font-bold text-slate-900">${a.tonnage || 10} MT</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+                ${a.status || 'Pending Review'}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <button onclick="approveApplication('${a.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition cursor-pointer">
+                ✓ Approve
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderDocumentsTable() {
@@ -1329,14 +1371,20 @@
       tbody.innerHTML = apps.map((a, i) => `
         <tr class="hover:bg-slate-50/80 transition">
           <td class="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
-            <span>📄</span> Khatta Certificate & Site Blueprint #${i+1}
+            <span>${a.photo ? '📸' : '📄'}</span> ${a.photo ? 'Site Verification Photo Evidence' : 'Khatta Certificate & Site Blueprint'} #${i+1}
           </td>
-          <td class="px-4 py-3 font-mono text-slate-600">PDF Blueprint</td>
+          <td class="px-4 py-3 font-mono text-slate-600">${a.photo ? 'Image / JPG' : 'PDF Blueprint'}</td>
           <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.id}</td>
           <td class="px-4 py-3 font-semibold text-slate-800">${a.applicantName || 'Applicant'}</td>
-          <td class="px-4 py-3 font-mono text-[11px] text-slate-500">Verified Online</td>
+          <td class="px-4 py-3 font-mono text-[11px] text-slate-500">${a.date || 'Today'}</td>
           <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">✓ Validated</span>
+            ${a.photo ? `
+              <button onclick="viewPhoto('${a.id}')" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono hover:bg-emerald-200">
+                🔍 View Evidence
+              </button>
+            ` : `
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">✓ Validated</span>
+            `}
           </td>
         </tr>
       `).join('');
@@ -1347,12 +1395,13 @@
       const backdrop = document.getElementById('modal-backdrop');
       const defaultPin = currentAuthorityKey === 'mcc' ? '570001' : (currentAuthorityKey === 'gp' ? '570026' : '570018');
       const defaultArea = currentAuthorityKey === 'mcc' ? 'Ward 14 (Palace & Devaraja Market)' : (currentAuthorityKey === 'gp' ? 'GP Ward 01 (Bogadi Rural)' : 'TP Ward 01 (Hootagalli Town)');
+      const deptName = DEFAULT_DEPARTMENTS[currentAuthorityKey].name;
 
       modalContainer.innerHTML = `
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
             <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <span>👷</span> Create New Inspector Account
+              <span>👷</span> Create New Inspector (${deptName})
             </h3>
             <p class="text-xs text-slate-500">Create login credentials and link designated PIN code for automated request routing.</p>
           </div>
@@ -1432,7 +1481,8 @@
         phone,
         password,
         role: 'inspector',
-        authority: 'Ward Inspector (PIN: ' + assignedPin + ')',
+        department: currentAuthorityKey,
+        authority: DEFAULT_DEPARTMENTS[currentAuthorityKey].name + ' Inspector (PIN: ' + assignedPin + ')',
         assignedPin,
         assignedArea,
         designation,
@@ -1467,6 +1517,8 @@
 
     function renderInspectorsTable() {
       const tbody = document.getElementById('table-inspectors');
+      const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+      const deptPins = (dept.pinCodes || '').split(',').map(p => p.trim()).filter(Boolean);
       
       const registeredInspectors = registeredUsers.filter(u => (u.role || '').toLowerCase() === 'inspector' || (u.authority || '').toLowerCase().includes('inspector'));
       const customInspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
@@ -1480,13 +1532,33 @@
 
       if (mergedInspectors.length === 0) {
         mergedInspectors.push(
-          { id: 'INS-01', name: 'Rajesh Kumar', email: 'inspector.mcc@gmail.com', phone: '+91 98450 11001', assignedPin: '570001', assignedArea: 'Ward 14 (Palace & Devaraja Market)', designation: 'Ward Health Inspector', status: 'Active (On Duty)' },
-          { id: 'INS-02', name: 'S. Nanjappa', email: 'nanjappa.gp@gmail.com', phone: '+91 98450 11002', assignedPin: '570026', assignedArea: 'GP Ward 01 (Bogadi Rural)', designation: 'Panchayat Health Inspector', status: 'Active (On Duty)' },
-          { id: 'INS-03', name: 'M. Anand', email: 'anand.tp@gmail.com', phone: '+91 98450 11003', assignedPin: '570018', assignedArea: 'TP Ward 01 (Hootagalli Town)', designation: 'Town Municipal Inspector', status: 'Active (On Duty)' }
+          { id: 'INS-01', name: 'Rajesh Kumar', email: 'inspector.mcc@gmail.com', phone: '+91 98450 11001', department: 'mcc', assignedPin: '570001', assignedArea: 'Ward 14 (Palace & Devaraja Market)', designation: 'Ward Health Inspector', status: 'Active (On Duty)' },
+          { id: 'INS-02', name: 'S. Nanjappa', email: 'nanjappa.gp@gmail.com', phone: '+91 98450 11002', department: 'gp', assignedPin: '570026', assignedArea: 'GP Ward 01 (Bogadi Rural)', designation: 'Panchayat Health Inspector', status: 'Active (On Duty)' },
+          { id: 'INS-03', name: 'M. Anand', email: 'anand.tp@gmail.com', phone: '+91 98450 11003', department: 'tp', assignedPin: '570018', assignedArea: 'TP Ward 01 (Hootagalli Town)', designation: 'Town Municipal Inspector', status: 'Active (On Duty)' }
         );
       }
 
-      tbody.innerHTML = mergedInspectors.map((ins, idx) => {
+      // Strictly isolate inspectors to this authority
+      const authorityInspectors = mergedInspectors.filter(ins => {
+        if (ins.department) {
+          return ins.department.toLowerCase() === currentAuthorityKey.toLowerCase();
+        }
+        const pin = String(ins.assignedPin || ins.pin || '').trim();
+        return deptPins.includes(pin);
+      });
+
+      if (authorityInspectors.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No field inspectors registered under ${dept.name} yet. Click "+ Create Inspector Account" to register one.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = authorityInspectors.map((ins, idx) => {
         const pin = ins.assignedPin || ins.pin || '570001';
         const linkedCount = applicationsList.filter(a => {
           const appPin = String(a.pincode || a.pin || '').trim();
@@ -1506,7 +1578,7 @@
               <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-950 font-mono font-bold text-xs border border-emerald-200 block w-fit">
                 📍 PIN: ${pin}
               </span>
-              <span class="text-[11px] text-slate-600 block mt-0.5">${ins.assignedArea || 'Mysuru Zone Area'}</span>
+              <span class="text-[11px] text-slate-600 block mt-0.5">${ins.assignedArea || 'Zone Area'}</span>
             </td>
             <td class="px-4 py-3 font-mono font-bold text-emerald-700">
               <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[11px]">${linkedCount} Linked Request(s)</span>
