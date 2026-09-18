@@ -70,7 +70,7 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- MAIN SPLIT-SCREEN AUTH CONTAINER -->
-  <div class="w-full max-w-6xl min-h-[640px] bg-white sm:rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+  <div class="w-full max-w-6xl min-h-[600px] bg-white sm:rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
     
     <!-- LEFT SIDE: CIVIC BRANDING & HIGHLIGHTS (5 Cols) -->
     <div class="lg:col-span-5 bg-mesh p-8 sm:p-12 text-white flex flex-col justify-between relative overflow-hidden">
@@ -126,28 +126,45 @@
     </div>
 
     <!-- RIGHT SIDE: CLEAN MODERN AUTH FORM (7 Cols) -->
-    <div class="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
+    <div class="lg:col-span-7 p-6 sm:p-10 lg:p-14 flex flex-col justify-center bg-white">
       
-      <div class="max-w-md w-full mx-auto space-y-5">
+      <div class="max-w-md w-full mx-auto space-y-6">
         
         <!-- Header -->
         <div>
-          <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Create Customer Account</h1>
-          <p id="auth-subtitle" class="text-xs sm:text-sm text-slate-500 mt-1">Register to report C&D debris, book demolition pickups, and track clearances.</p>
+          <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Sign In</h1>
+          <p id="auth-subtitle" class="text-xs sm:text-sm text-slate-500 mt-1">Sign in with your Email and Password to access your specific dashboard.</p>
         </div>
 
         <!-- Custom Tab Switcher -->
         <div class="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600">
-          <button id="tab-signup" onclick="setAuthTab('signup')" class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer">
-            Create Account
-          </button>
-          <button id="tab-signin" onclick="setAuthTab('signin')" class="py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer">
+          <button id="tab-signin" onclick="setAuthTab('signin')" class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer">
             Sign In
+          </button>
+          <button id="tab-signup" onclick="setAuthTab('signup')" class="py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer">
+            Create Account
           </button>
         </div>
 
-        <!-- 1. CUSTOMER SIGN UP FORM -->
-        <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-3.5">
+        <!-- 1. ROLE-BASED SIGN IN FORM -->
+        <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
+            <input id="login-email" type="email" required placeholder="name@domain.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Password</label>
+            <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2">
+            <span>Sign In to Dashboard &rarr;</span>
+          </button>
+        </form>
+
+        <!-- 2. CUSTOMER SIGN UP FORM -->
+        <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-3.5 hidden">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Full Name</label>
             <input id="reg-name" type="text" required placeholder="e.g. Harsha Vardhan" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
@@ -169,64 +186,10 @@
             </div>
           </div>
 
-          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2">
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2">
             <span>Register as Customer &rarr;</span>
           </button>
         </form>
-
-        <!-- 2. ROLE-BASED SIGN IN FORM -->
-        <div id="signin-form-wrapper" class="hidden space-y-4">
-          
-          <!-- Quick Demo Accounts Quick-Select Chips -->
-          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">⚡ Quick Demo Test Accounts:</span>
-              <span class="text-[10px] text-emerald-600 font-mono font-bold">1-Click Auto Fill</span>
-            </div>
-            <div class="grid grid-cols-2 gap-1.5 text-xs">
-              <button type="button" onclick="fillCredentials('admin@mysuru.gov.in', 'admin123')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-left transition cursor-pointer">
-                <span class="block font-bold text-slate-900 text-[11px]">👑 Super Admin</span>
-                <span class="block text-[9px] text-slate-500 font-mono">admin@mysuru.gov.in</span>
-              </button>
-              <button type="button" onclick="fillCredentials('mcc.officer@mysuru.gov.in', 'mcc123')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-left transition cursor-pointer">
-                <span class="block font-bold text-slate-900 text-[11px]">🏛️ MCC Officer</span>
-                <span class="block text-[9px] text-slate-500 font-mono">mcc.officer@...</span>
-              </button>
-              <button type="button" onclick="fillCredentials('gp.officer@mysuru.gov.in', 'gp123')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-left transition cursor-pointer">
-                <span class="block font-bold text-slate-900 text-[11px]">🌾 GP Officer</span>
-                <span class="block text-[9px] text-slate-500 font-mono">gp.officer@...</span>
-              </button>
-              <button type="button" onclick="fillCredentials('tp.officer@mysuru.gov.in', 'tp123')" class="p-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-left transition cursor-pointer">
-                <span class="block font-bold text-slate-900 text-[11px]">🏭 TP Officer</span>
-                <span class="block text-[9px] text-slate-500 font-mono">tp.officer@...</span>
-              </button>
-              <button type="button" onclick="fillCredentials('customer@gmail.com', 'user123')" class="p-2 rounded-xl bg-emerald-50/60 border border-emerald-300 hover:border-emerald-500 text-left transition cursor-pointer col-span-2">
-                <div class="flex items-center justify-between">
-                  <span class="block font-bold text-emerald-950 text-[11px]">👤 Customer / Citizen Account</span>
-                  <span class="text-[9px] font-mono font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">user123</span>
-                </div>
-                <span class="block text-[9px] text-emerald-800 font-mono">customer@gmail.com</span>
-              </button>
-            </div>
-          </div>
-
-          <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-3.5">
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Email Address</label>
-              <input id="login-email" type="text" required placeholder="your.email@example.com" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Password</label>
-              <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
-            </div>
-
-            <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
-              <span>Sign In to Dashboard &rarr;</span>
-            </button>
-          </form>
-
-        </div>
 
       </div>
 
@@ -235,8 +198,8 @@
   </div>
 
   <script>
-    // Hardcoded Preset Accounts for instant reliability on Vercel & offline
-    const PRELOADED_ACCOUNTS = [
+    // Configured System Accounts
+    const CONFIGURED_ACCOUNTS = [
       {
         id: 'u_admin',
         name: 'Dr. Ramesh Rao (Super Admin)',
@@ -284,16 +247,10 @@
       }
     ];
 
-    function fillCredentials(email, pass) {
-      document.getElementById('login-email').value = email;
-      document.getElementById('login-password').value = pass;
-      showToast('Credentials filled: ' + email, 'success');
-    }
-
     function getAllUsers() {
       try {
         const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-        const merged = [...PRELOADED_ACCOUNTS];
+        const merged = [...CONFIGURED_ACCOUNTS];
         stored.forEach(su => {
           if (!merged.find(m => m.email.toLowerCase() === (su.email || '').toLowerCase())) {
             merged.push(su);
@@ -301,7 +258,7 @@
         });
         return merged;
       } catch(e) {
-        return PRELOADED_ACCOUNTS;
+        return CONFIGURED_ACCOUNTS;
       }
     }
 
@@ -325,7 +282,7 @@
 
     function setAuthTab(tab) {
       const formSignUp = document.getElementById('signup-form');
-      const formSignIn = document.getElementById('signin-form-wrapper');
+      const formSignIn = document.getElementById('signin-form');
       const btnSignUp = document.getElementById('tab-signup');
       const btnSignIn = document.getElementById('tab-signin');
       const title = document.getElementById('auth-title');
@@ -384,7 +341,7 @@
       // Customers go ONLY to citizen.html!
       setTimeout(() => {
         window.location.href = 'citizen.html';
-      }, 600);
+      }, 500);
     }
 
     function handleSignIn(e) {
@@ -394,12 +351,13 @@
 
       const allUsers = getAllUsers();
       const user = allUsers.find(u => 
-        (u.email.toLowerCase() === emailInput || (u.name && u.name.toLowerCase() === emailInput)) && 
+        u.email.toLowerCase() === emailInput && 
         u.password === passwordInput
       );
 
+      // If fake / invalid email or password
       if (!user) {
-        showToast('Invalid credentials. Please verify email & password or click a quick-login chip above.', 'error');
+        showToast('Invalid email or password. Please check your credentials.', 'error');
         return;
       }
 
@@ -423,15 +381,8 @@
       }, 450);
     }
 
-    // Check URL parameters on load
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('tab') === 'signin' || urlParams.get('role')) {
-        setAuthTab('signin');
-        if (urlParams.get('role') === 'admin') fillCredentials('admin@mysuru.gov.in', 'admin123');
-        else if (urlParams.get('role') === 'customer') fillCredentials('customer@gmail.com', 'user123');
-      }
-    } catch(e) {}
+    // Initialize to Sign In tab by default
+    setAuthTab('signin');
   </script>
 </body>
 </html>

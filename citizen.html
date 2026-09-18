@@ -247,26 +247,18 @@
     function checkAuth() {
       try {
         const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
-        let user;
         if (!saved) {
-          user = {
-            id: 'u_cust',
-            name: 'Ananya Sharma',
-            email: 'customer@gmail.com',
-            role: 'citizen',
-            authority: 'Citizen',
-            phone: '+91 98450 77777'
-          };
-          localStorage.setItem('current_user', JSON.stringify(user));
-          sessionStorage.setItem('current_user', JSON.stringify(user));
-        } else {
-          user = JSON.parse(saved);
+          window.location.href = 'auth.html?tab=signin';
+          return;
         }
+        const user = JSON.parse(saved);
         if (document.getElementById('cust-name-display')) document.getElementById('cust-name-display').innerText = user.name || 'Citizen User';
         if (document.getElementById('cust-welcome-title')) document.getElementById('cust-welcome-title').innerText = 'Welcome, ' + (user.name || 'Citizen');
         previewAuthorityRoute();
         renderCustomerRequests();
-      } catch(e) {}
+      } catch(e) {
+        window.location.href = 'auth.html?tab=signin';
+      }
     }
 
     function previewAuthorityRoute() {

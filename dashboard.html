@@ -14,16 +14,7 @@
       try {
         const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
         if (!saved) {
-          // Fallback to Super Admin demo profile so preview is always smooth
-          const demoAdmin = {
-            id: 'u_admin',
-            name: 'Dr. Ramesh Rao (Super Admin)',
-            email: 'admin@mysuru.gov.in',
-            role: 'admin',
-            authority: 'MCC'
-          };
-          localStorage.setItem('current_user', JSON.stringify(demoAdmin));
-          sessionStorage.setItem('current_user', JSON.stringify(demoAdmin));
+          window.location.href = 'auth.html?tab=signin';
           return;
         }
         const user = JSON.parse(saved);
@@ -33,7 +24,14 @@
           window.location.href = 'citizen.html';
           return;
         }
-      } catch(e) {}
+        // Only admin and officers can view admin console
+        if (!(role === 'admin' || role === 'super_admin' || role.includes('officer') || role.includes('member') || role.includes('inspector'))) {
+          window.location.href = 'citizen.html';
+          return;
+        }
+      } catch(e) {
+        window.location.href = 'auth.html?tab=signin';
+      }
     }
     checkAdminAuth();
     
