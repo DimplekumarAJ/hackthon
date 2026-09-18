@@ -280,24 +280,38 @@
 
               <!-- 2. Location Details -->
               <div class="space-y-3 pt-2">
-                <div class="flex items-center gap-2">
-                  <span class="size-6 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">2</span>
-                  <h3 class="font-bold text-slate-900 text-sm">Location Details</h3>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="size-6 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">2</span>
+                    <h3 class="font-bold text-slate-900 text-sm">Location & Geotag Details</h3>
+                  </div>
+                  <button type="button" onclick="autoDetectCustomerGPS()" class="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 transition cursor-pointer">
+                    <span>🔄</span> <span>Auto-Detect Live GPS</span>
+                  </button>
+                </div>
+
+                <!-- Live GPS Geotag Banner -->
+                <div class="p-3 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div class="flex items-center gap-2.5">
+                    <span class="size-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shrink-0">📍</span>
+                    <div>
+                      <span class="text-[10px] uppercase font-bold text-emerald-800 tracking-wider block">Live Geotag Location (Latitude & Longitude)</span>
+                      <span id="live-gps-display" class="font-mono text-xs font-bold text-slate-900">Lat: 12.29581° N, Lng: 76.63942° E</span>
+                    </div>
+                  </div>
+                  <a id="live-gps-map-link" href="https://www.google.com/maps?q=12.29581,76.63942" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#065f46] hover:bg-[#047857] text-white font-bold text-[11px] flex items-center gap-1 shadow-xs transition w-fit">
+                    <span>Google Maps</span> <span>↗</span>
+                  </a>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <div class="flex items-center justify-between mb-1">
-                      <label class="block text-xs font-semibold text-slate-700">PIN Code <span class="text-rose-500">*</span></label>
-                      <button type="button" onclick="autoDetectCustomerGPS()" class="text-[10px] text-emerald-600 hover:text-emerald-700 font-bold underline cursor-pointer">
-                        🔄 Auto-Detect Live GPS
-                      </button>
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">PIN Code <span class="text-rose-500">*</span></label>
                     <div class="relative">
                       <span class="absolute left-3.5 top-3 text-slate-400 text-sm">📍</span>
-                      <input id="form-cust-pin" type="text" required value="570001" oninput="handlePinChange()" placeholder="Enter 6-digit PIN code" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50/70 border border-slate-200 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
+                      <input id="form-cust-pin" type="text" required maxlength="6" oninput="handlePinChange()" placeholder="e.g. 570001" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50/70 border border-slate-200 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
                     </div>
-                    <span id="pin-route-sub" class="text-[10px] text-emerald-700 font-mono font-semibold block mt-1">Routing to: Mysuru Municipal Corporation (MCC Urban)</span>
+                    <span id="pin-route-sub" class="text-[10px] text-emerald-700 font-mono font-semibold block mt-1">Routing: Enter PIN code above to auto-match your Ward Inspector</span>
                   </div>
 
                   <div>
@@ -306,7 +320,7 @@
                       <span class="absolute left-3.5 top-3 text-slate-400 text-sm">🏠</span>
                       <input id="form-cust-address" type="text" required placeholder="House No., Street, Locality, City" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50/70 border border-slate-200 text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
                     </div>
-                    <span class="text-[10px] text-slate-400 block mt-1">Include landmark for easy identification</span>
+                    <span class="text-[10px] text-slate-400 block mt-1">Include landmark for easy physical inspection</span>
                   </div>
                 </div>
               </div>
@@ -322,20 +336,25 @@
                   <label class="block text-xs font-semibold text-slate-700 mb-1">Property ID <span class="text-rose-500">*</span></label>
                   <div class="relative max-w-md">
                     <span class="absolute left-3.5 top-3 text-slate-400 text-sm">🏢</span>
-                    <input id="form-cust-property-id" type="text" required value="PROP-MYS-8821" placeholder="Enter property ID" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50/70 border border-slate-200 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
+                    <input id="form-cust-property-id" type="text" required placeholder="e.g. PROP-MYS-8821" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-50/70 border border-slate-200 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
                   </div>
+                  <span class="text-[10px] text-slate-400 block mt-1">PID / Assessment / Khatta number from your property tax receipt</span>
                 </div>
               </div>
 
-              <!-- 4. Live Photos Box -->
+              <!-- 4. Live Photos Box (Camera-Only Strict Mode) -->
               <div class="space-y-3 pt-2">
-                <div class="flex items-center gap-2">
-                  <span class="size-6 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">4</span>
-                  <h3 class="font-bold text-slate-900 text-sm">Live Photos</h3>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="size-6 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">4</span>
+                    <h3 class="font-bold text-slate-900 text-sm">Live Camera Photo Evidence (Mandatory)</h3>
+                  </div>
+                  <span class="text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300">
+                    📷 Camera Capture Only
+                  </span>
                 </div>
 
-                <!-- Hidden file inputs -->
-                <input id="file-upload-input" type="file" accept="image/*" multiple class="hidden" onchange="handleFileSelect(event)"/>
+                <!-- Hidden camera capture input -->
                 <input id="camera-capture-input" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(event)"/>
 
                 <div class="bg-[#f2faf7] border border-[#bbf0df] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -344,22 +363,18 @@
                       📷
                     </div>
                     <div>
-                      <h4 class="font-bold text-slate-900 text-xs">Capture Live Photo</h4>
-                      <p class="text-[11px] text-slate-500">Use your camera to take a photo of the property</p>
+                      <h4 class="font-bold text-slate-900 text-xs">Capture Live On-Site Photo</h4>
+                      <p class="text-[11px] text-slate-500">Take a live photo directly from your camera. Uploading saved photos is disabled for authenticity.</p>
                     </div>
                   </div>
 
-                  <div class="flex items-center gap-2">
-                    <button type="button" onclick="triggerCameraCapture()" class="px-4 py-2 rounded-xl bg-[#065f46] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition cursor-pointer">
-                      <span>📷</span> <span>Capture Photo</span>
-                    </button>
-                    <span class="text-xs text-slate-400 font-medium">or</span>
-                    <button type="button" onclick="document.getElementById('file-upload-input').click()" class="px-4 py-2 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
-                      <span>📤</span> <span>Upload Photo</span>
+                  <div>
+                    <button type="button" onclick="triggerCameraCapture()" class="px-5 py-2.5 rounded-xl bg-[#065f46] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-900/20 flex items-center gap-2 transition cursor-pointer">
+                      <span>📷</span> <span>Capture Live Photo</span>
                     </button>
                   </div>
                 </div>
-                <span class="text-[11px] text-slate-400 block">You can add multiple photos (up to 5)</span>
+                <span class="text-[11px] text-slate-400 block">Capture up to 5 live site photos with automatic GPS geotagging.</span>
               </div>
 
               <!-- 5. Certificate Details -->
@@ -374,15 +389,15 @@
                     <label class="block text-[11px] font-semibold text-slate-700 mb-1">Certificate Number <span class="text-rose-500">*</span></label>
                     <div class="relative">
                       <span class="absolute left-3 top-2.5 text-slate-400 text-xs">📄</span>
-                      <input id="form-cert-num" type="text" oninput="syncPreviewCards()" placeholder="Enter certificate number" class="w-full pl-8 pr-2.5 py-2 rounded-xl bg-slate-50/70 border border-slate-200 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
+                      <input id="form-cert-num" type="text" oninput="syncPreviewCards()" placeholder="e.g. MCC-2026-001" class="w-full pl-8 pr-2.5 py-2 rounded-xl bg-slate-50/70 border border-slate-200 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"/>
                     </div>
                   </div>
 
                   <div>
                     <label class="block text-[11px] font-semibold text-slate-700 mb-1">Certificate Type <span class="text-rose-500">*</span></label>
                     <select id="form-cert-type" onchange="syncPreviewCards()" class="w-full px-3 py-2 rounded-xl bg-slate-50/70 border border-slate-200 text-xs font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
-                      <option value="">Select certificate type</option>
-                      <option value="C&D Waste Clearance NOC" selected>C&D Waste Clearance NOC</option>
+                      <option value="" selected disabled>Select certificate type</option>
+                      <option value="C&D Waste Clearance NOC">C&D Waste Clearance NOC</option>
                       <option value="Green Demolition Certificate">Green Demolition Certificate</option>
                       <option value="Debris Recycling NOC">Debris Recycling NOC</option>
                       <option value="Water & Power Rebate NOC">Water & Power Rebate NOC</option>
@@ -758,22 +773,30 @@
 
     // Auto-detect Live GPS Coordinates
     function autoDetectCustomerGPS() {
+      const displayEl = document.getElementById('live-gps-display');
+      const mapLink = document.getElementById('live-gps-map-link');
+      if (displayEl) displayEl.innerText = 'Acquiring high-accuracy GPS...';
+
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           pos => {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
-            const gpsStr = `${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E`;
+            const gpsStr = `Lat: ${lat.toFixed(5)}° N, Lng: ${lng.toFixed(5)}° E`;
             customerLiveCoords = { lat, lng, gpsText: gpsStr };
+            if (displayEl) displayEl.innerText = gpsStr;
+            if (mapLink) mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
             showToast('📍 Live GPS acquired: ' + gpsStr, 'success');
           },
           err => {
-            const pin = (document.getElementById('form-cust-pin').value || '570001').trim();
-            let fallbackLat = 12.3021, fallbackLng = 76.6450;
-            if (pin === '570026') { fallbackLat = 12.2850; fallbackLng = 76.5920; }
-            else if (pin === '570018') { fallbackLat = 12.3410; fallbackLng = 76.5890; }
-            const gpsStr = `${fallbackLat.toFixed(4)}° N, ${fallbackLng.toFixed(4)}° E (Mysuru Zone)`;
+            const pin = (document.getElementById('form-cust-pin')?.value || '').trim();
+            let fallbackLat = 12.29581, fallbackLng = 76.63942;
+            if (pin.startsWith('570026') || pin.startsWith('571130')) { fallbackLat = 12.28504; fallbackLng = 76.59201; }
+            else if (pin.startsWith('570018') || pin.startsWith('570017')) { fallbackLat = 12.34102; fallbackLng = 76.58905; }
+            const gpsStr = `Lat: ${fallbackLat.toFixed(5)}° N, Lng: ${fallbackLng.toFixed(5)}° E`;
             customerLiveCoords = { lat: fallbackLat, lng: fallbackLng, gpsText: gpsStr };
+            if (displayEl) displayEl.innerText = gpsStr + ' (Mysuru Zone)';
+            if (mapLink) mapLink.href = `https://www.google.com/maps?q=${fallbackLat},${fallbackLng}`;
           },
           { timeout: 7000, enableHighAccuracy: true }
         );
@@ -785,7 +808,9 @@
       const sub = document.getElementById('pin-route-sub');
       if (!sub) return;
 
-      if (pin.startsWith('570026') || pin.startsWith('571130') || pin.startsWith('570028')) {
+      if (!pin) {
+        sub.innerText = 'Routing: Enter PIN code above to auto-match your Ward Inspector';
+      } else if (pin.startsWith('570026') || pin.startsWith('571130') || pin.startsWith('570028')) {
         sub.innerText = 'Routing to: Bogadi Gram Panchayat (Rural Debris Squad)';
       } else if (pin.startsWith('570018') || pin.startsWith('570017')) {
         sub.innerText = 'Routing to: Hootagalli Town Panchayat (Industrial Clearance)';
@@ -795,7 +820,7 @@
       autoDetectCustomerGPS();
     }
 
-    // Photo Capture & Upload Handling
+    // Photo Capture & Upload Handling (Strict Camera-Only)
     function triggerCameraCapture() {
       const modal = document.getElementById('camera-modal');
       const video = document.getElementById('camera-stream');
@@ -873,7 +898,7 @@
         };
         reader.readAsDataURL(file);
       }
-      showToast('Photos loaded successfully!', 'success');
+      showToast('Photo captured successfully!', 'success');
     }
 
     function removePhoto(index) {
@@ -904,8 +929,9 @@
         } else {
           html += `
             <div class="flex flex-col items-center gap-1">
-              <div onclick="document.getElementById('file-upload-input').click()" class="w-full aspect-square rounded-xl border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50 hover:bg-emerald-50/40 flex items-center justify-center text-slate-400 hover:text-emerald-700 transition cursor-pointer">
+              <div onclick="triggerCameraCapture()" class="w-full aspect-square rounded-xl border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50 hover:bg-emerald-50/40 flex flex-col items-center justify-center text-slate-400 hover:text-emerald-700 transition cursor-pointer" title="Click to capture live photo">
                 <span class="text-base">📷</span>
+                <span class="text-[9px] font-bold mt-0.5">Capture</span>
               </div>
               <span class="text-[10px] font-semibold text-slate-400">Photo ${i+1}</span>
             </div>
@@ -1329,18 +1355,11 @@
       if (saved) {
         try {
           const user = JSON.parse(saved);
-          if (document.getElementById('form-cust-name')) document.getElementById('form-cust-name').value = user.name || 'Citizen User';
-          if (document.getElementById('form-cust-phone')) document.getElementById('form-cust-phone').value = user.phone || '+91 98450 77777';
-          if (document.getElementById('top-user-name')) document.getElementById('top-user-name').innerText = user.name || 'Citizen';
-          if (document.getElementById('drop-user-name')) document.getElementById('drop-user-name').innerText = user.name || 'Citizen User';
-          if (document.getElementById('drop-user-email')) document.getElementById('drop-user-email').innerText = user.email || 'customer@gmail.com';
+          if (user.name && document.getElementById('top-user-name')) document.getElementById('top-user-name').innerText = user.name;
+          if (user.name && document.getElementById('drop-user-name')) document.getElementById('drop-user-name').innerText = user.name;
+          if (user.email && document.getElementById('drop-user-email')) document.getElementById('drop-user-email').innerText = user.email;
         } catch(e) {}
       }
-
-      // Default Date to Today
-      const today = new Date().toISOString().split('T')[0];
-      if (document.getElementById('form-cert-date')) document.getElementById('form-cert-date').value = today;
-      if (document.getElementById('form-cert-num')) document.getElementById('form-cert-num').value = 'MCC-' + Math.floor(100000 + Math.random() * 900000);
 
       renderPhotoPreviewSlots();
       syncPreviewCards();
