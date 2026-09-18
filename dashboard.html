@@ -8,6 +8,24 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+
+    // Authentication Guard Check
+    function checkAdminAuth() {
+      const saved = sessionStorage.getItem('current_user');
+      if (!saved) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      const user = JSON.parse(saved);
+      const role = (user.role || '').toLowerCase();
+      // If customer/citizen tries to access admin dashboard, redirect to citizen portal!
+      if (role === 'citizen' || role === 'customer') {
+        window.location.href = 'citizen.html';
+        return;
+      }
+    }
+    checkAdminAuth();
+    
     tailwind.config = {
       theme: {
         extend: {
@@ -733,6 +751,24 @@
 
   <!-- Interactive JavaScript & Live API Bindings -->
   <script>
+
+    // Authentication Guard Check
+    function checkAdminAuth() {
+      const saved = sessionStorage.getItem('current_user');
+      if (!saved) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      const user = JSON.parse(saved);
+      const role = (user.role || '').toLowerCase();
+      // If customer/citizen tries to access admin dashboard, redirect to citizen portal!
+      if (role === 'citizen' || role === 'customer') {
+        window.location.href = 'citizen.html';
+        return;
+      }
+    }
+    checkAdminAuth();
+    
     const views = [
       'dashboard', 'applications', 'pinmapping', 'authorities',
       'inspectors', 'inspections', 'demolition_requests', 'demolition_status',

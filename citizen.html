@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Customer Civic Portal — Smart Civic C&D Debris Routing Mysuru</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+    }
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased text-slate-900 selection:bg-emerald-500 selection:text-white">
+
+  <!-- Toast Notification Stack -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Top Customer Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="size-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          🏗️
+        </div>
+        <div>
+          <span class="block font-bold text-slate-900 leading-tight text-sm">Smart Civic C&D</span>
+          <span class="block text-[11px] text-slate-500 font-mono">Customer Debris & Demolition Portal</span>
+        </div>
+      </a>
+
+      <!-- Right Customer Profile & Sign Out -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="size-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">
+            👤
+          </div>
+          <div class="text-left leading-tight hidden sm:block">
+            <span id="cust-name-display" class="block text-xs font-bold text-slate-900">Customer User</span>
+            <span class="block text-[10px] font-mono text-emerald-700 font-semibold uppercase">Verified Citizen</span>
+          </div>
+        </div>
+
+        <button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-bold transition cursor-pointer">
+          Sign Out
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Customer Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
+
+    <!-- Welcome Hero Banner -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="size-14 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-2xl shadow-inner">
+          📢
+        </div>
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold text-[10px] uppercase border border-emerald-200">
+            Citizen Grievance & Demolition Desk
+          </span>
+          <h2 id="cust-welcome-title" class="text-2xl font-bold text-slate-900 mt-1">Lodge & Track C&D Waste Clearances</h2>
+          <p class="text-xs text-slate-500">Report construction debris or request demolition clearance in Mysuru. Our system automatically routes to the responsible authority by PIN code.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 Columns Grid: Form on Left, Tracking on Right -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- LEFT 5 COLS: REQUEST INTAKE FORM -->
+      <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="text-emerald-600">➕</span> Submit Debris / Demolition Request
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Enter your site details and PIN code. The system auto-identifies your authority.</p>
+        </div>
+
+        <form onsubmit="handleCustomerSubmit(event)" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Debris Material Category</label>
+            <select id="req-material" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 transition">
+              <option value="Concrete & Masonry Rubble">Concrete & Masonry Rubble (Demolition)</option>
+              <option value="Bricks, Plaster & Mortar">Bricks, Plaster & Mortar (Renovation)</option>
+              <option value="Excavated Soil, Silt & Rocks">Excavated Soil, Silt & Rocks (Foundation)</option>
+              <option value="Ceramic Tiles, Granite & Marble Scrap">Ceramic Tiles, Granite & Marble Scrap</option>
+              <option value="Dismantled Steel, Rebar & Timber">Dismantled Steel, Rebar & Timber</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">PIN Code (e.g. 570001)</label>
+              <input id="req-pin" type="text" required value="570001" maxlength="6" oninput="previewAuthorityRoute()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-mono font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"/>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Estimated Quantity</label>
+              <select id="req-qty" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 transition">
+                <option value="1-2 Tractor Loads (3-5 MT)">1-2 Tractor Loads (3-5 MT)</option>
+                <option value="1-2 Tipper Trucks (8-15 MT)">1-2 Tipper Trucks (8-15 MT)</option>
+                <option value="Large Site Demolition (> 30 MT)">Large Demolition (> 30 MT)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Authority Routing Preview Pill -->
+          <div id="route-preview-pill" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2 font-mono">
+            <span>⚡</span> <span id="route-preview-text" class="text-[11px] font-bold">PIN 570001 &rarr; Mysuru Municipal Corporation (MCC Urban)</span>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Property Site Address / Landmark</label>
+            <input id="req-address" type="text" required placeholder="e.g. Site #45, Near Devaraja Market North Gate" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"/>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Site Notes / Access Details</label>
+            <textarea id="req-notes" rows="2" placeholder="e.g. Wide road available for 10-tonne tipper truck access..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition"></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Photo Evidence (Optional)</label>
+            <input type="file" id="req-photo" accept="image/*" class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:bg-slate-100 file:text-slate-800"/>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition cursor-pointer">
+            Submit Request & Auto-Dispatch &rarr;
+          </button>
+        </form>
+      </div>
+
+      <!-- RIGHT 7 COLS: LIVE TRACKING TIMELINE & CERTIFICATES -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- Live Tracking Stream -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-4">
+          <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">📍 Live Clearance Tracking Timeline</h3>
+              <p class="text-xs text-slate-500">6-stage municipal clearance lifecycle from intake to recycling.</p>
+            </div>
+            <span id="cust-active-count" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-mono font-bold">2 Requests</span>
+          </div>
+
+          <div id="cust-requests-container" class="space-y-4">
+            <!-- Dynamic Request Cards with 6-stage timeline -->
+          </div>
+        </div>
+
+        <!-- My Certificates & Utility Rebates -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-4">
+          <div class="border-b border-slate-100 pb-3">
+            <h3 class="text-base font-bold text-slate-900">📜 My Green C&D Disposal Certificates</h3>
+            <p class="text-xs text-slate-500">Use these certificates for municipal building occupancy and CHESCOM/Water Board rebates.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-mono font-bold text-emerald-800 block text-sm">CERT-CD-MYS-8821</span>
+              <span class="text-slate-600 font-medium">Sayyaji Rao Road Restorations · 45 MT Cleared</span>
+              <span class="block text-[10px] text-emerald-700 font-mono mt-0.5">✓ QR Verified by MCC Health Inspector</span>
+            </div>
+            <button onclick="showToast('Downloading Green Disposal Certificate PDF...')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs">
+              PDF Download
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const item = document.createElement('div');
+      item.className = 'toast px-4 py-3 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2.5 border ' + 
+        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-rose-600 text-white border-rose-500');
+      item.innerHTML = '<span>✓</span> <span>' + msg + '</span>';
+      container.appendChild(item);
+      setTimeout(() => item.remove(), 4000);
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('current_user');
+      window.location.href = 'auth.html';
+    }
+
+    function checkAuth() {
+      const saved = sessionStorage.getItem('current_user');
+      if (!saved) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      const user = JSON.parse(saved);
+      document.getElementById('cust-name-display').innerText = user.name;
+      document.getElementById('cust-welcome-title').innerText = 'Welcome, ' + user.name;
+      previewAuthorityRoute();
+      renderCustomerRequests();
+    }
+
+    function previewAuthorityRoute() {
+      const pin = document.getElementById('req-pin').value.trim();
+      const text = document.getElementById('route-preview-text');
+
+      if (pin.startsWith('570026')) {
+        text.innerText = 'PIN 570026 ➔ Bogadi Gram Panchayat (Rural Debris Squad)';
+      } else if (pin.startsWith('570018')) {
+        text.innerText = 'PIN 570018 ➔ Hootagalli Town Panchayat (Industrial Clearance)';
+      } else if (pin.startsWith('570001') || pin.startsWith('570002') || pin.startsWith('570017')) {
+        text.innerText = 'PIN ' + pin + ' ➔ Mysuru Municipal Corporation (MCC Urban Debris Cell)';
+      } else {
+        text.innerText = 'PIN ' + pin + ' ➔ Greater Mysuru Central Jurisdiction Desk';
+      }
+    }
+
+    function handleCustomerSubmit(e) {
+      e.preventDefault();
+      const user = JSON.parse(sessionStorage.getItem('current_user') || '{}');
+      const material = document.getElementById('req-material').value;
+      const pin = document.getElementById('req-pin').value.trim();
+      const qty = document.getElementById('req-qty').value;
+      const address = document.getElementById('req-address').value.trim();
+      const notes = document.getElementById('req-notes').value.trim();
+
+      let authority = 'MCC Urban C&D Cell';
+      if (pin.startsWith('570026')) authority = 'Bogadi Gram Panchayat';
+      else if (pin.startsWith('570018')) authority = 'Hootagalli Town Panchayat';
+
+      const newId = 'CD-REQ-' + Math.floor(1000 + Math.random() * 9000);
+      const newReq = {
+        id: newId,
+        material,
+        pin,
+        qty,
+        address,
+        authority,
+        notes,
+        status: 'DISPATCHED_IN_PROGRESS',
+        date: new Date().toLocaleDateString()
+      };
+
+      const requests = JSON.parse(localStorage.getItem('cust_my_requests') || '[]');
+      requests.unshift(newReq);
+      localStorage.setItem('cust_my_requests', JSON.stringify(requests));
+
+      // Also submit to backend API if available
+      fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          applicantName: user.name || 'Citizen',
+          phone: user.phone || '+91 98450 12345',
+          address: address,
+          pin: pin,
+          area: 'Mysuru',
+          ward: 'Ward Ops',
+          propertyDetails: material + ' (' + qty + ')',
+          documents: 'Site_Evidence.jpg'
+        })
+      }).catch(() => {});
+
+      showToast('🎉 Request ' + newId + ' logged and auto-routed to ' + authority + '!');
+      e.target.reset();
+      document.getElementById('req-pin').value = '570001';
+      previewAuthorityRoute();
+      renderCustomerRequests();
+    }
+
+    function renderCustomerRequests() {
+      let requests = JSON.parse(localStorage.getItem('cust_my_requests') || '[]');
+      if (requests.length === 0) {
+        requests = [
+          {
+            id: 'CD-REQ-9418',
+            material: 'Reinforced Concrete & Bricks',
+            pin: '570001',
+            qty: '1-2 Tipper Trucks (8-15 MT)',
+            address: 'Site #42, Sayyaji Rao Rd, Devaraja',
+            authority: 'Mysuru Municipal Corporation (MCC)',
+            status: 'IN_PROGRESS',
+            date: '2026-09-18'
+          }
+        ];
+      }
+
+      document.getElementById('cust-active-count').innerText = requests.length + ' Active Requests';
+      const container = document.getElementById('cust-requests-container');
+
+      container.innerHTML = requests.map(r => `
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3.5">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <span class="font-mono text-emerald-700 font-bold text-sm">${r.id}</span>
+              <h4 class="font-bold text-slate-900 text-base">${r.material}</h4>
+              <p class="text-xs text-slate-600">📍 ${r.address} (PIN ${r.pin})</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-blue-100 text-blue-800">
+                ${r.authority}
+              </span>
+              <span class="block text-[10px] text-slate-400 font-mono mt-1">${r.date}</span>
+            </div>
+          </div>
+
+          <!-- 6-Stage Tracking Timeline -->
+          <div class="space-y-1.5">
+            <span class="text-[10px] font-mono uppercase text-slate-500 font-bold">Live Municipal Progress Pipeline</span>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div class="p-2 rounded-xl text-xs bg-white border border-emerald-300 text-emerald-900 shadow-xs flex items-center gap-2">
+                <span class="size-2 rounded-full bg-emerald-500"></span>
+                <div>
+                  <span class="block font-bold text-[11px] leading-tight">1. Submitted</span>
+                  <span class="block text-[9px] font-mono text-slate-500">Intake Verified</span>
+                </div>
+              </div>
+              <div class="p-2 rounded-xl text-xs bg-white border border-emerald-300 text-emerald-900 shadow-xs flex items-center gap-2">
+                <span class="size-2 rounded-full bg-emerald-500"></span>
+                <div>
+                  <span class="block font-bold text-[11px] leading-tight">2. PIN Auto-Routed</span>
+                  <span class="block text-[9px] font-mono text-slate-500">${r.authority.split('(')[0]}</span>
+                </div>
+              </div>
+              <div class="p-2 rounded-xl text-xs bg-white border border-emerald-300 text-emerald-900 shadow-xs flex items-center gap-2">
+                <span class="size-2 rounded-full bg-emerald-500"></span>
+                <div>
+                  <span class="block font-bold text-[11px] leading-tight">3. Site Inspected</span>
+                  <span class="block text-[9px] font-mono text-slate-500">Officer Approved</span>
+                </div>
+              </div>
+              <div class="p-2 rounded-xl text-xs bg-white border border-emerald-300 text-emerald-900 shadow-xs flex items-center gap-2">
+                <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <div>
+                  <span class="block font-bold text-[11px] leading-tight">4. Fleet Dispatched</span>
+                  <span class="block text-[9px] font-mono text-slate-500">JCB + Tipper Unit</span>
+                </div>
+              </div>
+              <div class="p-2 rounded-xl text-xs bg-slate-100/70 border border-slate-200 text-slate-400 flex items-center gap-2">
+                <span class="size-2 rounded-full bg-slate-300"></span>
+                <div>
+                  <span class="block font-bold text-[11px] leading-tight">5. Hauled to Yard</span>
+                  <span class="block text-[9px] font-mono text-slate-400">Kumbarakoppal</span>
+                </div>
+              </div>
+              <div class="p-2 rounded-xl text-xs bg-slate-100/70 border border-slate-200 text-slate-400 flex items-center gap-2">
+                <span class="size-2 rounded-full bg-slate-300"></span>
+                <div>
+                  <span class="block font-bold text-[11px] leading-tight">6. Certificate</span>
+                  <span class="block text-[9px] font-mono text-slate-400">Green NOC</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

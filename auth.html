@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Portal Access — Smart Civic Waste Routing Mysuru</title>
+  <title>Portal Access — Smart Civic C&D Debris Routing Mysuru</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +32,6 @@
     }
   </script>
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -67,7 +66,7 @@
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 antialiased flex items-center justify-center p-0 sm:p-6 lg:p-10">
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Notification Stack -->
   <div id="toast-container" class="toast-container"></div>
 
   <!-- MAIN SPLIT-SCREEN AUTH CONTAINER -->
@@ -80,11 +79,11 @@
       <div>
         <a href="index.html" class="inline-flex items-center gap-3 group">
           <div class="size-11 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition transform">
-            ♻️
+            🏗️
           </div>
           <div>
-            <span class="block font-bold text-base tracking-tight text-white">Smart Civic Waste Routing</span>
-            <span class="block text-[11px] text-emerald-400 font-mono tracking-wide uppercase">Mysuru Governance Hub</span>
+            <span class="block font-bold text-base tracking-tight text-white">Smart Civic C&D</span>
+            <span class="block text-[11px] text-emerald-400 font-mono tracking-wide uppercase">Mysuru Debris Hub</span>
           </div>
         </a>
       </div>
@@ -93,7 +92,7 @@
       <div class="my-8 space-y-5">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
           <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Jurisdiction-Aware Civic Engine
+          Construction & Demolition Routing
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
@@ -133,8 +132,8 @@
         
         <!-- Header -->
         <div>
-          <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Create Account</h1>
-          <p id="auth-subtitle" class="text-sm text-slate-500 mt-1">Get access to the civic waste reporting and operations portal.</p>
+          <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Create Customer Account</h1>
+          <p id="auth-subtitle" class="text-sm text-slate-500 mt-1">Register to report C&D debris, book demolition pickups, and track clearances.</p>
         </div>
 
         <!-- Custom Tab Switcher -->
@@ -147,10 +146,10 @@
           </button>
         </div>
 
-        <!-- 1. SIGN UP FORM -->
+        <!-- 1. CUSTOMER SIGN UP FORM -->
         <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Your Full Name</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Full Name</label>
             <input id="reg-name" type="text" required placeholder="e.g. Harsha Vardhan" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
           </div>
 
@@ -171,12 +170,11 @@
           </div>
 
           <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
-            <span>Register & Continue to Dashboard</span>
-            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <span>Register as Customer &rarr;</span>
           </button>
         </form>
 
-        <!-- 2. SIGN IN FORM -->
+        <!-- 2. ROLE-BASED SIGN IN FORM -->
         <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4 hidden">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
@@ -184,15 +182,12 @@
           </div>
 
           <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Password</label>
-            </div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Password</label>
             <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
           </div>
 
           <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
-            <span>Sign In to Portal</span>
-            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <span>Sign In to Dashboard &rarr;</span>
           </button>
         </form>
 
@@ -214,10 +209,8 @@
       const container = document.getElementById('toast-container');
       const item = document.createElement('div');
       item.className = 'toast px-4 py-3 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2.5 border ' + 
-        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' :
-         type === 'warning' ? 'bg-amber-500 text-white border-amber-400' :
-         'bg-rose-600 text-white border-rose-500');
-      item.innerHTML = '<span>' + (type === 'success' ? '✓' : type === 'warning' ? '⚠️' : '✕') + '</span> <span>' + msg + '</span>';
+        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-rose-600 text-white border-rose-500');
+      item.innerHTML = '<span>' + (type === 'success' ? '✓' : '⚠️') + '</span> <span>' + msg + '</span>';
       container.appendChild(item);
       setTimeout(() => item.remove(), 4000);
     }
@@ -235,15 +228,15 @@
         formSignIn.classList.add('hidden');
         btnSignUp.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
         btnSignIn.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
-        title.innerText = 'Create Account';
-        sub.innerText = 'Get access to the civic waste reporting and operations portal.';
+        title.innerText = 'Create Customer Account';
+        sub.innerText = 'Register to report C&D debris, book demolition pickups, and track clearances.';
       } else {
         formSignIn.classList.remove('hidden');
         formSignUp.classList.add('hidden');
         btnSignIn.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
         btnSignUp.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
-        title.innerText = 'Welcome Back';
-        sub.innerText = 'Sign in to access your authority or citizen dashboard.';
+        title.innerText = 'Sign In';
+        sub.innerText = 'Sign in with your Email and Password to access your specific dashboard.';
       }
     }
 
@@ -260,19 +253,15 @@
         return;
       }
 
-      // Backend logic: 1st person who creates an account becomes Super Admin! Subsequent signups are citizens.
-      const isFirst = users.length === 0;
-      const role = isFirst ? 'admin' : 'citizen';
-      const authority = isFirst ? 'MCC' : 'Citizen';
-
+      // Public signups are ALWAYS Customer / Citizen accounts
       const newUser = {
         id: 'u_' + Date.now(),
         name,
         email,
         phone,
         password,
-        role,
-        authority,
+        role: 'citizen',
+        authority: 'Citizen',
         createdAt: new Date().toISOString()
       };
 
@@ -280,10 +269,11 @@
       saveUsers(users);
       sessionStorage.setItem('current_user', JSON.stringify(newUser));
 
-      showToast('Account registered successfully! Redirecting...', 'success');
+      showToast('Customer account registered successfully! Opening customer portal...', 'success');
       
+      // Customers go ONLY to citizen.html!
       setTimeout(() => {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'citizen.html';
       }, 600);
     }
 
@@ -296,7 +286,7 @@
       const user = users.find(u => (u.email === email || u.name.toLowerCase() === email) && u.password === password);
 
       if (!user) {
-        showToast('Invalid email or password. Please check your credentials.', 'error');
+        showToast('Invalid email or password. Please verify credentials.', 'error');
         return;
       }
 
@@ -304,9 +294,56 @@
       showToast('Welcome back, ' + user.name + '!', 'success');
 
       setTimeout(() => {
-        window.location.href = 'dashboard.html';
+        const role = (user.role || '').toLowerCase();
+        // ONLY Admin and authorized officers open dashboard.html!
+        if (role === 'admin' || role === 'super_admin' || role.includes('officer') || role.includes('member') || role.includes('inspector')) {
+          window.location.href = 'dashboard.html';
+        } else {
+          // Customers / Citizens open citizen.html
+          window.location.href = 'citizen.html';
+        }
       }, 500);
     }
+
+    function initPreloadedAccounts() {
+      let users = getUsers();
+      if (!users.find(u => u.email === 'admin@mysuru.gov.in')) {
+        users.unshift({
+          id: 'u_admin',
+          name: 'Dr. Ramesh Rao (Super Admin)',
+          email: 'admin@mysuru.gov.in',
+          password: 'admin123',
+          role: 'admin',
+          authority: 'MCC',
+          phone: '+91 98450 00001'
+        });
+      }
+      if (!users.find(u => u.email === 'mcc.officer@mysuru.gov.in')) {
+        users.push({
+          id: 'u_mcc',
+          name: 'Sri. Suresh Kumar',
+          email: 'mcc.officer@mysuru.gov.in',
+          password: 'mcc123',
+          role: 'mcc_officer',
+          authority: 'MCC',
+          phone: '+91 98450 00002'
+        });
+      }
+      if (!users.find(u => u.email === 'customer@gmail.com')) {
+        users.push({
+          id: 'u_cust',
+          name: 'Ananya Sharma',
+          email: 'customer@gmail.com',
+          password: 'user123',
+          role: 'citizen',
+          authority: 'Citizen',
+          phone: '+91 98450 77777'
+        });
+      }
+      saveUsers(users);
+    }
+
+    initPreloadedAccounts();
   </script>
 </body>
 </html>
