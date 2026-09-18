@@ -125,7 +125,7 @@
       </div>
     </div>
 
-    <!-- RIGHT SIDE: CLEAN MODERN AUTH FORM (7 Cols) -->
+    <!-- RIGHT SIDE: CLEAN AUTH FORM (7 Cols) -->
     <div class="lg:col-span-7 p-6 sm:p-10 lg:p-14 flex flex-col justify-center bg-white">
       
       <div class="max-w-md w-full mx-auto space-y-6">
@@ -133,7 +133,7 @@
         <!-- Header -->
         <div>
           <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Sign In</h1>
-          <p id="auth-subtitle" class="text-xs sm:text-sm text-slate-500 mt-1">Sign in with your Email and Password to access your specific dashboard.</p>
+          <p id="auth-subtitle" class="text-xs sm:text-sm text-slate-500 mt-1">Sign in with your Email and Password to access your dashboard.</p>
         </div>
 
         <!-- Custom Tab Switcher -->
@@ -146,7 +146,7 @@
           </button>
         </div>
 
-        <!-- 1. ROLE-BASED SIGN IN FORM -->
+        <!-- 1. SIGN IN FORM -->
         <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
@@ -163,7 +163,7 @@
           </button>
         </form>
 
-        <!-- 2. CUSTOMER SIGN UP FORM -->
+        <!-- 2. CREATE ACCOUNT FORM -->
         <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-3.5 hidden">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Full Name</label>
@@ -187,7 +187,7 @@
           </div>
 
           <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2">
-            <span>Register as Customer &rarr;</span>
+            <span>Create Account &rarr;</span>
           </button>
         </form>
 
@@ -198,76 +198,30 @@
   </div>
 
   <script>
-    // Configured System Accounts
-    const CONFIGURED_ACCOUNTS = [
+    // Pre-seeded fallback admin account
+    const DEFAULT_ACCOUNTS = [
       {
-        id: 'u_admin',
+        id: 'u_admin_default',
         name: 'Dr. Ramesh Rao (Super Admin)',
         email: 'admin@mysuru.gov.in',
         password: 'admin123',
         role: 'admin',
-        authority: 'MCC',
+        authority: 'Super Admin',
         phone: '+91 98450 00001'
-      },
-      {
-        id: 'u_mcc',
-        name: 'Sri. Suresh Kumar',
-        email: 'mcc.officer@mysuru.gov.in',
-        password: 'mcc123',
-        role: 'mcc_officer',
-        authority: 'MCC',
-        phone: '+91 98450 00002'
-      },
-      {
-        id: 'u_gp',
-        name: 'Smt. Lakshmi Devi',
-        email: 'gp.officer@mysuru.gov.in',
-        password: 'gp123',
-        role: 'gp_officer',
-        authority: 'Gram Panchayat',
-        phone: '+91 98450 00003'
-      },
-      {
-        id: 'u_tp',
-        name: 'Sri. Venkatesh M',
-        email: 'tp.officer@mysuru.gov.in',
-        password: 'tp123',
-        role: 'tp_officer',
-        authority: 'Town Panchayat',
-        phone: '+91 98450 00004'
-      },
-      {
-        id: 'u_cust',
-        name: 'Ananya Sharma',
-        email: 'customer@gmail.com',
-        password: 'user123',
-        role: 'citizen',
-        authority: 'Citizen',
-        phone: '+91 98450 77777'
       }
     ];
 
     function getAllUsers() {
       try {
         const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-        const merged = [...CONFIGURED_ACCOUNTS];
-        stored.forEach(su => {
-          if (!merged.find(m => m.email.toLowerCase() === (su.email || '').toLowerCase())) {
-            merged.push(su);
-          }
-        });
+        const merged = [...stored];
+        if (!merged.find(u => u.email.toLowerCase() === 'admin@mysuru.gov.in')) {
+          merged.push(DEFAULT_ACCOUNTS[0]);
+        }
         return merged;
       } catch(e) {
-        return CONFIGURED_ACCOUNTS;
+        return DEFAULT_ACCOUNTS;
       }
-    }
-
-    function saveUserRegistration(u) {
-      try {
-        const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-        stored.push(u);
-        localStorage.setItem('civic_registered_users', JSON.stringify(stored));
-      } catch(e) {}
     }
 
     function showToast(msg, type = 'success') {
@@ -293,15 +247,15 @@
         formSignIn.classList.add('hidden');
         btnSignUp.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
         btnSignIn.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
-        title.innerText = 'Create Customer Account';
-        sub.innerText = 'Register to report C&D debris, book demolition pickups, and track clearances.';
+        title.innerText = 'Create Account';
+        sub.innerText = 'Register your account to access the platform.';
       } else {
         formSignIn.classList.remove('hidden');
         formSignUp.classList.add('hidden');
         btnSignIn.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
         btnSignUp.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
         title.innerText = 'Sign In';
-        sub.innerText = 'Sign in with your Email and Password to access your specific dashboard.';
+        sub.innerText = 'Sign in with your Email and Password to access your dashboard.';
       }
     }
 
@@ -312,36 +266,47 @@
       const phone = document.getElementById('reg-phone').value.trim();
       const password = document.getElementById('reg-password').value.trim();
 
-      const allUsers = getAllUsers();
-      if (allUsers.find(u => u.email.toLowerCase() === email)) {
+      const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+      if (registered.find(u => u.email.toLowerCase() === email)) {
         showToast('An account with this email already exists. Please sign in.', 'error');
         return;
       }
 
-      // Public signups are ALWAYS Customer / Citizen accounts
+      // FIRST PERSON to create account becomes Super Admin!
+      // All subsequent people become Customer / Citizen!
+      const isFirstUser = (registered.length === 0);
+      const assignedRole = isFirstUser ? 'admin' : 'citizen';
+      const assignedAuthority = isFirstUser ? 'Super Admin' : 'Customer';
+
       const newUser = {
         id: 'u_' + Date.now(),
         name,
         email,
         phone,
         password,
-        role: 'citizen',
-        authority: 'Citizen',
+        role: assignedRole,
+        authority: assignedAuthority,
         createdAt: new Date().toISOString()
       };
 
-      saveUserRegistration(newUser);
+      registered.push(newUser);
       try {
+        localStorage.setItem('civic_registered_users', JSON.stringify(registered));
         localStorage.setItem('current_user', JSON.stringify(newUser));
         sessionStorage.setItem('current_user', JSON.stringify(newUser));
       } catch(e) {}
 
-      showToast('Customer account registered successfully! Opening customer portal...', 'success');
-      
-      // Customers go ONLY to citizen.html!
-      setTimeout(() => {
-        window.location.href = 'citizen.html';
-      }, 500);
+      if (isFirstUser) {
+        showToast('First account registered as Super Admin! Opening Admin Console...', 'success');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 500);
+      } else {
+        showToast('Customer account registered successfully! Opening Customer Portal...', 'success');
+        setTimeout(() => {
+          window.location.href = 'citizen.html';
+        }, 500);
+      }
     }
 
     function handleSignIn(e) {
@@ -371,17 +336,17 @@
 
       setTimeout(() => {
         const role = (user.role || '').toLowerCase();
-        // ONLY Admin and authorized officers open dashboard.html!
+        // Super Admin opens Admin Governance Console (dashboard.html)
         if (role === 'admin' || role === 'super_admin' || role.includes('officer') || role.includes('member') || role.includes('inspector')) {
           window.location.href = 'dashboard.html';
         } else {
-          // Customers / Citizens open citizen.html
+          // Customers / Citizens open Customer Portal (citizen.html)
           window.location.href = 'citizen.html';
         }
       }, 450);
     }
 
-    // Initialize to Sign In tab by default
+    // Default to Sign In tab
     setAuthTab('signin');
   </script>
 </body>
