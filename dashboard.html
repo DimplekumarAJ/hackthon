@@ -163,12 +163,12 @@
     
     <!-- Top Brand Logo -->
     <div class="p-6 border-b border-white/10 flex items-center gap-3">
-      <div class="size-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/20">
+      <div id="brand-icon" class="size-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/20">
         🏗️
       </div>
       <div class="leading-tight">
-        <span class="block font-bold text-sm text-white tracking-tight">Smart Civic C&D</span>
-        <span class="block text-[10px] text-emerald-400 font-mono tracking-wider uppercase font-semibold">Mysuru Debris Hub</span>
+        <span id="brand-title" class="block font-bold text-sm text-white tracking-tight">Smart Civic C&D</span>
+        <span id="brand-subtitle" class="block text-[10px] text-emerald-400 font-mono tracking-wider uppercase font-semibold">Mysuru Debris Hub</span>
       </div>
     </div>
 
@@ -964,15 +964,15 @@
 
     // Authentication Guard Check
     function checkAdminAuth() {
-      const saved = sessionStorage.getItem('current_user');
+      const saved = sessionStorage.getItem('current_user') || localStorage.getItem('current_user');
       if (!saved) {
         window.location.href = 'auth.html';
         return;
       }
       const user = JSON.parse(saved);
-      const role = (user.role || '').toLowerCase();
+      const role = ((user.role || '') + ' ' + (user.authority || '')).toLowerCase();
       // If customer/citizen tries to access admin dashboard, redirect to citizen portal!
-      if (role === 'citizen' || role === 'customer') {
+      if (role.includes('citizen') || role.includes('customer')) {
         window.location.href = 'citizen.html';
         return;
       }
@@ -2422,14 +2422,35 @@
           const userName = user.name || 'Officer';
           const userRole = user.authority || user.role || 'Super Admin';
           const userEmail = (user.email || '').toLowerCase();
-          const roleLower = (userRole + ' ' + (user.role || '')).toLowerCase();
+          const roleLower = (userRole + ' ' + (user.role || '') + ' ' + (user.department || '')).toLowerCase();
 
           if (document.getElementById('admin-name')) document.getElementById('admin-name').innerText = userName;
           if (document.getElementById('admin-role-badge')) document.getElementById('admin-role-badge').innerText = userRole;
 
+          const brandName = document.getElementById('brand-title');
+          const brandSub = document.getElementById('brand-subtitle');
+          const brandIcon = document.getElementById('brand-icon');
+          const topbarTitle = document.getElementById('topbar-title');
+          const topbarSub = document.getElementById('topbar-sub');
+          const adminAvatar = document.getElementById('admin-avatar');
+          const scopeTabs = document.getElementById('authority-scope-tabs');
+
           // Department Banner Personalization & Initial Scope
           if (roleLower.includes('panchayat') || userEmail.includes('gp')) {
             currentAuthorityScope = 'gp';
+            if (brandName) brandName.innerText = 'Gram Panchayat Portal';
+            if (brandSub) brandSub.innerText = 'Bogadi Rural Desk';
+            if (brandIcon) brandIcon.innerText = '🏡';
+            if (adminAvatar) adminAvatar.innerText = '🏡';
+            if (topbarTitle) topbarTitle.innerText = '🏡 Gram Panchayat Officer Dashboard';
+            if (topbarSub) topbarSub.innerText = 'Bogadi Gram Panchayat · Rural Wards & Debris Operations Console';
+            if (scopeTabs) {
+              scopeTabs.innerHTML = `
+                <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1.5">
+                  <span>🏡</span> Gram Panchayat Assigned Desk
+                </span>
+              `;
+            }
             if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-amber-50 border border-amber-200 text-amber-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
@@ -2452,6 +2473,19 @@
             }
           } else if (roleLower.includes('town') || userEmail.includes('tp')) {
             currentAuthorityScope = 'tp';
+            if (brandName) brandName.innerText = 'Town Panchayat Portal';
+            if (brandSub) brandSub.innerText = 'Hootagalli Suburban Hub';
+            if (brandIcon) brandIcon.innerText = '🏭';
+            if (adminAvatar) adminAvatar.innerText = '🏭';
+            if (topbarTitle) topbarTitle.innerText = '🏭 Town Panchayat Officer Dashboard';
+            if (topbarSub) topbarSub.innerText = 'Hootagalli Town Panchayat · Suburban Wards & Debris Operations Console';
+            if (scopeTabs) {
+              scopeTabs.innerHTML = `
+                <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-100 text-blue-900 border border-blue-300 flex items-center gap-1.5">
+                  <span>🏭</span> Town Panchayat Assigned Desk
+                </span>
+              `;
+            }
             if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-blue-50 border border-blue-200 text-blue-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
@@ -2474,6 +2508,19 @@
             }
           } else if (roleLower.includes('mcc') || userEmail.includes('mcc')) {
             currentAuthorityScope = 'mcc';
+            if (brandName) brandName.innerText = 'MCC Urban Portal';
+            if (brandSub) brandSub.innerText = 'Mysuru City Corporation';
+            if (brandIcon) brandIcon.innerText = '🏛️';
+            if (adminAvatar) adminAvatar.innerText = '🏛️';
+            if (topbarTitle) topbarTitle.innerText = '🏛️ MCC Urban Officer Dashboard';
+            if (topbarSub) topbarSub.innerText = 'Mysuru City Corporation · 65 Urban Wards Debris Governance Console';
+            if (scopeTabs) {
+              scopeTabs.innerHTML = `
+                <span class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5">
+                  <span>🏛️</span> MCC Urban Assigned Desk
+                </span>
+              `;
+            }
             if (banner) {
               banner.innerHTML = `
                 <div class="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
