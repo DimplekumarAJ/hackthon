@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Officer Field Operations Hub — Smart Civic C&D Mysuru</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Authentication Guard Check for Officers
+    function checkOfficerAuth() {
+      try {
+        const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
+        if (!saved) {
+          window.location.href = 'auth.html?tab=signin';
+          return;
+        }
+        const user = JSON.parse(saved);
+        const role = (user.role || '').toLowerCase();
+        const auth = (user.authority || '').toLowerCase();
+
+        // If regular customer/citizen tries to access officer console
+        if (role === 'citizen' || role === 'customer' || auth === 'customer') {
+          window.location.href = 'citizen.html';
+          return;
+        }
+      } catch(e) {
+        window.location.href = 'auth.html?tab=signin';
+      }
+    }
+    checkOfficerAuth();
+
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 9999px;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #94a3b8;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      text-align: left;
+    }
+    .nav-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.07);
+    }
+    .nav-btn.active {
+      color: #ffffff;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border-left: 3.5px solid #10b981;
+      font-weight: 700;
+    }
+    .nav-btn .icon-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .panel-view {
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .panel-view.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex text-slate-900 antialiased overflow-x-hidden selection:bg-emerald-500 selection:text-white">
+
+  <!-- Toast Notification Stack -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ========================================================================= -->
+  <!-- 1. LEFT SIDEBAR NAVIGATION PANEL (CONTAINING ALL 18 ENTITIES)             -->
+  <!-- ========================================================================= -->
+  <aside class="w-80 bg-[#0c1527] text-white flex flex-col justify-between shrink-0 h-screen sticky top-0 border-r border-slate-800 z-50">
+    
+    <!-- Top Brand & Authority Header -->
+    <div class="p-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div id="brand-icon" class="size-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/20 shrink-0">
+          🏛️
+        </div>
+        <div class="leading-tight overflow-hidden">
+          <span id="brand-title" class="block font-bold text-sm text-white tracking-tight truncate">MCC Officer Console</span>
+          <span id="brand-dept-tag" class="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-mono font-bold uppercase tracking-wider">
+            Mysuru Urban Division
+          </span>
+        </div>
+      </div>
+
+      <!-- Authority Switcher -->
+      <div class="mt-3.5 bg-slate-900/90 p-1.5 rounded-xl flex items-center gap-1 border border-slate-700/60">
+        <button onclick="changeOfficerAuthority('mcc')" id="tab-scope-mcc" class="flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center bg-emerald-600 text-white shadow-xs">
+          MCC
+        </button>
+        <button onclick="changeOfficerAuthority('gp')" id="tab-scope-gp" class="flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center text-slate-400 hover:text-white">
+          GP (Rural)
+        </button>
+        <button onclick="changeOfficerAuthority('tp')" id="tab-scope-tp" class="flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center text-slate-400 hover:text-white">
+          TP (Town)
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation List (All 18 Entities directly in Left Panel) -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-3 space-y-4">
+      
+      <!-- Group 1: Jurisdictional & Citizen Profiles -->
+      <div>
+        <span class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Jurisdiction & Demographics</span>
+        <div class="space-y-0.5">
+          <button onclick="switchOfficerTab('authority')" id="nav-authority" class="nav-btn active">
+            <span class="icon-box bg-emerald-500/20 text-emerald-300">🏛️</span>
+            <span class="truncate">1. <span id="nav-auth-title">MCC Authority</span></span>
+          </button>
+          <button onclick="switchOfficerTab('wards')" id="nav-wards" class="nav-btn">
+            <span class="icon-box bg-blue-500/20 text-blue-300">🗺️</span>
+            <span class="truncate">2. Wards</span>
+          </button>
+          <button onclick="switchOfficerTab('areas')" id="nav-areas" class="nav-btn">
+            <span class="icon-box bg-cyan-500/20 text-cyan-300">📍</span>
+            <span class="truncate">3. Areas / Localities</span>
+          </button>
+          <button onclick="switchOfficerTab('pincodes')" id="nav-pincodes" class="nav-btn">
+            <span class="icon-box bg-amber-500/20 text-amber-300">📮</span>
+            <span class="truncate">4. PIN Codes</span>
+          </button>
+          <button onclick="switchOfficerTab('citizens')" id="nav-citizens" class="nav-btn">
+            <span class="icon-box bg-indigo-500/20 text-indigo-300">👥</span>
+            <span class="truncate">5. Applicants / Citizens</span>
+          </button>
+          <button onclick="switchOfficerTab('properties')" id="nav-properties" class="nav-btn">
+            <span class="icon-box bg-violet-500/20 text-violet-300">🏢</span>
+            <span class="truncate">6. Properties / Buildings</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Group 2: Permits & Field Workflows -->
+      <div>
+        <span class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Permits & Field Desk</span>
+        <div class="space-y-0.5">
+          <button onclick="switchOfficerTab('applications')" id="nav-applications" class="nav-btn">
+            <span class="icon-box bg-teal-500/20 text-teal-300">📁</span>
+            <span class="truncate">7. Applications</span>
+          </button>
+          <button onclick="switchOfficerTab('documents')" id="nav-documents" class="nav-btn">
+            <span class="icon-box bg-sky-500/20 text-sky-300">📑</span>
+            <span class="truncate">8. Documents</span>
+          </button>
+          <button onclick="switchOfficerTab('inspectors')" id="nav-inspectors" class="nav-btn">
+            <span class="icon-box bg-orange-500/20 text-orange-300">👷</span>
+            <span class="truncate">9. Inspectors / Field Officers</span>
+          </button>
+          <button onclick="switchOfficerTab('inspections')" id="nav-inspections" class="nav-btn">
+            <span class="icon-box bg-rose-500/20 text-rose-300">🔍</span>
+            <span class="truncate">10. Inspections</span>
+          </button>
+          <button onclick="switchOfficerTab('demolition_requests')" id="nav-demolition_requests" class="nav-btn">
+            <span class="icon-box bg-amber-500/20 text-amber-300">🏗️</span>
+            <span class="truncate">11. Demolition Requests</span>
+          </button>
+          <button onclick="switchOfficerTab('demolition_cases')" id="nav-demolition_cases" class="nav-btn">
+            <span class="icon-box bg-red-500/20 text-red-300">⏳</span>
+            <span class="truncate">12. Demolition Cases</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Group 3: Clearances, Utilities & Logs -->
+      <div>
+        <span class="px-3 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Clearances & Governance</span>
+        <div class="space-y-0.5">
+          <button onclick="switchOfficerTab('certificates')" id="nav-certificates" class="nav-btn">
+            <span class="icon-box bg-emerald-500/20 text-emerald-300">📜</span>
+            <span class="truncate">13. Certificates</span>
+          </button>
+          <button onclick="switchOfficerTab('water')" id="nav-water" class="nav-btn">
+            <span class="icon-box bg-blue-500/20 text-blue-300">💧</span>
+            <span class="truncate">14. Water Connections</span>
+          </button>
+          <button onclick="switchOfficerTab('electricity')" id="nav-electricity" class="nav-btn">
+            <span class="icon-box bg-yellow-500/20 text-yellow-300">⚡</span>
+            <span class="truncate">15. Electricity Connections</span>
+          </button>
+          <button onclick="switchOfficerTab('notifications')" id="nav-notifications" class="nav-btn">
+            <span class="icon-box bg-pink-500/20 text-pink-300">🔔</span>
+            <span class="truncate">16. Notifications</span>
+          </button>
+          <button onclick="switchOfficerTab('reports')" id="nav-reports" class="nav-btn">
+            <span class="icon-box bg-purple-500/20 text-purple-300">📈</span>
+            <span class="truncate">17. Reports</span>
+          </button>
+          <button onclick="switchOfficerTab('users')" id="nav-users" class="nav-btn">
+            <span class="icon-box bg-slate-500/20 text-slate-300">👤</span>
+            <span class="truncate">18. Users / Admins</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Officer Profile & Logout Footer -->
+    <div class="p-3.5 border-t border-white/10 bg-slate-950/60 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 overflow-hidden">
+        <div id="officer-avatar" class="size-8 rounded-xl bg-emerald-600 font-bold text-white flex items-center justify-center text-xs shrink-0">
+          EO
+        </div>
+        <div class="overflow-hidden leading-tight">
+          <span id="officer-name-display" class="block font-bold text-xs text-white truncate">MCC Executive Officer</span>
+          <span id="officer-email-display" class="block text-[10px] text-slate-400 font-mono truncate">mcc@gmail.com</span>
+        </div>
+      </div>
+      <button onclick="handleSignOut()" title="Sign Out" class="size-8 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs transition cursor-pointer shrink-0">
+        🚪
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN VIEWPORT & 18 ENTITY PANELS                                       -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 flex flex-col min-w-0 bg-slate-50 min-h-screen">
+    
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-40 flex items-center justify-between gap-4 shadow-xs">
+      <div class="flex items-center gap-3">
+        <div class="size-9 rounded-xl bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center text-lg border border-emerald-100" id="header-icon">
+          🏛️
+        </div>
+        <div>
+          <h1 id="header-title" class="text-lg font-extrabold text-slate-900">MCC Authority Profile</h1>
+          <p id="header-subtitle" class="text-xs text-slate-500">Mysuru City Corporation jurisdictional registry, contact & operational desks.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200">
+          <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="header-live-badge" class="text-xs font-mono font-bold text-slate-700">Live Sync: Mysuru Central DB</span>
+        </div>
+        <a href="citizen.html" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+          <span>🌐 Citizen View</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Content Workspace -->
+    <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 1: AUTHORITY PROFILE                                           -->
+      <!-- ===================================================================== -->
+      <section id="panel-authority" class="panel-view active space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <span id="auth-pill-role" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Official Authority Registration
+              </span>
+              <h2 id="auth-card-title" class="text-xl font-bold text-slate-900 mt-2">Mysuru City Corporation (MCC)</h2>
+              <p id="auth-card-sub" class="text-xs text-slate-500 mt-0.5">Manage official authority details, designated executive officers, and credentials.</p>
+            </div>
+            <button onclick="saveAuthorityChanges()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-2">
+              <span>💾 Save Authority Details</span>
+            </button>
+          </div>
+
+          <div id="authority-fields-container" class="space-y-4">
+            <!-- Populated dynamically based on active authority -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 2: WARDS                                                       -->
+      <!-- ===================================================================== -->
+      <section id="panel-wards" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Jurisdictional Wards & Zones</h2>
+              <p class="text-xs text-slate-500">Wards covered under this civic authority with assigned supervisors and active clearance works.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Ward No.</th>
+                  <th class="px-4 py-3">Ward Name</th>
+                  <th class="px-4 py-3">Zone / Taluk</th>
+                  <th class="px-4 py-3">Designated Officer / Supervisor</th>
+                  <th class="px-4 py-3">Active C&D Sites</th>
+                  <th class="px-4 py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-wards" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 3: AREAS / LOCALITIES                                          -->
+      <!-- ===================================================================== -->
+      <section id="panel-areas" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Areas & Localities Directory</h2>
+              <p class="text-xs text-slate-500">Neighborhoods, layouts, and colonies under this authority.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Area / Layout Name</th>
+                  <th class="px-4 py-3">Associated Ward</th>
+                  <th class="px-4 py-3">PIN Code</th>
+                  <th class="px-4 py-3">Debris Dumping Risk</th>
+                  <th class="px-4 py-3">Nearest Recycling Yard</th>
+                  <th class="px-4 py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-areas" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 4: PIN CODES                                                   -->
+      <!-- ===================================================================== -->
+      <section id="panel-pincodes" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Postal PIN Code Jurisdiction Map</h2>
+              <p class="text-xs text-slate-500">Routing rules for citizen permit submissions by Postal Index Number.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">PIN Code</th>
+                  <th class="px-4 py-3">Jurisdiction Name</th>
+                  <th class="px-4 py-3">Authority Level</th>
+                  <th class="px-4 py-3">Assigned Officer Email</th>
+                  <th class="px-4 py-3">Routing Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-pincodes" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 5: APPLICANTS / CITIZENS                                       -->
+      <!-- ===================================================================== -->
+      <section id="panel-citizens" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Registered Applicants & Citizens</h2>
+              <p class="text-xs text-slate-500">Real citizens who registered accounts and applied for construction/demolition clearance in this jurisdiction.</p>
+            </div>
+            <span id="citizens-count-badge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-mono text-xs font-bold">0 Registered</span>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Citizen ID</th>
+                  <th class="px-4 py-3">Full Name</th>
+                  <th class="px-4 py-3">Email Address</th>
+                  <th class="px-4 py-3">Phone Number</th>
+                  <th class="px-4 py-3">Registered On</th>
+                  <th class="px-4 py-3">Applications Filed</th>
+                </tr>
+              </thead>
+              <tbody id="table-citizens" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 6: PROPERTIES / BUILDINGS                                      -->
+      <!-- ===================================================================== -->
+      <section id="panel-properties" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Properties & Construction Sites</h2>
+              <p class="text-xs text-slate-500">Building plots, renovation sites, and structural premises verified under this jurisdiction.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Property PID / Khatta</th>
+                  <th class="px-4 py-3">Site Address</th>
+                  <th class="px-4 py-3">Property Type</th>
+                  <th class="px-4 py-3">Estimated Waste Volume</th>
+                  <th class="px-4 py-3">Associated Applicant</th>
+                  <th class="px-4 py-3">Compliance Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-properties" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 7: APPLICATIONS                                                -->
+      <!-- ===================================================================== -->
+      <section id="panel-applications" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Demolition & Debris Applications Registry</h2>
+              <p class="text-xs text-slate-500">Permit requests routed to this authority for review, site clearance, and approval.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Application ID</th>
+                  <th class="px-4 py-3">Applicant Details</th>
+                  <th class="px-4 py-3">Site Location & PIN</th>
+                  <th class="px-4 py-3">Estimated Tonnage</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-applications" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 8: DOCUMENTS                                                   -->
+      <!-- ===================================================================== -->
+      <section id="panel-documents" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Submitted Site Documents & Blueprints</h2>
+              <p class="text-xs text-slate-500">Khatta certificates, structural blueprints, property deeds, and before-demolition photos.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Document Title</th>
+                  <th class="px-4 py-3">Type</th>
+                  <th class="px-4 py-3">Linked Application</th>
+                  <th class="px-4 py-3">Applicant</th>
+                  <th class="px-4 py-3">Upload Date</th>
+                  <th class="px-4 py-3">Verification</th>
+                </tr>
+              </thead>
+              <tbody id="table-documents" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 9: INSPECTORS / FIELD OFFICERS                                 -->
+      <!-- ===================================================================== -->
+      <section id="panel-inspectors" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Inspectors & Field Officers Roster</h2>
+              <p class="text-xs text-slate-500">Squad officers assigned to physically verify demolition sites and C&D debris tonnage.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Inspector ID</th>
+                  <th class="px-4 py-3">Officer Name</th>
+                  <th class="px-4 py-3">Contact Phone</th>
+                  <th class="px-4 py-3">Assigned Wards / Areas</th>
+                  <th class="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-inspectors" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 10: INSPECTIONS                                                -->
+      <!-- ===================================================================== -->
+      <section id="panel-inspections" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Field Inspection Logs & GPS Audits</h2>
+              <p class="text-xs text-slate-500">Schedule, record, and verify on-ground site inspections.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Inspection ID</th>
+                  <th class="px-4 py-3">Application ID</th>
+                  <th class="px-4 py-3">Assigned Inspector</th>
+                  <th class="px-4 py-3">Scheduled Date</th>
+                  <th class="px-4 py-3">Audit Outcome</th>
+                </tr>
+              </thead>
+              <tbody id="table-inspections" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 11: DEMOLITION REQUESTS                                        -->
+      <!-- ===================================================================== -->
+      <section id="panel-demolition_requests" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Demolition Clearance Requests</h2>
+              <p class="text-xs text-slate-500">Initial applications requesting structural dismantling authorization.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Request ID</th>
+                  <th class="px-4 py-3">Structure Details</th>
+                  <th class="px-4 py-3">Location</th>
+                  <th class="px-4 py-3">Submission Date</th>
+                  <th class="px-4 py-3">Review Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-demolition_requests" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 12: DEMOLITION CASES                                           -->
+      <!-- ===================================================================== -->
+      <section id="panel-demolition_cases" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Active Demolition Cases & Tipper Dispatch</h2>
+              <p class="text-xs text-slate-500">Ongoing demolition operations, debris hauling vehicles, and recycling destination tracking.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Case ID</th>
+                  <th class="px-4 py-3">Site Address</th>
+                  <th class="px-4 py-3">Assigned Tipper & Driver</th>
+                  <th class="px-4 py-3">Disposal Facility</th>
+                  <th class="px-4 py-3">Progress</th>
+                </tr>
+              </thead>
+              <tbody id="table-demolition_cases" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 13: CERTIFICATES                                               -->
+      <!-- ===================================================================== -->
+      <section id="panel-certificates" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Green Demolition & Debris Disposal Certificates</h2>
+              <p class="text-xs text-slate-500">Official QR-verified civic compliance certificates issued upon verified recycling.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Certificate No.</th>
+                  <th class="px-4 py-3">Applicant Name</th>
+                  <th class="px-4 py-3">Property / Site</th>
+                  <th class="px-4 py-3">Tonnage Recycled</th>
+                  <th class="px-4 py-3">Issue Date</th>
+                </tr>
+              </thead>
+              <tbody id="table-certificates" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 14: WATER CONNECTIONS                                          -->
+      <!-- ===================================================================== -->
+      <section id="panel-water" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Water Supply Board Clearance (KUWSDB / MCC)</h2>
+              <p class="text-xs text-slate-500">Verification of water line disconnection before demolition and new connection NOC approval.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Water RR No.</th>
+                  <th class="px-4 py-3">Site Address</th>
+                  <th class="px-4 py-3">Owner Name</th>
+                  <th class="px-4 py-3">Pipeline Status</th>
+                  <th class="px-4 py-3">NOC Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-water" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 15: ELECTRICITY CONNECTIONS                                    -->
+      <!-- ===================================================================== -->
+      <section id="panel-electricity" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Electricity Disconnection & CESC Clearance</h2>
+              <p class="text-xs text-slate-500">Power grid isolation verification to guarantee safety during structural dismantling.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">CESC Account ID</th>
+                  <th class="px-4 py-3">Installation Address</th>
+                  <th class="px-4 py-3">Consumer Name</th>
+                  <th class="px-4 py-3">Grid Isolation</th>
+                  <th class="px-4 py-3">CESC Clearance</th>
+                </tr>
+              </thead>
+              <tbody id="table-electricity" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 16: NOTIFICATIONS                                              -->
+      <!-- ===================================================================== -->
+      <section id="panel-notifications" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Official Notifications & Dispatch Log</h2>
+              <p class="text-xs text-slate-500">SMS, Email, and in-app compliance alerts sent to citizens and field inspectors.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Notice ID</th>
+                  <th class="px-4 py-3">Recipient</th>
+                  <th class="px-4 py-3">Subject / Message</th>
+                  <th class="px-4 py-3">Channel</th>
+                  <th class="px-4 py-3">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="table-notifications" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 17: REPORTS                                                    -->
+      <!-- ===================================================================== -->
+      <section id="panel-reports" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Operational Reports & Waste Analytics</h2>
+              <p class="text-xs text-slate-500">Monthly C&D waste tonnages, recycling rates, and clearance compliance statistics.</p>
+            </div>
+          </div>
+
+          <!-- Metric Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Permits Processed</span>
+              <span id="rep-total-permits" class="text-2xl font-extrabold text-slate-900 mt-1 block">0</span>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Debris Hauled</span>
+              <span id="rep-debris-hauled" class="text-2xl font-extrabold text-emerald-600 mt-1 block">0 MT</span>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Recycled into Pavers</span>
+              <span id="rep-recycling-rate" class="text-2xl font-extrabold text-blue-600 mt-1 block">0%</span>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Clearance Fee Collected</span>
+              <span id="rep-fee-collected" class="text-2xl font-extrabold text-purple-600 mt-1 block">₹0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ENTITY 18: USERS / ADMINS                                             -->
+      <!-- ===================================================================== -->
+      <section id="panel-users" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Department Officers & Admin Accounts</h2>
+              <p class="text-xs text-slate-500">Officer credentials and designated staff with access to this jurisdiction.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">User Name</th>
+                  <th class="px-4 py-3">Official Email</th>
+                  <th class="px-4 py-3">Role</th>
+                  <th class="px-4 py-3">Designation</th>
+                  <th class="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-users" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT CONTROLLER                                                     -->
+  <!-- ========================================================================= -->
+  <script>
+    const DEFAULT_DEPARTMENTS = {
+      mcc: {
+        key: 'mcc',
+        name: 'Mysuru City Corporation (MCC)',
+        tag: 'MCC Officer Console',
+        title: 'MCC Authority — Mysuru City Corporation',
+        sub: 'Urban core jurisdiction across 65 wards (Zone 1 to Zone 9)',
+        organization: 'Mysuru City Corporation (MCC)',
+        headName: 'MCC Executive Officer',
+        designation: 'Executive Engineer / C&D Waste Incharge',
+        empId: 'MCC-ADM-101',
+        phone: '+91 98450 00002',
+        email: 'mcc@gmail.com',
+        password: 'mcc123',
+        address: 'MCC Central Office, Sayyaji Rao Road, Mysuru - 570001',
+        jurisdiction: 'Mysuru City (Urban Core)',
+        pinCodes: '570001, 570002, 570004, 570008, 570020, 570024',
+        role: 'MCC Admin',
+        status: 'Active',
+        icon: '🏛️'
+      },
+      gp: {
+        key: 'gp',
+        name: 'Gram Panchayat (Mysuru Rural)',
+        tag: 'Gram Panchayat Field Hub',
+        title: 'Gram Panchayat Authority — Mysuru Rural',
+        sub: 'Rural and peripheral village jurisdictions under Mysuru Taluk Panchayat',
+        organization: 'Bogadi Gram Panchayat',
+        headName: 'Gram Panchayat PDO',
+        designation: 'Panchayat Development Officer (PDO)',
+        empId: 'GP-PDO-201',
+        phone: '+91 98450 00003',
+        email: 'gp@gmail.com',
+        password: 'gp123',
+        address: 'Gram Panchayat Bhavan, Bogadi Village, Mysuru - 570026',
+        jurisdiction: 'Mysuru Rural Villages & Layouts',
+        pinCodes: '570026, 571130, 570028, 571311',
+        role: 'Panchayat Admin',
+        status: 'Active',
+        icon: '🏡'
+      },
+      tp: {
+        key: 'tp',
+        name: 'Town Panchayat (Mysuru Sub-Urban)',
+        tag: 'Town Panchayat Command Desk',
+        title: 'Town Panchayat Authority — Mysuru Sub-Urban',
+        sub: 'Sub-urban municipal bodies & Town Panchayat development areas',
+        organization: 'Hootagalli Town Municipal Council (TMC)',
+        headName: 'Town Panchayat Chief Officer',
+        designation: 'Chief Officer (Group-B Gazetted)',
+        empId: 'TP-CO-301',
+        phone: '+91 98450 00004',
+        email: 'tp@gmail.com',
+        password: 'tp123',
+        address: 'Town Panchayat Office, Hootagalli Industrial Area Main Road, Mysuru - 570018',
+        jurisdiction: 'Hootagalli & Bogadi Town Periphery',
+        pinCodes: '570018, 570017, 570027',
+        role: 'Town Panchayat Admin',
+        status: 'Active',
+        icon: '🏭'
+      }
+    };
+
+    let currentAuthorityKey = 'mcc';
+    let currentUser = null;
+    let registeredUsers = [];
+    let applicationsList = [];
+
+    function initOfficerSession() {
+      try {
+        const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
+        if (saved) {
+          currentUser = JSON.parse(saved);
+          const email = (currentUser.email || '').toLowerCase();
+          const auth = (currentUser.authority || '').toLowerCase();
+
+          if (email.includes('gp') || auth.includes('panchayat')) {
+            currentAuthorityKey = 'gp';
+          } else if (email.includes('tp') || auth.includes('town')) {
+            currentAuthorityKey = 'tp';
+          } else {
+            currentAuthorityKey = 'mcc';
+          }
+
+          document.getElementById('officer-name-display').innerText = currentUser.name || 'Officer';
+          document.getElementById('officer-email-display').innerText = currentUser.email || 'officer@mysuru.gov.in';
+          const initials = (currentUser.name || 'OF').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+          document.getElementById('officer-avatar').innerText = initials || 'OF';
+        }
+      } catch(e) {}
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/auth/users');
+        if (res.ok) registeredUsers = await res.json();
+      } catch(e) {}
+      if (!registeredUsers || registeredUsers.length === 0) {
+        registeredUsers = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+      }
+
+      try {
+        const res = await fetch('/api/applications');
+        if (res.ok) applicationsList = await res.json();
+      } catch(e) {}
+      if (!applicationsList || applicationsList.length === 0) {
+        applicationsList = JSON.parse(localStorage.getItem('civic_applications') || '[]');
+      }
+
+      renderCurrentAuthorityUI();
+      renderAllTables();
+    }
+
+    function changeOfficerAuthority(key) {
+      currentAuthorityKey = key;
+      ['mcc', 'gp', 'tp'].forEach(k => {
+        const btn = document.getElementById('tab-scope-' + k);
+        if (k === key) {
+          btn.className = 'flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center bg-emerald-600 text-white shadow-xs';
+        } else {
+          btn.className = 'flex-1 py-1 text-[11px] font-bold rounded-lg transition text-center text-slate-400 hover:text-white';
+        }
+      });
+
+      renderCurrentAuthorityUI();
+      renderAllTables();
+      showToast('Switched view to ' + DEFAULT_DEPARTMENTS[key].name, 'success');
+    }
+
+    function renderCurrentAuthorityUI() {
+      const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+      
+      document.getElementById('brand-icon').innerText = dept.icon;
+      document.getElementById('brand-title').innerText = dept.tag;
+      document.getElementById('brand-dept-tag').innerText = dept.jurisdiction || dept.name;
+      document.getElementById('nav-auth-title').innerText = dept.name.split('(')[0].trim() + ' Profile';
+
+      document.getElementById('header-icon').innerText = dept.icon;
+      document.getElementById('header-title').innerText = dept.title;
+      document.getElementById('header-subtitle').innerText = dept.sub;
+
+      renderAuthorityFields();
+    }
+
+    function renderAuthorityFields() {
+      const d = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+      const container = document.getElementById('authority-fields-container');
+
+      container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Organization</label>
+            <input id="f-org" type="text" value="${d.organization || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Designated Officer Name</label>
+            <input id="f-head" type="text" value="${d.headName || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Designation</label>
+            <input id="f-desig" type="text" value="${d.designation || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Officer / Employee ID</label>
+            <input id="f-empid" type="text" value="${d.empId || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Contact Phone</label>
+            <input id="f-phone" type="tel" value="${d.phone || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Login Email</label>
+            <input id="f-email" type="email" value="${d.email || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
+            <input id="f-address" type="text" value="${d.address || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jurisdiction Scope</label>
+            <input id="f-jurisdiction" type="text" value="${d.jurisdiction || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mapped PIN Codes</label>
+            <input id="f-pins" type="text" value="${d.pinCodes || ''}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Operational Status</label>
+            <input id="f-status" type="text" value="${d.status || 'Active'}" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-sm border border-emerald-200"/>
+          </div>
+        </div>
+      `;
+    }
+
+    function saveAuthorityChanges() {
+      const d = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+      d.organization = document.getElementById('f-org').value;
+      d.headName = document.getElementById('f-head').value;
+      d.designation = document.getElementById('f-desig').value;
+      d.empId = document.getElementById('f-empid').value;
+      d.phone = document.getElementById('f-phone').value;
+      d.email = document.getElementById('f-email').value;
+      d.address = document.getElementById('f-address').value;
+      d.jurisdiction = document.getElementById('f-jurisdiction').value;
+      d.pinCodes = document.getElementById('f-pins').value;
+
+      localStorage.setItem('civic_dept_settings_' + currentAuthorityKey, JSON.stringify(d));
+      showToast('Authority details updated and saved successfully!', 'success');
+    }
+
+    function switchOfficerTab(tabId) {
+      document.querySelectorAll('.panel-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const targetPanel = document.getElementById('panel-' + tabId);
+      const targetBtn = document.getElementById('nav-' + tabId);
+      if (targetPanel) targetPanel.classList.add('active');
+      if (targetBtn) targetBtn.classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getAuthorityApplications() {
+      const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+      const deptPins = (dept.pinCodes || '').split(',').map(p => p.trim());
+
+      return applicationsList.filter(app => {
+        if (!app.pincode && !app.pin) return true;
+        const appPin = (app.pincode || app.pin || '').trim();
+        return deptPins.includes(appPin) || currentAuthorityKey === 'mcc';
+      });
+    }
+
+    function renderAllTables() {
+      renderWardsTable();
+      renderAreasTable();
+      renderPinCodesTable();
+      renderCitizensTable();
+      renderPropertiesTable();
+      renderApplicationsTable();
+      renderDocumentsTable();
+      renderInspectorsTable();
+      renderInspectionsTable();
+      renderDemolitionRequestsTable();
+      renderDemolitionCasesTable();
+      renderCertificatesTable();
+      renderWaterTable();
+      renderElectricityTable();
+      renderNotificationsTable();
+      renderReportsTable();
+      renderUsersTable();
+    }
+
+    function renderWardsTable() {
+      const tbody = document.getElementById('table-wards');
+      let baseWards = [];
+      if (currentAuthorityKey === 'mcc') {
+        baseWards = [
+          { no: 'Ward 01', name: 'Chamundipuram', zone: 'Zone 1 (South)', supervisor: 'Officer K. Raman', sites: 2 },
+          { no: 'Ward 04', name: 'Krishnaraja Boulevard', zone: 'Zone 2 (Central)', supervisor: 'Officer S. Suresh', sites: 3 },
+          { no: 'Ward 12', name: 'Gokulam 3rd Stage', zone: 'Zone 3 (West)', supervisor: 'Officer M. Vinay', sites: 1 },
+          { no: 'Ward 24', name: 'Kuvempunagar Central', zone: 'Zone 5 (South-West)', supervisor: 'Officer R. Nagaraj', sites: 4 },
+          { no: 'Ward 35', name: 'Vijayanagar 2nd Stage', zone: 'Zone 7 (West)', supervisor: 'Officer P. Lokesh', sites: 2 }
+        ];
+      } else if (currentAuthorityKey === 'gp') {
+        baseWards = [
+          { no: 'GP Ward 01', name: 'Bogadi Rural North', zone: 'Mysuru Rural', supervisor: 'PDO In-charge', sites: 1 },
+          { no: 'GP Ward 02', name: 'Maratikyathanahalli', zone: 'Mysuru Rural', supervisor: 'Village Accountant', sites: 0 },
+          { no: 'GP Ward 03', name: 'Kadakola Grama', zone: 'Nanjangud Border', supervisor: 'PDO Assistant', sites: 2 }
+        ];
+      } else {
+        baseWards = [
+          { no: 'TP Ward 01', name: 'Hootagalli Town Center', zone: 'TMC Zone 1', supervisor: 'Chief Officer Squad', sites: 2 },
+          { no: 'TP Ward 07', name: 'Koorgalli Industrial Estate', zone: 'TMC Industrial', supervisor: 'Sanitary Inspector', sites: 3 },
+          { no: 'TP Ward 14', name: 'Belawadi Sub-Urban', zone: 'TMC Zone 2', supervisor: 'Revenue Officer', sites: 1 }
+        ];
+      }
+
+      tbody.innerHTML = baseWards.map(w => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">${w.no}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${w.name}</td>
+          <td class="px-4 py-3 text-slate-600">${w.zone}</td>
+          <td class="px-4 py-3 text-slate-700">${w.supervisor}</td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-900">${w.sites} Active</td>
+          <td class="px-4 py-3">
+            <button class="text-xs font-bold text-emerald-600 hover:text-emerald-700">Inspect &rarr;</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAreasTable() {
+      const tbody = document.getElementById('table-areas');
+      let baseAreas = [];
+      if (currentAuthorityKey === 'mcc') {
+        baseAreas = [
+          { name: 'Sayyaji Rao Road Corridor', ward: 'Ward 04', pin: '570001', risk: 'Medium', yard: 'Kumbarakoppal Recycling Yard' },
+          { name: 'KRS Road Industrial Belt', ward: 'Ward 18', pin: '570020', risk: 'High', yard: 'Hebbal Processing Plant' },
+          { name: 'Gokulam 2nd & 3rd Stage', ward: 'Ward 12', pin: '570002', risk: 'Low', yard: 'Kumbarakoppal Recycling Yard' }
+        ];
+      } else if (currentAuthorityKey === 'gp') {
+        baseAreas = [
+          { name: 'Bogadi Outer Ring Road Junction', ward: 'GP Ward 01', pin: '570026', risk: 'High (Dumping Zone)', yard: 'Bogadi Rural Dump Site' },
+          { name: 'Kadakola Industrial Area', ward: 'GP Ward 03', pin: '571311', risk: 'High', yard: 'Nanjangud Road Yard' }
+        ];
+      } else {
+        baseAreas = [
+          { name: 'Hootagalli Main Industrial Layout', ward: 'TP Ward 01', pin: '570018', risk: 'High', yard: 'Koorgalli Heavy C&D Yard' },
+          { name: 'Belawadi Urban Extension', ward: 'TP Ward 14', pin: '570017', risk: 'Medium', yard: 'Hebbal Processing Plant' }
+        ];
+      }
+
+      tbody.innerHTML = baseAreas.map(a => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-semibold text-slate-900">${a.name}</td>
+          <td class="px-4 py-3 text-slate-600 font-mono">${a.ward}</td>
+          <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.pin}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${a.risk.includes('High') ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}">${a.risk}</span>
+          </td>
+          <td class="px-4 py-3 text-slate-600">${a.yard}</td>
+          <td class="px-4 py-3">
+            <button class="text-xs font-bold text-slate-600 hover:text-slate-900">Map Route</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPinCodesTable() {
+      const tbody = document.getElementById('table-pincodes');
+      const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+      const pins = (dept.pinCodes || '').split(',').map(p => p.trim());
+
+      tbody.innerHTML = pins.map(pin => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-extrabold text-emerald-800 text-sm">${pin}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${dept.name}</td>
+          <td class="px-4 py-3 text-slate-600 font-mono">${dept.role}</td>
+          <td class="px-4 py-3 font-mono text-slate-700">${dept.email}</td>
+          <td class="px-4 py-3">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold font-mono text-[10px] border border-emerald-200">
+              ✓ Active Routing
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCitizensTable() {
+      const tbody = document.getElementById('table-citizens');
+      const badge = document.getElementById('citizens-count-badge');
+      const citizens = registeredUsers.filter(u => (u.role || '').toLowerCase() === 'citizen' || (u.authority || '').toLowerCase() === 'customer');
+
+      badge.innerText = citizens.length + ' Registered Citizens';
+
+      if (citizens.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No citizens registered yet. Real registered accounts will appear here automatically.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = citizens.map((c, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-slate-500">CITZ-${String(i+1).padStart(3, '0')}</td>
+          <td class="px-4 py-3 font-bold text-slate-900">${c.name}</td>
+          <td class="px-4 py-3 font-mono text-slate-600">${c.email}</td>
+          <td class="px-4 py-3 font-mono text-slate-700">${c.phone || '+91 98450 XXXXX'}</td>
+          <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Active Member'}</td>
+          <td class="px-4 py-3 font-mono font-bold text-emerald-700">
+            ${applicationsList.filter(a => (a.applicantName || '').toLowerCase() === (c.name || '').toLowerCase()).length} Permit(s)
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPropertiesTable() {
+      const tbody = document.getElementById('table-properties');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No properties registered in this jurisdiction yet. Fresh applications will list their site properties here.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">PID-MYS-${String(i+101)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${a.address || 'Mysuru Site Premise'}</td>
+          <td class="px-4 py-3 text-slate-600">${a.propertyType || 'Residential Structure'}</td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-900">${a.tonnage || a.wasteVolume || '15'} MT Estimated</td>
+          <td class="px-4 py-3 font-bold text-slate-800">${a.applicantName || 'Applicant'}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${a.status || 'Under Review'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderApplicationsTable() {
+      const tbody = document.getElementById('table-applications');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No clearance applications submitted for ${DEFAULT_DEPARTMENTS[currentAuthorityKey].name} yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map(a => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">${a.id}</td>
+          <td class="px-4 py-3">
+            <span class="font-bold text-slate-900 block">${a.applicantName || 'Citizen'}</span>
+            <span class="font-mono text-slate-500 text-[11px] block">${a.phone || ''}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="text-slate-800 block">${a.address || 'Mysuru'}</span>
+            <span class="font-mono text-emerald-700 text-[11px] font-bold block">PIN: ${a.pincode || a.pin || '570001'}</span>
+          </td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-900">${a.tonnage || 10} MT</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+              ${a.status || 'Pending Review'}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <button onclick="approveApplication('${a.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition cursor-pointer">
+              ✓ Approve
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderDocumentsTable() {
+      const tbody = document.getElementById('table-documents');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No documents uploaded yet. Document files from citizen permit filings will display here.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
+            <span>📄</span> Khatta Certificate & Site Blueprint #${i+1}
+          </td>
+          <td class="px-4 py-3 font-mono text-slate-600">PDF Blueprint</td>
+          <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.id}</td>
+          <td class="px-4 py-3 font-semibold text-slate-800">${a.applicantName || 'Applicant'}</td>
+          <td class="px-4 py-3 font-mono text-[11px] text-slate-500">Verified Online</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">✓ Validated</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderInspectorsTable() {
+      const tbody = document.getElementById('table-inspectors');
+      const inspectors = [
+        { id: 'INS-01', name: 'Rajesh Kumar', phone: '+91 98450 11001', wards: 'Zone 1 & 2 (Ward 1-15)', status: 'Active (On Duty)' },
+        { id: 'INS-02', name: 'S. Nanjappa', phone: '+91 98450 11002', wards: 'Zone 3 & 4 (Ward 16-30)', status: 'Active (On Duty)' },
+        { id: 'INS-03', name: 'M. Anand', phone: '+91 98450 11003', wards: 'Zone 5 & 6 (Ward 31-45)', status: 'On Field Inspection' }
+      ];
+
+      tbody.innerHTML = inspectors.map(ins => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">${ins.id}</td>
+          <td class="px-4 py-3 font-bold text-slate-900">${ins.name}</td>
+          <td class="px-4 py-3 font-mono text-slate-700">${ins.phone}</td>
+          <td class="px-4 py-3 text-slate-600">${ins.wards}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
+              ${ins.status}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderInspectionsTable() {
+      const tbody = document.getElementById('table-inspections');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No field inspections scheduled yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">INSP-${String(i+201)}</td>
+          <td class="px-4 py-3 font-mono text-slate-700 font-semibold">${a.id}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">Rajesh Kumar (INS-01)</td>
+          <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">Today, 2:30 PM</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+              ✓ Verified & Passed
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderDemolitionRequestsTable() {
+      const tbody = document.getElementById('table-demolition_requests');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No pending demolition clearance requests in this authority queue.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">DEM-REQ-${String(i+501)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${a.propertyType || 'Residential Building (G+2)'}</td>
+          <td class="px-4 py-3 text-slate-700">${a.address || 'Mysuru Premise'}</td>
+          <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">Recent</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold font-mono">
+              Under Structural Audit
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderDemolitionCasesTable() {
+      const tbody = document.getElementById('table-demolition_cases');
+      const apps = getAuthorityApplications().filter(a => a.status === 'Approved');
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No active demolition cases under execution right now.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">CASE-${String(i+701)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${a.address || 'Mysuru Site'}</td>
+          <td class="px-4 py-3 font-mono text-slate-700">KA-09-EA-4412 (10-Ton Tipper)</td>
+          <td class="px-4 py-3 text-slate-600">Kumbarakoppal Recycling Yard</td>
+          <td class="px-4 py-3">
+            <div class="w-28 bg-slate-200 rounded-full h-2 overflow-hidden">
+              <div class="bg-emerald-500 h-2 rounded-full" style="width: 75%"></div>
+            </div>
+            <span class="text-[10px] font-mono font-bold text-emerald-700 mt-0.5 block">75% Cleared</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCertificatesTable() {
+      const tbody = document.getElementById('table-certificates');
+      const apps = getAuthorityApplications().filter(a => a.status === 'Approved');
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No certificates generated yet. Issue certificates upon verified waste recycling.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">MYS-GREEN-${String(i+1001)}</td>
+          <td class="px-4 py-3 font-bold text-slate-900">${a.applicantName || 'Citizen'}</td>
+          <td class="px-4 py-3 text-slate-700">${a.address || 'Mysuru Site'}</td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-900">${a.tonnage || 12} MT Recycled</td>
+          <td class="px-4 py-3 font-mono text-[11px] text-slate-500">Issued Today</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderWaterTable() {
+      const tbody = document.getElementById('table-water');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No water disconnection or NOC requests in this queue.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-blue-700">WTR-RR-${String(i+3301)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${a.address || 'Mysuru Property'}</td>
+          <td class="px-4 py-3 text-slate-800">${a.applicantName || 'Owner'}</td>
+          <td class="px-4 py-3 font-mono text-slate-600">Meter Valve Locked</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+              ✓ NOC Granted
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderElectricityTable() {
+      const tbody = document.getElementById('table-electricity');
+      const apps = getAuthorityApplications();
+
+      if (apps.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No CESC power disconnection requests logged.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = apps.map((a, i) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-amber-700">CESC-AC-${String(i+8810)}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${a.address || 'Mysuru Site'}</td>
+          <td class="px-4 py-3 text-slate-800">${a.applicantName || 'Consumer'}</td>
+          <td class="px-4 py-3 font-mono text-slate-600">Phase Cut & Grounded</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+              ✓ Safety Clearance
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderNotificationsTable() {
+      const tbody = document.getElementById('table-notifications');
+      const notices = [
+        { id: 'NOTIF-801', recipient: 'All Active Squads', msg: 'Monsoon Debris Clearance Protocol Active across Mysuru', channel: 'SMS + Push', time: '10 Mins Ago' },
+        { id: 'NOTIF-802', recipient: 'Registered Applicants', msg: 'Permit approval and recycling collection schedule dispatched', channel: 'Email', time: '1 Hour Ago' }
+      ];
+
+      tbody.innerHTML = notices.map(n => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-mono font-bold text-emerald-800">${n.id}</td>
+          <td class="px-4 py-3 font-bold text-slate-900">${n.recipient}</td>
+          <td class="px-4 py-3 text-slate-700">${n.msg}</td>
+          <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${n.channel}</td>
+          <td class="px-4 py-3 font-mono text-slate-400 text-[11px]">${n.time}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderReportsTable() {
+      const apps = getAuthorityApplications();
+      const totalPermits = apps.length;
+      let totalTonnage = 0;
+      apps.forEach(a => { totalTonnage += Number(a.tonnage || 10); });
+
+      document.getElementById('rep-total-permits').innerText = totalPermits;
+      document.getElementById('rep-debris-hauled').innerText = totalTonnage + ' MT';
+      document.getElementById('rep-recycling-rate').innerText = totalPermits > 0 ? '94.2%' : '0%';
+      document.getElementById('rep-fee-collected').innerText = '₹' + (totalTonnage * 450).toLocaleString();
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('table-users');
+      const dept = DEFAULT_DEPARTMENTS[currentAuthorityKey];
+
+      tbody.innerHTML = `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="px-4 py-3 font-bold text-slate-900">${dept.headName}</td>
+          <td class="px-4 py-3 font-mono text-emerald-800 font-semibold">${dept.email}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-100 text-emerald-800">${dept.role}</span>
+          </td>
+          <td class="px-4 py-3 text-slate-600">${dept.designation}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">Active (Authorized)</span>
+          </td>
+        </tr>
+      `;
+    }
+
+    function approveApplication(appId) {
+      const app = applicationsList.find(a => a.id === appId);
+      if (app) {
+        app.status = 'Approved';
+        localStorage.setItem('civic_applications', JSON.stringify(applicationsList));
+        renderAllTables();
+        showToast('Application #' + appId + ' approved! Permit clearance generated.', 'success');
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const item = document.createElement('div');
+      item.className = 'toast px-4 py-3 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2.5 border ' + 
+        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-rose-600 text-white border-rose-500');
+      item.innerHTML = '<span>' + (type === 'success' ? '✓' : '⚠️') + '</span> <span>' + msg + '</span>';
+      container.appendChild(item);
+      setTimeout(() => item.remove(), 3500);
+    }
+
+    function handleSignOut() {
+      localStorage.removeItem('current_user');
+      sessionStorage.removeItem('current_user');
+      showToast('Signed out successfully.', 'success');
+      setTimeout(() => {
+        window.location.href = 'auth.html?tab=signin';
+      }, 400);
+    }
+
+    initOfficerSession();
+    loadData();
+  </script>
+</body>
+</html>

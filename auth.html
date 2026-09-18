@@ -503,9 +503,22 @@
 
       setTimeout(() => {
         const role = (user.role || '').toLowerCase();
-        // Super Admin & Officers open Admin Governance Console (dashboard.html)
-        if (role === 'admin' || role === 'super_admin' || role.includes('officer') || role.includes('member') || role.includes('inspector')) {
+        const auth = (user.authority || '').toLowerCase();
+        const email = (user.email || '').toLowerCase();
+
+        // 1. Dedicated Officer Dashboard for MCC, Gram Panchayat, and Town Panchayat Officers
+        const isOfficer = email === 'mcc@gmail.com' || email === 'gp@gmail.com' || email === 'tp@gmail.com' ||
+                          email.includes('officer@mysuru.gov.in') ||
+                          auth.includes('mcc') || auth.includes('panchayat') || auth.includes('town') ||
+                          role === 'officer' || role.includes('dept') || role.includes('inspector');
+
+        // 2. Super Admin Governance Console (Admin only)
+        const isSuperAdmin = (role === 'admin' || role === 'super_admin' || auth === 'super admin' || email === 'admin@gmail.com' || email === 'superadmin@gmail.com' || email === 'admin@mysuru.gov.in') && !isOfficer;
+
+        if (isSuperAdmin) {
           window.location.href = 'dashboard.html';
+        } else if (isOfficer) {
+          window.location.href = 'officer.html';
         } else {
           // Customers / Citizens open Customer Portal (citizen.html)
           window.location.href = 'citizen.html';

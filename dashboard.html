@@ -342,42 +342,7 @@
           </div>
         </div>
 
-        <!-- ENTITIES MATRIX CONSOLE (MCC / GP / TP / Combined Panel) -->
-        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span id="entity-matrix-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono text-[11px] font-bold border border-emerald-200">
-                  🏛️ MCC Urban Panel
-                </span>
-                <span class="text-xs text-slate-500 font-medium">18 Governance Entities & Operational Desks</span>
-              </div>
-              <h3 id="entity-matrix-title" class="text-lg font-bold text-slate-900">MCC Panel — Entities & Field Operations Roster</h3>
-              <p id="entity-matrix-sub" class="text-xs text-slate-500">Official registry of entities under Mysuru City Corporation (MCC) jurisdiction. Click any entity to access its live data table.</p>
-            </div>
-            
-            <!-- Authority Scope Selector Tabs -->
-            <div id="authority-scope-tabs" class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl">
-              <button onclick="setAuthorityScope('all')" id="scope-tab-all" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
-                🌐 All Mysuru
-              </button>
-              <button onclick="setAuthorityScope('mcc')" id="scope-tab-mcc" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-emerald-900 shadow-xs">
-                🏛️ MCC Panel
-              </button>
-              <button onclick="setAuthorityScope('gp')" id="scope-tab-gp" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
-                🏡 Gram Panchayat
-              </button>
-              <button onclick="setAuthorityScope('tp')" id="scope-tab-tp" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-slate-900">
-                🏭 Town Panchayat
-              </button>
-            </div>
-          </div>
 
-          <!-- 18 ENTITY TILES GRID -->
-          <div id="entities-matrix-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-            <!-- Dynamically populated via renderEntitiesMatrix() -->
-          </div>
-        </div>
 
         <!-- Debris Hotspot Map & Table -->
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
