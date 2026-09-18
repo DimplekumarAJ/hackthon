@@ -317,27 +317,27 @@
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Applications</span>
-            <span id="dash-total-apps" class="text-3xl font-extrabold text-slate-900 mt-2 block">142</span>
+            <span id="dash-total-apps" class="text-3xl font-extrabold text-slate-900 mt-2 block">0</span>
             <span class="text-[11px] text-blue-600 font-semibold mt-1 block">C&D Haulage & Clearance</span>
           </div>
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Pending Inspections</span>
-            <span id="dash-pending-insp" class="text-3xl font-extrabold text-amber-600 mt-2 block">18</span>
+            <span id="dash-pending-insp" class="text-3xl font-extrabold text-amber-600 mt-2 block">0</span>
             <span class="text-[11px] text-amber-700 font-semibold mt-1 block">Scheduled for field review</span>
           </div>
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Pending Debris</span>
-            <span id="dash-pending-debris" class="text-3xl font-extrabold text-rose-600 mt-2 block">34</span>
+            <span id="dash-pending-debris" class="text-3xl font-extrabold text-rose-600 mt-2 block">0</span>
             <span class="text-[11px] text-rose-700 font-semibold mt-1 block">Awaiting tipper dispatch</span>
           </div>
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Completed Collections</span>
-            <span id="dash-completed-coll" class="text-3xl font-extrabold text-emerald-600 mt-2 block">90</span>
+            <span id="dash-completed-coll" class="text-3xl font-extrabold text-emerald-600 mt-2 block">0</span>
             <span class="text-[11px] text-emerald-700 font-semibold mt-1 block">Hauled to recycling yards</span>
           </div>
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs col-span-2 lg:col-span-1">
             <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Active Officers</span>
-            <span id="dash-active-officers" class="text-3xl font-extrabold text-purple-600 mt-2 block">26</span>
+            <span id="dash-active-officers" class="text-3xl font-extrabold text-purple-600 mt-2 block">3</span>
             <span class="text-[11px] text-purple-700 font-semibold mt-1 block">MCC + GP + TP squads</span>
           </div>
         </div>
@@ -351,7 +351,7 @@
               </h3>
               <p class="text-xs text-slate-500">Live Mysuru arterial roads and ring-road hotspots flagged for heavy machinery clearance.</p>
             </div>
-            <span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-bold font-mono">4 High-Severity Zones</span>
+            <span id="dash-hotspots-count" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold font-mono">0 Active Hotspots</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dash-hotspots-container">
@@ -835,27 +835,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Monthly Debris Collected</span>
-            <span class="text-3xl font-extrabold text-emerald-700 block">3,840 MT</span>
+            <span id="report-tonnage" class="text-3xl font-extrabold text-emerald-700 block">0 MT</span>
             <p class="text-xs text-slate-500">Aggregate recovered at Kumbarakoppal & Rayanakere processing plants.</p>
           </div>
           <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Avg SLA Resolution</span>
-            <span class="text-3xl font-extrabold text-blue-700 block">4.2 Hours</span>
+            <span id="report-sla" class="text-3xl font-extrabold text-blue-700 block">0.0 Hours</span>
             <p class="text-xs text-slate-500">From citizen PIN lodging to JCB equipment arrival on site.</p>
           </div>
           <div class="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Recycling Conversion</span>
-            <span class="text-3xl font-extrabold text-purple-700 block">95.4%</span>
+            <span id="report-recycling" class="text-3xl font-extrabold text-purple-700 block">100%</span>
             <p class="text-xs text-slate-500">Crushed into manufactured sand and civic interlocking paving tiles.</p>
           </div>
         </div>
 
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
           <h3 class="text-base font-bold text-slate-900">Area & Ward Debris Statistics</h3>
-          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-3 gap-4 text-xs font-semibold">
-            <div>🏢 MCC Urban: <strong class="text-slate-900">68% (2,610 MT)</strong></div>
-            <div>🌾 Gram Panchayat: <strong class="text-slate-900">20% (770 MT)</strong></div>
-            <div>🏘️ Town Panchayat: <strong class="text-slate-900">12% (460 MT)</strong></div>
+          <div id="report-breakdown" class="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center text-slate-500 text-xs font-medium">
+            No regional debris tonnage records logged yet. Fresh statistics will generate automatically as applications are fulfilled.
           </div>
         </div>
       </section>
@@ -1013,41 +1011,63 @@
         const resStats = await fetch('/api/dashboard/stats');
         if (resStats.ok) {
           const data = await resStats.json();
-          document.getElementById('dash-total-apps').innerText = data.stats.totalApplications;
-          document.getElementById('dash-pending-insp').innerText = data.stats.pendingInspections;
-          document.getElementById('dash-pending-debris').innerText = data.stats.pendingDebris;
-          document.getElementById('dash-completed-coll').innerText = data.stats.completedCollections;
-          document.getElementById('dash-active-officers').innerText = data.stats.activeOfficers;
+          document.getElementById('dash-total-apps').innerText = data.stats.totalApplications || 0;
+          document.getElementById('dash-pending-insp').innerText = data.stats.pendingInspections || 0;
+          document.getElementById('dash-pending-debris').innerText = data.stats.pendingDebris || 0;
+          document.getElementById('dash-completed-coll').innerText = data.stats.completedCollections || 0;
+          document.getElementById('dash-active-officers').innerText = (data.stats.activeOfficers || (3 + additionalOfficers.length));
 
           const hotContainer = document.getElementById('dash-hotspots-container');
-          hotContainer.innerHTML = data.hotspots.map(h => `
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-              <div>
-                <span class="font-bold text-slate-900 block text-sm">${h.area} <span class="font-mono text-slate-400 text-xs">(PIN ${h.pin})</span></span>
-                <span class="text-xs text-slate-500 mt-0.5 block">${h.debrisType} · <strong>${h.reportedTonnage}</strong></span>
-                <span class="text-[10px] font-mono text-emerald-700 font-bold">${h.authority}</span>
+          const hotCount = document.getElementById('dash-hotspots-count');
+          if (hotCount) hotCount.innerText = (data.hotspots && data.hotspots.length ? data.hotspots.length + ' High-Severity Zones' : '0 Active Hotspots');
+
+          if (!data.hotspots || data.hotspots.length === 0) {
+            hotContainer.innerHTML = `
+              <div class="col-span-full p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center text-slate-500 font-medium text-xs">
+                No active critical dumping hotspots reported. Real-time hotspots will appear here upon citizen reporting.
               </div>
-              <span class="badge-status ${h.severity === 'Critical' ? 'badge-critical' : 'badge-pending'}">
-                ${h.severity}
-              </span>
-            </div>
-          `).join('');
+            `;
+          } else {
+            hotContainer.innerHTML = data.hotspots.map(h => `
+              <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-slate-900 block text-sm">${h.area} <span class="font-mono text-slate-400 text-xs">(PIN ${h.pin})</span></span>
+                  <span class="text-xs text-slate-500 mt-0.5 block">${h.debrisType} · <strong>${h.reportedTonnage}</strong></span>
+                  <span class="text-[10px] font-mono text-emerald-700 font-bold">${h.authority}</span>
+                </div>
+                <span class="badge-status ${h.severity === 'Critical' ? 'badge-critical' : 'badge-pending'}">
+                  ${h.severity}
+                </span>
+              </div>
+            `).join('');
+          }
         }
 
         // Fetch Applications
         const resApps = await fetch('/api/applications');
         if (resApps.ok) {
           const apps = await resApps.json();
-          document.getElementById('table-applications').innerHTML = apps.map(a => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.id}</td>
-              <td class="px-4 py-3"><strong>${a.applicantName}</strong><br><span class="text-slate-400 text-[11px] font-mono">${a.phone}</span></td>
-              <td class="px-4 py-3 text-slate-700">${a.address}<br><span class="text-slate-400 text-[10px] font-mono">PIN ${a.pin} · ${a.ward}</span></td>
-              <td class="px-4 py-3 text-slate-600">${a.propertyDetails}</td>
-              <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${a.documents}</td>
-              <td class="px-4 py-3"><span class="badge-status ${a.status === 'Approved' ? 'badge-approved' : 'badge-pending'}">${a.status}</span></td>
-            </tr>
-          `).join('');
+          const tableApps = document.getElementById('table-applications');
+          if (apps.length === 0) {
+            tableApps.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No applications lodged yet. Fresh applications submitted by citizens or via "+ New Application" will appear here.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableApps.innerHTML = apps.map(a => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.id}</td>
+                <td class="px-4 py-3"><strong>${a.applicantName}</strong><br><span class="text-slate-400 text-[11px] font-mono">${a.phone}</span></td>
+                <td class="px-4 py-3 text-slate-700">${a.address}<br><span class="text-slate-400 text-[10px] font-mono">PIN ${a.pin} · ${a.ward}</span></td>
+                <td class="px-4 py-3 text-slate-600">${a.propertyDetails}</td>
+                <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${a.documents}</td>
+                <td class="px-4 py-3"><span class="badge-status ${a.status === 'Approved' ? 'badge-approved' : 'badge-pending'}">${a.status}</span></td>
+              </tr>
+            `).join('');
+          }
         }
 
         // Fetch PIN Mappings
@@ -1074,113 +1094,199 @@
         const resInspections = await fetch('/api/inspections');
         if (resInspections.ok) {
           const list = await resInspections.json();
-          document.getElementById('table-inspections').innerHTML = list.map(item => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-mono font-bold text-emerald-700">${item.application}</td>
-              <td class="px-4 py-3 text-slate-700">${item.location}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">${item.inspector}</td>
-              <td class="px-4 py-3 font-mono text-slate-600">${item.inspectionDate}</td>
-              <td class="px-4 py-3"><strong>${item.debrisType}</strong><br><span class="text-amber-700 font-bold">${item.estimatedQuantity}</span></td>
-              <td class="px-4 py-3 text-slate-500">${item.remarks}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${item.status}</span></td>
-            </tr>
-          `).join('');
+          const tableInsp = document.getElementById('table-inspections');
+          if (list.length === 0) {
+            tableInsp.innerHTML = `
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No field inspections scheduled yet. Inspections assigned to ward officers will appear here.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableInsp.innerHTML = list.map(item => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono font-bold text-emerald-700">${item.application}</td>
+                <td class="px-4 py-3 text-slate-700">${item.location}</td>
+                <td class="px-4 py-3 font-bold text-slate-900">${item.inspector}</td>
+                <td class="px-4 py-3 font-mono text-slate-600">${item.inspectionDate}</td>
+                <td class="px-4 py-3"><strong>${item.debrisType}</strong><br><span class="text-amber-700 font-bold">${item.estimatedQuantity}</span></td>
+                <td class="px-4 py-3 text-slate-500">${item.remarks}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${item.status}</span></td>
+              </tr>
+            `).join('');
+          }
         }
 
         // Fetch Demolition Requests
         const resDem = await fetch('/api/demolition-requests');
         if (resDem.ok) {
           const reqs = await resDem.json();
-          document.getElementById('table-demolition-requests').innerHTML = reqs.map(d => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-mono font-bold text-emerald-700">${d.requestId}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">${d.property}</td>
-              <td class="px-4 py-3 text-slate-700">${d.location}</td>
-              <td class="px-4 py-3 text-slate-800">${d.applicant}</td>
-              <td class="px-4 py-3 font-bold text-amber-700">${d.estimatedDebris}</td>
-              <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${d.documents}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${d.status}</span></td>
-            </tr>
-          `).join('');
+          const tableDem = document.getElementById('table-demolition-requests');
+          if (reqs.length === 0) {
+            tableDem.innerHTML = `
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No building demolition clearance requests submitted yet. Fresh requests will appear here.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableDem.innerHTML = reqs.map(d => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono font-bold text-emerald-700">${d.requestId}</td>
+                <td class="px-4 py-3 font-bold text-slate-900">${d.property}</td>
+                <td class="px-4 py-3 text-slate-700">${d.location}</td>
+                <td class="px-4 py-3 text-slate-800">${d.applicant}</td>
+                <td class="px-4 py-3 font-bold text-amber-700">${d.estimatedDebris}</td>
+                <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${d.documents}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${d.status}</span></td>
+              </tr>
+            `).join('');
+          }
         }
 
         // Fetch Demolition Status
         const resDemStatus = await fetch('/api/demolition-status');
         if (resDemStatus.ok) {
           const stats = await resDemStatus.json();
-          document.getElementById('table-demolition-status').innerHTML = stats.map(s => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-mono font-bold text-emerald-700">${s.requestId}</td>
-              <td class="px-4 py-3 font-mono text-slate-600">${s.scheduledDate}</td>
-              <td class="px-4 py-3 font-mono text-emerald-700 font-bold">${s.completionDate}</td>
-              <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${s.beforePhoto}, ${s.afterPhoto}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">${s.debrisQuantity}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${s.collectionStatus}</span></td>
-            </tr>
-          `).join('');
+          const tableStatus = document.getElementById('table-demolition-status');
+          if (stats.length === 0) {
+            tableStatus.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No active demolition hauling operations in progress.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableStatus.innerHTML = stats.map(s => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono font-bold text-emerald-700">${s.requestId}</td>
+                <td class="px-4 py-3 font-mono text-slate-600">${s.scheduledDate}</td>
+                <td class="px-4 py-3 font-mono text-emerald-700 font-bold">${s.completionDate}</td>
+                <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${s.beforePhoto}, ${s.afterPhoto}</td>
+                <td class="px-4 py-3 font-bold text-slate-900">${s.debrisQuantity}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${s.collectionStatus}</span></td>
+              </tr>
+            `).join('');
+          }
         }
 
         // Fetch Certificates
         const resCerts = await fetch('/api/certificates');
         if (resCerts.ok) {
           const certs = await resCerts.json();
-          document.getElementById('table-certificates').innerHTML = certs.map(c => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-mono font-bold text-emerald-700">${c.certificateId}</td>
-              <td class="px-4 py-3 font-mono text-slate-500">${c.applicationId}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">${c.applicant}</td>
-              <td class="px-4 py-3 text-slate-700">${c.property}</td>
-              <td class="px-4 py-3 font-mono text-slate-600">${c.issueDate}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">✓ QR VERIFIED</span></td>
-              <td class="px-4 py-3"><button onclick="showToast('Downloading Certificate ' + '${c.certificateId}')" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">PDF Download</button></td>
-            </tr>
-          `).join('');
+          const tableCerts = document.getElementById('table-certificates');
+          if (certs.length === 0) {
+            tableCerts.innerHTML = `
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No green clearance certificates generated yet. Verified certificates with QR code are issued once debris collection is verified.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableCerts.innerHTML = certs.map(c => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono font-bold text-emerald-700">${c.certificateId}</td>
+                <td class="px-4 py-3 font-mono text-slate-500">${c.applicationId}</td>
+                <td class="px-4 py-3 font-bold text-slate-900">${c.applicant}</td>
+                <td class="px-4 py-3 text-slate-700">${c.property}</td>
+                <td class="px-4 py-3 font-mono text-slate-600">${c.issueDate}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">✓ QR VERIFIED</span></td>
+                <td class="px-4 py-3"><button onclick="showToast('Downloading Certificate ' + '${c.certificateId}')" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">PDF Download</button></td>
+              </tr>
+            `).join('');
+          }
         }
 
         // Fetch Utilities
         const resUtil = await fetch('/api/utilities');
         if (resUtil.ok) {
           const utils = await resUtil.json();
-          document.getElementById('table-utilities').innerHTML = utils.map(u => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-bold text-slate-900">${u.property}</td>
-              <td class="px-4 py-3 text-slate-700">${u.connectionType}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${u.requestStatus}</span></td>
-              <td class="px-4 py-3 font-bold text-blue-800">${u.authority}</td>
-              <td class="px-4 py-3 font-mono text-slate-600">${u.referenceNumber}</td>
-            </tr>
-          `).join('');
+          const tableUtil = document.getElementById('table-utilities');
+          if (utils.length === 0) {
+            tableUtil.innerHTML = `
+              <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No civic utility clearance linkages filed yet.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableUtil.innerHTML = utils.map(u => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-bold text-slate-900">${u.property}</td>
+                <td class="px-4 py-3 text-slate-700">${u.connectionType}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${u.requestStatus}</span></td>
+                <td class="px-4 py-3 font-bold text-blue-800">${u.authority}</td>
+                <td class="px-4 py-3 font-mono text-slate-600">${u.referenceNumber}</td>
+              </tr>
+            `).join('');
+          }
         }
 
         // Fetch Notifications
         const resNotif = await fetch('/api/notifications');
         if (resNotif.ok) {
           const notifs = await resNotif.json();
-          document.getElementById('table-notifications').innerHTML = notifs.map(n => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-bold text-slate-900">${n.recipient}</td>
-              <td class="px-4 py-3 text-slate-700">${n.message}</td>
-              <td class="px-4 py-3 font-mono text-[11px] text-purple-700 font-bold">${n.type}</td>
-              <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${n.timestamp}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${n.status}</span></td>
-            </tr>
-          `).join('');
+          const tableNotifs = document.getElementById('table-notifications');
+          if (notifs.length === 0) {
+            tableNotifs.innerHTML = `
+              <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No SMS or dispatch notifications sent yet. Use "+ Send Direct Alert" to broadcast.
+                </td>
+              </tr>
+            `;
+          } else {
+            tableNotifs.innerHTML = notifs.map(n => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-bold text-slate-900">${n.recipient}</td>
+                <td class="px-4 py-3 text-slate-700">${n.message}</td>
+                <td class="px-4 py-3 font-mono text-[11px] text-purple-700 font-bold">${n.type}</td>
+                <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${n.timestamp}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${n.status}</span></td>
+              </tr>
+            `).join('');
+          }
         }
 
-        // Fetch Users
+        // Fetch Users (Renders real system users)
         const resUsers = await fetch('/api/users');
         if (resUsers.ok) {
           const users = await resUsers.json();
-          document.getElementById('table-users').innerHTML = users.map(u => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-bold text-slate-900">${u.name}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-active">${u.role}</span></td>
-              <td class="px-4 py-3 font-mono text-slate-600">${u.phone}<br>${u.email}</td>
-              <td class="px-4 py-3 text-slate-700">${u.area}</td>
-              <td class="px-4 py-3 text-slate-500 text-[11px]">${u.permissions}</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${u.status}</span></td>
-            </tr>
-          `).join('');
+          const tableUsers = document.getElementById('table-users');
+          if (users.length === 0) {
+            // Render configured department heads as real system users
+            const deptUsers = [
+              { name: departmentsState.mcc.headName, role: 'MCC Admin', phone: departmentsState.mcc.phone, email: departmentsState.mcc.email, area: 'Mysuru City Urban', permissions: 'Full MCC Admin Rights', status: 'Active' },
+              { name: departmentsState.gp.headName, role: 'Gram Panchayat Admin', phone: departmentsState.gp.phone, email: departmentsState.gp.email, area: 'Bogadi Gram Panchayat', permissions: 'Panchayat Officer Rights', status: 'Active' },
+              { name: departmentsState.tp.headName, role: 'Town Panchayat Admin', phone: departmentsState.tp.phone, email: departmentsState.tp.email, area: 'Hootagalli Town Panchayat', permissions: 'Suburban Officer Rights', status: 'Active' }
+            ];
+            tableUsers.innerHTML = deptUsers.map(u => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-bold text-slate-900">${u.name}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-active">${u.role}</span></td>
+                <td class="px-4 py-3 font-mono text-slate-600">${u.phone}<br>${u.email}</td>
+                <td class="px-4 py-3 text-slate-700">${u.area}</td>
+                <td class="px-4 py-3 text-slate-500 text-[11px]">${u.permissions}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${u.status}</span></td>
+              </tr>
+            `).join('');
+          } else {
+            tableUsers.innerHTML = users.map(u => `
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-bold text-slate-900">${u.name}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-active">${u.role}</span></td>
+                <td class="px-4 py-3 font-mono text-slate-600">${u.phone}<br>${u.email}</td>
+                <td class="px-4 py-3 text-slate-700">${u.area}</td>
+                <td class="px-4 py-3 text-slate-500 text-[11px]">${u.permissions}</td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${u.status}</span></td>
+              </tr>
+            `).join('');
+          }
         }
 
       } catch(e) {
