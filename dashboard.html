@@ -305,6 +305,9 @@
     <!-- Content Viewport -->
     <main class="p-6 sm:p-8 flex-1 space-y-6">
 
+      <!-- Dynamic Logged-in Officer Department Banner -->
+      <div id="department-banner"></div>
+
       <!-- ===================================================================== -->
       <!-- 1. DASHBOARD                                                          -->
       <!-- ===================================================================== -->
@@ -564,14 +567,70 @@
       </section>
 
       <!-- ===================================================================== -->
-      <!-- 5. INSPECTORS / FIELD OFFICERS                                        -->
+      <!-- 5. INSPECTORS / FIELD OFFICERS & DEPARTMENT ROSTER                    -->
       <!-- ===================================================================== -->
       <section id="panel-inspectors" class="panel-view space-y-6">
-        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+        
+        <!-- Department Summary Counters -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
+            <div class="size-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xl">
+              👥
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Officers</p>
+              <h4 id="stat-total-officers" class="text-2xl font-extrabold text-slate-900 mt-0.5">8 Active</h4>
+            </div>
+          </div>
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
+            <div class="size-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xl">
+              🏛️
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">MCC Officers</p>
+              <h4 id="stat-mcc-officers" class="text-2xl font-extrabold text-emerald-800 mt-0.5">3 Assigned</h4>
+            </div>
+          </div>
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
+            <div class="size-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-xl">
+              🏡
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Gram Panchayat</p>
+              <h4 id="stat-gp-officers" class="text-2xl font-extrabold text-amber-800 mt-0.5">3 Assigned</h4>
+            </div>
+          </div>
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
+            <div class="size-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xl">
+              🏭
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Town Panchayat</p>
+              <h4 id="stat-tp-officers" class="text-2xl font-extrabold text-blue-800 mt-0.5">2 Assigned</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-              <h3 class="text-base font-bold text-slate-900">Inspectors & Field Officers Roster</h3>
-              <p class="text-xs text-slate-500">Assigned areas, active cases, employee IDs, and on-duty availability.</p>
+              <h3 class="text-base font-bold text-slate-900">Officers & Field Inspectors Management Console</h3>
+              <p class="text-xs text-slate-500">All officers configured across MCC, Gram Panchayat, and Town Panchayat with their assigned jurisdictions, login status & active debris cases.</p>
+            </div>
+            <!-- Department Filter Tabs -->
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl">
+              <button onclick="filterOfficersByDept('all')" id="btn-filter-all" class="px-3.5 py-1.5 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-xs transition cursor-pointer">
+                All Officers
+              </button>
+              <button onclick="filterOfficersByDept('mcc')" id="btn-filter-mcc" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-bold text-xs transition cursor-pointer">
+                🏛️ MCC
+              </button>
+              <button onclick="filterOfficersByDept('gp')" id="btn-filter-gp" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-bold text-xs transition cursor-pointer">
+                🏡 Gram Panchayat
+              </button>
+              <button onclick="filterOfficersByDept('tp')" id="btn-filter-tp" class="px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-bold text-xs transition cursor-pointer">
+                🏭 Town Panchayat
+              </button>
             </div>
           </div>
 
@@ -579,12 +638,14 @@
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                 <tr>
-                  <th class="px-4 py-3">Name</th>
+                  <th class="px-4 py-3">Officer Name & Designation</th>
+                  <th class="px-4 py-3">Department & Authority</th>
                   <th class="px-4 py-3">Employee ID</th>
-                  <th class="px-4 py-3">Phone</th>
-                  <th class="px-4 py-3">Assigned Area</th>
+                  <th class="px-4 py-3">Official Gmail & Phone</th>
+                  <th class="px-4 py-3">Assigned Jurisdiction & PINs</th>
                   <th class="px-4 py-3">Active Cases</th>
-                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Login Status</th>
+                  <th class="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody id="table-inspectors" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
@@ -1005,36 +1066,9 @@
           `).join('');
         }
 
-        // Fetch Authorities
-        const resAuth = await fetch('/api/authorities');
-        if (resAuth.ok) {
-          const auths = await resAuth.json();
-          document.getElementById('table-authorities').innerHTML = auths.map(a => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-bold text-slate-900">${a.name}</td>
-              <td class="px-4 py-3 text-slate-700 font-semibold">${a.department}</td>
-              <td class="px-4 py-3 text-slate-600">${a.areaWard}</td>
-              <td class="px-4 py-3 text-slate-700 font-mono text-[11px]">${a.contactDetails}</td>
-              <td class="px-4 py-3 text-slate-500">${a.address}</td>
-            </tr>
-          `).join('');
-        }
-
-        // Fetch Inspectors
-        const resInsp = await fetch('/api/inspectors');
-        if (resInsp.ok) {
-          const insp = await resInsp.json();
-          document.getElementById('table-inspectors').innerHTML = insp.map(i => `
-            <tr class="hover:bg-slate-50">
-              <td class="px-4 py-3 font-bold text-slate-900">${i.name}</td>
-              <td class="px-4 py-3 font-mono text-slate-600">${i.empId}</td>
-              <td class="px-4 py-3 font-mono text-slate-600">${i.phone}</td>
-              <td class="px-4 py-3 text-slate-700">${i.assignedArea}</td>
-              <td class="px-4 py-3 font-bold text-amber-700">${i.activeCases} Cases</td>
-              <td class="px-4 py-3"><span class="badge-status badge-approved">${i.status}</span></td>
-            </tr>
-          `).join('');
-        }
+        // Sync Department Authorities Roster and Inspectors Console
+        renderAuthoritiesTable();
+        renderInspectorsTable();
 
         // Fetch Inspections
         const resInspections = await fetch('/api/inspections');
@@ -1591,6 +1625,7 @@
       } catch(e) {}
 
       renderAuthoritiesTable();
+      renderInspectorsTable();
       showToast('✅ Saved ' + d.organization + ' Officer! Login: ' + d.email + ' | Password: ' + d.password);
     }
 
@@ -1601,6 +1636,7 @@
       } catch(e) {}
       selectDepartment(currentSelectedDept);
       renderAuthoritiesTable();
+      renderInspectorsTable();
       showToast('Reset ' + currentSelectedDept.toUpperCase() + ' to official default settings.');
     }
 
@@ -1747,6 +1783,7 @@
       } catch(e) {}
 
       renderAuthoritiesTable();
+      renderInspectorsTable();
       showToast('🎉 Officer ' + name + ' registered with login: ' + email + ' (Password: ' + password + ')!');
     }
 
@@ -1757,8 +1794,216 @@
           localStorage.setItem('civic_additional_officers', JSON.stringify(additionalOfficers));
         } catch(e) {}
         renderAuthoritiesTable();
+        renderInspectorsTable();
         showToast('Officer removed.');
       }
+    }
+
+    // =========================================================================
+    // 5. INSPECTORS & OFFICERS DIRECTORY CONSOLE (SYNCS WITH DEPARTMENTS)
+    // =========================================================================
+    let currentOfficerFilter = 'all';
+
+    function filterOfficersByDept(dept) {
+      currentOfficerFilter = dept;
+      ['all', 'mcc', 'gp', 'tp'].forEach(k => {
+        const btn = document.getElementById('btn-filter-' + k);
+        if (btn) {
+          if (k === dept) {
+            btn.className = 'px-3.5 py-1.5 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-xs transition cursor-pointer';
+          } else {
+            btn.className = 'px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 font-bold text-xs transition cursor-pointer';
+          }
+        }
+      });
+      renderInspectorsTable(dept);
+    }
+
+    function renderInspectorsTable(filter = currentOfficerFilter) {
+      const tbody = document.getElementById('table-inspectors');
+      if (!tbody) return;
+
+      // Base department heads
+      const baseOfficers = [
+        { ...departmentsState.mcc, type: 'mcc', activeCases: '8 Cases Active', dutyZone: 'MCC Urban Zone 1-4' },
+        { ...departmentsState.gp, type: 'gp', activeCases: '4 Cases Active', dutyZone: 'Bogadi Rural Cluster' },
+        { ...departmentsState.tp, type: 'tp', activeCases: '5 Cases Active', dutyZone: 'Hootagalli Industrial' }
+      ];
+
+      // Default pre-seeded field inspectors
+      const defaultFieldSquad = [
+        {
+          type: 'mcc',
+          icon: '🏛️',
+          organization: 'Mysuru City Corporation (MCC)',
+          headName: 'Sri. Ravi Kumar N',
+          designation: 'Senior Ward Sanitary Inspector',
+          empId: 'MCC-INSP-104',
+          email: 'ravi.mcc@gmail.com',
+          password: 'mcc123',
+          phone: '+91 98450 11002',
+          jurisdiction: 'Zone 3 & 4 (Kuvempunagar, Saraswathipuram)',
+          pinCodes: '570009, 570023',
+          activeCases: '6 Cases Active',
+          dutyZone: 'Zone 3 Field Squad',
+          role: 'MCC Ward Inspector',
+          status: 'Active'
+        },
+        {
+          type: 'mcc',
+          icon: '🏛️',
+          organization: 'Mysuru City Corporation (MCC)',
+          headName: 'Sri. Anand Prakash',
+          designation: 'Field Inspection Officer (Debris Audit)',
+          empId: 'MCC-INSP-108',
+          email: 'anand.mcc@gmail.com',
+          password: 'mcc123',
+          phone: '+91 98450 11005',
+          jurisdiction: 'Zone 1 & 2 (Central Market, Sayyaji Rao Rd)',
+          pinCodes: '570001, 570004',
+          activeCases: '3 Cases Active',
+          dutyZone: 'Zone 1 Enforcement',
+          role: 'MCC Ward Inspector',
+          status: 'Active'
+        },
+        {
+          type: 'gp',
+          icon: '🏡',
+          organization: 'Bogadi Gram Panchayat',
+          headName: 'Sri. Ningappa Gowda',
+          designation: 'Panchayat Field Village Assistant',
+          empId: 'GP-VA-204',
+          email: 'ningappa.gp@gmail.com',
+          password: 'gp123',
+          phone: '+91 98450 22004',
+          jurisdiction: 'Maratikyathanahalli & Belavadi Outskirts',
+          pinCodes: '570026, 571130',
+          activeCases: '2 Cases Active',
+          dutyZone: 'Rural Ward 2 & 3',
+          role: 'Panchayat Inspector',
+          status: 'Active'
+        },
+        {
+          type: 'tp',
+          icon: '🏭',
+          organization: 'Hootagalli Town Panchayat (CMC)',
+          headName: 'Smt. Shailaja R',
+          designation: 'Town Sanitary Supervisor',
+          empId: 'TP-SS-305',
+          email: 'shailaja.tp@gmail.com',
+          password: 'tp123',
+          phone: '+91 98450 33008',
+          jurisdiction: 'Koorgalli & Belagola Industrial Belt',
+          pinCodes: '570018, 571607',
+          activeCases: '4 Cases Active',
+          dutyZone: 'Industrial Sector 2',
+          role: 'Town Panchayat Inspector',
+          status: 'Active'
+        }
+      ];
+
+      // Custom officers added by Super Admin via "+ Add Office Member"
+      const customSquad = additionalOfficers.map(off => ({
+        ...off,
+        activeCases: '1 Case Assigned',
+        dutyZone: off.jurisdiction || 'Assigned Ward'
+      }));
+
+      // Combine all
+      const allOfficers = [...baseOfficers, ...defaultFieldSquad, ...customSquad];
+
+      // Update Department Summary Counters
+      const mccCount = allOfficers.filter(o => o.type === 'mcc').length;
+      const gpCount = allOfficers.filter(o => o.type === 'gp').length;
+      const tpCount = allOfficers.filter(o => o.type === 'tp').length;
+
+      const statTotal = document.getElementById('stat-total-officers');
+      const statMcc = document.getElementById('stat-mcc-officers');
+      const statGp = document.getElementById('stat-gp-officers');
+      const statTp = document.getElementById('stat-tp-officers');
+
+      if (statTotal) statTotal.innerText = allOfficers.length + ' Active';
+      if (statMcc) statMcc.innerText = mccCount + ' Assigned';
+      if (statGp) statGp.innerText = gpCount + ' Assigned';
+      if (statTp) statTp.innerText = tpCount + ' Assigned';
+
+      // Filter
+      let displayed = allOfficers;
+      if (filter && filter !== 'all') {
+        displayed = allOfficers.filter(o => o.type === filter);
+      }
+
+      if (displayed.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No officers found for this department filter. Use "➕ Add New Officer Member" in Module 4 to register officers.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = displayed.map(officer => {
+        const deptBadgeColor = officer.type === 'mcc' 
+          ? 'bg-emerald-100 text-emerald-800 border-emerald-200' 
+          : (officer.type === 'gp' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-blue-100 text-blue-800 border-blue-200');
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3.5">
+              <div class="flex items-center gap-2.5">
+                <span class="size-8 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-sm shadow-xs">${officer.icon || '🏛️'}</span>
+                <div>
+                  <span class="block font-bold text-slate-900">${officer.headName}</span>
+                  <span class="block text-[11px] text-slate-500 font-medium">${officer.designation || 'Officer'}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3.5">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${deptBadgeColor} inline-block">
+                ${officer.organization}
+              </span>
+            </td>
+            <td class="px-4 py-3.5 font-mono">
+              <span class="font-bold text-slate-900">${officer.empId}</span><br>
+              <span class="text-[10px] text-slate-500 uppercase">${officer.role || 'Officer'}</span>
+            </td>
+            <td class="px-4 py-3.5 font-mono text-[11px]">
+              <span class="block text-emerald-950 font-bold bg-emerald-50/80 px-2 py-0.5 rounded border border-emerald-200 mb-0.5 inline-block">${officer.email}</span>
+              <span class="block text-slate-500 text-[10px]">${officer.phone}</span>
+            </td>
+            <td class="px-4 py-3.5 text-slate-700">
+              <span class="block font-semibold text-xs text-slate-900">${officer.jurisdiction || officer.dutyZone || 'Mysuru District'}</span>
+              <span class="block font-mono text-[10px] text-emerald-700 font-bold">PIN: ${officer.pinCodes || 'All PINs'}</span>
+            </td>
+            <td class="px-4 py-3.5">
+              <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] border border-slate-200 inline-flex items-center gap-1">
+                📍 <span>${officer.activeCases || '2 Active'}</span>
+              </span>
+            </td>
+            <td class="px-4 py-3.5">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Active Login</span>
+              </span>
+            </td>
+            <td class="px-4 py-3.5 text-right">
+              <button onclick="copyOfficerLogin('${officer.email}', '${officer.password || 'admin123'}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-xs transition cursor-pointer">
+                Copy Login
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function copyOfficerLogin(email, pwd) {
+      const text = 'Official Gmail: ' + email + '\nPassword: ' + pwd;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
+      showToast('📋 Copied login credentials for ' + email + ' (Password: ' + pwd + ')');
     }
 
     function handleAdminLogout() {
@@ -1772,10 +2017,97 @@
     function syncAdminProfile() {
       try {
         const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
+        const banner = document.getElementById('department-banner');
+        
         if (saved) {
           const user = JSON.parse(saved);
-          if (document.getElementById('admin-name')) document.getElementById('admin-name').innerText = user.name || 'Officer';
-          if (document.getElementById('admin-role-badge')) document.getElementById('admin-role-badge').innerText = (user.authority || user.role || 'Super Admin');
+          const userName = user.name || 'Officer';
+          const userRole = user.authority || user.role || 'Super Admin';
+          const userEmail = (user.email || '').toLowerCase();
+
+          if (document.getElementById('admin-name')) document.getElementById('admin-name').innerText = userName;
+          if (document.getElementById('admin-role-badge')) document.getElementById('admin-role-badge').innerText = userRole;
+
+          // Department Banner Personalization
+          if (banner) {
+            if (userRole.toLowerCase().includes('panchayat') || userEmail.includes('gp')) {
+              banner.innerHTML = `
+                <div class="p-4 rounded-3xl bg-amber-50 border border-amber-200 text-amber-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="size-11 rounded-2xl bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xl">
+                      🏡
+                    </div>
+                    <div>
+                      <h4 class="font-extrabold text-sm text-amber-900">Gram Panchayat Rural Solid & C&D Waste Management Portal</h4>
+                      <p class="text-xs text-amber-700">Logged in as <strong>${userName}</strong> (${userRole}) · Assigned Jurisdiction: <strong>Bogadi & Rural Wards (PIN 570026, 571130)</strong></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-200/80 text-amber-900 border border-amber-300">
+                      🏡 Rural Desk Active
+                    </span>
+                  </div>
+                </div>
+              `;
+            } else if (userRole.toLowerCase().includes('town') || userEmail.includes('tp')) {
+              banner.innerHTML = `
+                <div class="p-4 rounded-3xl bg-blue-50 border border-blue-200 text-blue-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="size-11 rounded-2xl bg-blue-200 text-blue-900 flex items-center justify-center font-bold text-xl">
+                      🏭
+                    </div>
+                    <div>
+                      <h4 class="font-extrabold text-sm text-blue-900">Town Panchayat Suburban C&D Waste Regulatory Desk</h4>
+                      <p class="text-xs text-blue-700">Logged in as <strong>${userName}</strong> (${userRole}) · Assigned Jurisdiction: <strong>Hootagalli CMC & Industrial Hubs (PIN 570018, 571607)</strong></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-200/80 text-blue-900 border border-blue-300">
+                      🏭 Suburban Desk Active
+                    </span>
+                  </div>
+                </div>
+              `;
+            } else if (userRole.toLowerCase().includes('mcc') || userEmail.includes('mcc')) {
+              banner.innerHTML = `
+                <div class="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="size-11 rounded-2xl bg-emerald-200 text-emerald-900 flex items-center justify-center font-bold text-xl">
+                      🏛️
+                    </div>
+                    <div>
+                      <h4 class="font-extrabold text-sm text-emerald-900">Mysuru City Corporation (MCC) Urban Governance Portal</h4>
+                      <p class="text-xs text-emerald-700">Logged in as <strong>${userName}</strong> (${userRole}) · Central Mysuru City 65 Urban Wards (Zone 1 to 9)</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-200/80 text-emerald-900 border border-emerald-300">
+                      🏛️ MCC Urban Admin Active
+                    </span>
+                  </div>
+                </div>
+              `;
+            } else {
+              banner.innerHTML = `
+                <div class="p-4 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-slate-100 to-emerald-50 border border-emerald-200/80 text-slate-900 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+                  <div class="flex items-center gap-3">
+                    <div class="size-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-inner">
+                      👑
+                    </div>
+                    <div>
+                      <h4 class="font-extrabold text-sm text-slate-900">Central Mysuru C&D Waste & Rubble Governance Command Centre</h4>
+                      <p class="text-xs text-slate-600">Logged in as <strong>${userName}</strong> (Super Administrator) · Full multi-agency oversight (MCC + Gram Panchayat + Town Panchayat)</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      ⭐ Multi-Agency Command
+                    </span>
+                  </div>
+                </div>
+              `;
+            }
+          }
         }
       } catch(e) {}
     }
@@ -1783,6 +2115,7 @@
     syncAdminProfile();
     selectDepartment('mcc');
     renderAuthoritiesTable();
+    renderInspectorsTable();
     loadData();
   </script>
 </body>
