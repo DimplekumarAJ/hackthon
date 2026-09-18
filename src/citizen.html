@@ -270,7 +270,7 @@
 
     function handleCustomerSubmit(e) {
       e.preventDefault();
-      const user = JSON.parse(sessionStorage.getItem('current_user') || '{}');
+      const user = JSON.parse(sessionStorage.getItem('current_user') || localStorage.getItem('current_user') || '{}');
       const material = document.getElementById('req-material').value;
       const pin = document.getElementById('req-pin').value.trim();
       const qty = document.getElementById('req-qty').value;
@@ -281,40 +281,73 @@
       if (pin.startsWith('570026')) authority = 'Bogadi Gram Panchayat';
       else if (pin.startsWith('570018')) authority = 'Hootagalli Town Panchayat';
 
+      // Match designated Inspector for this PIN code
+      let allUsers = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+      let customInspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
+      let allInspectors = [...customInspectors];
+      allUsers.forEach(u => {
+        if ((u.role || '').toLowerCase() === 'inspector' && !allInspectors.find(i => (i.email || '').toLowerCase() === (u.email || '').toLowerCase())) {
+          allInspectors.push(u);
+        }
+      });
+
+      let matchedInspector = allInspectors.find(ins => {
+        const insPin = String(ins.assignedPin || ins.pin || '').trim();
+        return insPin === pin || insPin.includes(pin);
+      });
+
+      const assignedInspectorEmail = matchedInspector ? matchedInspector.email : (pin.startsWith('570026') ? 'nanjappa.gp@gmail.com' : (pin.startsWith('570018') ? 'anand.tp@gmail.com' : 'inspector.mcc@gmail.com'));
+      const assignedInspectorName = matchedInspector ? matchedInspector.name : (pin.startsWith('570026') ? 'S. Nanjappa' : (pin.startsWith('570018') ? 'M. Anand' : 'Rajesh Kumar'));
+
       const newId = 'CD-REQ-' + Math.floor(1000 + Math.random() * 9000);
       const newReq = {
         id: newId,
+        applicantName: user.name || 'Citizen',
+        phone: user.phone || '+91 98450 12345',
         material,
         pin,
+        pincode: pin,
         qty,
         address,
         authority,
         notes,
         status: 'DISPATCHED_IN_PROGRESS',
-        date: new Date().toLocaleDateString()
+        assignedInspectorEmail,
+        assignedInspectorName,
+        date: new Date().toLocaleDateString(),
+        createdAt: new Date().toISOString()
       };
 
       const requests = JSON.parse(localStorage.getItem('cust_my_requests') || '[]');
       requests.unshift(newReq);
       localStorage.setItem('cust_my_requests', JSON.stringify(requests));
 
-      // Also submit to backend API if available
+      // Global applications list sync
+      const globalApps = JSON.parse(localStorage.getItem('civic_applications') || '[]');
+      globalApps.unshift({
+        id: newId,
+        applicantName: user.name || 'Citizen',
+        phone: user.phone || '+91 98450 12345',
+        address,
+        pin,
+        pincode: pin,
+        propertyType: material + ' (' + qty + ')',
+        status: 'Pending Field Verification',
+        assignedInspectorEmail,
+        assignedInspectorName,
+        tonnage: qty.includes('Tractor') ? '4' : (qty.includes('Tipper') ? '12' : '35'),
+        createdAt: new Date().toISOString()
+      });
+      localStorage.setItem('civic_applications', JSON.stringify(globalApps));
+
+      // Submit to backend API
       fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          applicantName: user.name || 'Citizen',
-          phone: user.phone || '+91 98450 12345',
-          address: address,
-          pin: pin,
-          area: 'Mysuru',
-          ward: 'Ward Ops',
-          propertyDetails: material + ' (' + qty + ')',
-          documents: 'Site_Evidence.jpg'
-        })
+        body: JSON.stringify(newReq)
       }).catch(() => {});
 
-      showToast('🎉 Request ' + newId + ' logged and auto-routed to ' + authority + '!');
+      showToast('🎉 Request ' + newId + ' logged! Auto-routed to Inspector ' + assignedInspectorName + ' (PIN: ' + pin + ')');
       e.target.reset();
       document.getElementById('req-pin').value = '570001';
       previewAuthorityRoute();

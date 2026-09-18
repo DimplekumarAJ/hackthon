@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ward Inspector Field Console — Smart Civic C&D Mysuru</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Authentication Guard for Field Inspectors
+    function checkInspectorAuth() {
+      try {
+        const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
+        if (!saved) {
+          window.location.href = 'auth.html?tab=signin';
+          return;
+        }
+        const user = JSON.parse(saved);
+        const role = (user.role || '').toLowerCase();
+        
+        // If customer/citizen tries to access inspector console
+        if (role === 'citizen' || role === 'customer') {
+          window.location.href = 'citizen.html';
+          return;
+        }
+      } catch(e) {
+        window.location.href = 'auth.html?tab=signin';
+      }
+    }
+    checkInspectorAuth();
+
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 9999px;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      text-align: left;
+    }
+    .nav-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.07);
+    }
+    .nav-btn.active {
+      color: #ffffff;
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border-left: 3.5px solid #10b981;
+      font-weight: 700;
+    }
+    .panel-view {
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .panel-view.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex text-slate-900 antialiased overflow-x-hidden selection:bg-emerald-500 selection:text-white">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Left Sidebar -->
+  <aside class="w-72 bg-[#0c1527] text-white flex flex-col justify-between shrink-0 h-screen sticky top-0 border-r border-slate-800 z-50">
+    <div class="p-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="size-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/20 shrink-0">
+          👷
+        </div>
+        <div class="leading-tight overflow-hidden">
+          <span class="block font-bold text-sm text-white tracking-tight truncate">Inspector Desk</span>
+          <span id="sidebar-pin-tag" class="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-mono font-bold uppercase tracking-wider">
+            PIN: 570001
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav Items -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-4 space-y-1.5">
+      <button onclick="switchInspectorTab('applications')" id="btn-tab-applications" class="nav-btn active">
+        <span class="text-base">📋</span>
+        <span>1. My Assigned PIN Requests</span>
+      </button>
+      <button onclick="switchInspectorTab('inspections')" id="btn-tab-inspections" class="nav-btn">
+        <span class="text-base">🔍</span>
+        <span>2. Site Field Audits</span>
+      </button>
+      <button onclick="switchInspectorTab('demolitions')" id="btn-tab-demolitions" class="nav-btn">
+        <span class="text-base">🏗️</span>
+        <span>3. Demolition & Tippers</span>
+      </button>
+      <button onclick="switchInspectorTab('utilities')" id="btn-tab-utilities" class="nav-btn">
+        <span class="text-base">⚡</span>
+        <span>4. Utility Clearances</span>
+      </button>
+      <button onclick="switchInspectorTab('profile')" id="btn-tab-profile" class="nav-btn">
+        <span class="text-base">👤</span>
+        <span>5. Inspector Profile</span>
+      </button>
+    </div>
+
+    <!-- Inspector Profile Footer -->
+    <div class="p-4 border-t border-white/10 bg-slate-950/60 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 overflow-hidden">
+        <div id="inspector-avatar" class="size-8 rounded-xl bg-emerald-600 font-bold text-white flex items-center justify-center text-xs shrink-0">
+          IN
+        </div>
+        <div class="overflow-hidden leading-tight">
+          <span id="inspector-name-display" class="block font-bold text-xs text-white truncate">Field Inspector</span>
+          <span id="inspector-email-display" class="block text-[10px] text-slate-400 font-mono truncate">inspector@gmail.com</span>
+        </div>
+      </div>
+      <button onclick="handleSignOut()" title="Sign Out" class="size-8 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs transition cursor-pointer shrink-0">
+        🚪
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Viewport -->
+  <main class="flex-1 flex flex-col min-w-0 bg-slate-50 min-h-screen">
+    <!-- Top Header -->
+    <header class="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-40 flex items-center justify-between gap-4 shadow-xs">
+      <div class="flex items-center gap-3">
+        <div class="size-9 rounded-xl bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center text-lg border border-emerald-100">
+          📍
+        </div>
+        <div>
+          <h1 id="header-jurisdiction-title" class="text-lg font-extrabold text-slate-900">Assigned Area: PIN 570001 (Mysuru)</h1>
+          <p id="header-jurisdiction-sub" class="text-xs text-slate-500">Only customer clearance requests matching your assigned PIN code are routed to this desk.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="header-assigned-pin-badge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs font-bold border border-emerald-200">
+          PIN: 570001
+        </span>
+        <button onclick="loadInspectorData()" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+          <span>🔄 Refresh Queue</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
+
+      <!-- TAB 1: MY ASSIGNED PIN REQUESTS -->
+      <section id="panel-applications" class="panel-view active space-y-6">
+        
+        <!-- Summary Stats Banner -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">My Assigned Requests</span>
+            <span id="stat-assigned-count" class="text-3xl font-extrabold text-emerald-600 mt-2 block">0</span>
+            <span class="text-[11px] text-slate-500 font-medium mt-0.5 block">Matched to your assigned PIN code</span>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Pending Field Audit</span>
+            <span id="stat-pending-audit" class="text-3xl font-extrabold text-amber-600 mt-2 block">0</span>
+            <span class="text-[11px] text-amber-700 font-medium mt-0.5 block">Awaiting physical site verification</span>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Approved & Hauled</span>
+            <span id="stat-cleared-count" class="text-3xl font-extrabold text-blue-600 mt-2 block">0</span>
+            <span class="text-[11px] text-blue-700 font-medium mt-0.5 block">Dispatched to recycling yard</span>
+          </div>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Demolition & Debris Requests in Your PIN Area</h2>
+              <p class="text-xs text-slate-500">Only customer applications matching your registered PIN are shown below.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Request ID</th>
+                  <th class="px-4 py-3">Applicant Name & Contact</th>
+                  <th class="px-4 py-3">Site Premise Address</th>
+                  <th class="px-4 py-3">PIN Code</th>
+                  <th class="px-4 py-3">Estimated Waste Volume</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Field Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-inspector-apps" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SITE FIELD AUDITS -->
+      <section id="panel-inspections" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Site Inspection & GPS Geotag Audits</h2>
+              <p class="text-xs text-slate-500">Record physical site inspection measurements and verify safety compliance.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Audit ID</th>
+                  <th class="px-4 py-3">Linked Application</th>
+                  <th class="px-4 py-3">Site Location</th>
+                  <th class="px-4 py-3">Assigned Inspector</th>
+                  <th class="px-4 py-3">Inspection Status</th>
+                  <th class="px-4 py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-inspector-audits" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: DEMOLITIONS & TIPPERS -->
+      <section id="panel-demolitions" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Active Demolition Works & Tipper Dispatch</h2>
+              <p class="text-xs text-slate-500">Track heavy machinery and tipper trucks operating in your assigned PIN area.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Case ID</th>
+                  <th class="px-4 py-3">Premise Location</th>
+                  <th class="px-4 py-3">Assigned Tipper Truck</th>
+                  <th class="px-4 py-3">Recycling Destination</th>
+                  <th class="px-4 py-3">Clearance Stage</th>
+                </tr>
+              </thead>
+              <tbody id="table-inspector-demolitions" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: UTILITY CLEARANCES -->
+      <section id="panel-utilities" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Water Board & CESC Power Disconnection Verification</h2>
+              <p class="text-xs text-slate-500">Ensure electricity and water mains are isolated before authorizing structural demolition.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Site Address</th>
+                  <th class="px-4 py-3">Applicant Name</th>
+                  <th class="px-4 py-3">CESC Power Isolation</th>
+                  <th class="px-4 py-3">Water Board NOC</th>
+                  <th class="px-4 py-3">Safety Clearance</th>
+                </tr>
+              </thead>
+              <tbody id="table-inspector-utilities" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: INSPECTOR PROFILE -->
+      <section id="panel-profile" class="panel-view space-y-6">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div class="border-b border-slate-100 pb-4">
+            <h2 class="text-lg font-bold text-slate-900">Field Inspector Official Profile</h2>
+            <p class="text-xs text-slate-500">Your assigned municipal credentials, jurisdiction PIN, and active dispatch desk.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="profile-fields-container">
+            <!-- Dynamically populated from currentUser -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Modal Container -->
+  <div id="modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="modal-container" class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
+      <!-- Injected Modal Content -->
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let applicationsList = [];
+
+    function initInspectorSession() {
+      try {
+        const saved = localStorage.getItem('current_user') || sessionStorage.getItem('current_user');
+        if (saved) {
+          currentUser = JSON.parse(saved);
+          
+          const name = currentUser.name || 'Field Inspector';
+          const email = currentUser.email || 'inspector@mysuru.gov.in';
+          const assignedPin = currentUser.assignedPin || currentUser.pin || '570001';
+          const area = currentUser.assignedArea || 'Mysuru Urban Zone';
+
+          document.getElementById('inspector-name-display').innerText = name;
+          document.getElementById('inspector-email-display').innerText = email;
+          document.getElementById('sidebar-pin-tag').innerText = 'PIN: ' + assignedPin;
+          document.getElementById('header-assigned-pin-badge').innerText = 'Assigned PIN: ' + assignedPin;
+          document.getElementById('header-jurisdiction-title').innerText = 'Assigned Area: PIN ' + assignedPin + ' (' + area + ')';
+
+          const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+          document.getElementById('inspector-avatar').innerText = initials || 'IN';
+
+          renderProfileTab();
+        }
+      } catch(e) {}
+    }
+
+    async function loadInspectorData() {
+      try {
+        const res = await fetch('/api/applications');
+        if (res.ok) applicationsList = await res.json();
+      } catch(e) {}
+      if (!applicationsList || applicationsList.length === 0) {
+        applicationsList = JSON.parse(localStorage.getItem('civic_applications') || '[]');
+      }
+
+      renderInspectorQueues();
+    }
+
+    // Filter applications strictly for this inspector's assigned PIN
+    function getMyAssignedApplications() {
+      if (!currentUser) return [];
+      const myPin = String(currentUser.assignedPin || currentUser.pin || '570001').trim();
+      const myEmail = (currentUser.email || '').toLowerCase().trim();
+
+      return applicationsList.filter(app => {
+        const appPin = String(app.pincode || app.pin || '').trim();
+        const appInspectorEmail = (app.assignedInspectorEmail || '').toLowerCase().trim();
+
+        // Match either by assigned PIN or directly assigned inspector email
+        if (appInspectorEmail && appInspectorEmail === myEmail) return true;
+        if (appPin && myPin && (appPin === myPin || myPin.includes(appPin) || appPin.includes(myPin))) return true;
+
+        // Fallback default match for first PIN if inspector has PIN 570001
+        if (myPin === '570001' && (appPin.startsWith('570001') || appPin === '')) return true;
+
+        return false;
+      });
+    }
+
+    function renderInspectorQueues() {
+      const myApps = getMyAssignedApplications();
+      const myPin = currentUser ? (currentUser.assignedPin || '570001') : '570001';
+
+      // Update Summary Stat Counters
+      document.getElementById('stat-assigned-count').innerText = myApps.length;
+      document.getElementById('stat-pending-audit').innerText = myApps.filter(a => a.status !== 'Approved').length;
+      document.getElementById('stat-cleared-count').innerText = myApps.filter(a => a.status === 'Approved').length;
+
+      // Render Tab 1: Applications Table
+      const tableApps = document.getElementById('table-inspector-apps');
+      if (myApps.length === 0) {
+        tableApps.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium">
+              No applications filed for your assigned PIN (${myPin}) yet. When a customer submits an application with PIN ${myPin}, it will appear here automatically.
+            </td>
+          </tr>
+        `;
+      } else {
+        tableApps.innerHTML = myApps.map(a => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3 font-mono font-bold text-emerald-800">${a.id}</td>
+            <td class="px-4 py-3">
+              <span class="font-bold text-slate-900 block">${a.applicantName || 'Citizen'}</span>
+              <span class="font-mono text-slate-500 text-[11px] block">${a.phone || ''}</span>
+            </td>
+            <td class="px-4 py-3 text-slate-800">${a.address || 'Mysuru Site Premise'}</td>
+            <td class="px-4 py-3 font-mono font-bold text-emerald-700">${a.pincode || a.pin || myPin}</td>
+            <td class="px-4 py-3 font-mono font-bold text-slate-900">${a.tonnage || a.wasteVolume || '10'} MT</td>
+            <td class="px-4 py-3">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono ${a.status === 'Approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+                ${a.status || 'Pending Field Verification'}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1.5">
+                <button onclick="openVerifyModal('${a.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition cursor-pointer">
+                  ✓ Field Audit
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Tab 2: Inspections
+      const tableAudits = document.getElementById('table-inspector-audits');
+      if (myApps.length === 0) {
+        tableAudits.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">No site audits pending for PIN ${myPin}.</td></tr>`;
+      } else {
+        tableAudits.innerHTML = myApps.map((a, i) => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3 font-mono font-bold text-emerald-800">AUDIT-${String(i+301)}</td>
+            <td class="px-4 py-3 font-mono text-slate-700 font-semibold">${a.id}</td>
+            <td class="px-4 py-3 text-slate-800">${a.address || 'Mysuru Site'}</td>
+            <td class="px-4 py-3 font-semibold text-slate-900">${currentUser.name || 'Field Inspector'}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+                ${a.status === 'Approved' ? '✓ Audit Completed' : 'Pending On-Site Inspection'}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <button onclick="openVerifyModal('${a.id}')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700">Audit Site &rarr;</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Tab 3: Demolitions
+      const tableDems = document.getElementById('table-inspector-demolitions');
+      const approvedApps = myApps.filter(a => a.status === 'Approved');
+      if (approvedApps.length === 0) {
+        tableDems.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">No active demolition tipper runs in PIN ${myPin} right now.</td></tr>`;
+      } else {
+        tableDems.innerHTML = approvedApps.map((a, i) => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3 font-mono font-bold text-emerald-800">CASE-PIN-${String(i+901)}</td>
+            <td class="px-4 py-3 text-slate-800 font-semibold">${a.address || 'Mysuru Site'}</td>
+            <td class="px-4 py-3 font-mono text-slate-700">KA-09-EA-5520 (10-Ton Tipper)</td>
+            <td class="px-4 py-3 text-slate-600">Kumbarakoppal Recycling Yard</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
+                ✓ Clearance Complete
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Tab 4: Utilities
+      const tableUtils = document.getElementById('table-inspector-utilities');
+      if (myApps.length === 0) {
+        tableUtils.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 font-medium">No utility clearance checks logged for PIN ${myPin}.</td></tr>`;
+      } else {
+        tableUtils.innerHTML = myApps.map(a => `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3 font-semibold text-slate-900">${a.address || 'Mysuru Premise'}</td>
+            <td class="px-4 py-3 text-slate-800">${a.applicantName || 'Citizen'}</td>
+            <td class="px-4 py-3 font-mono text-emerald-700 font-bold">✓ Isolated & Tagged</td>
+            <td class="px-4 py-3 font-mono text-blue-700 font-bold">✓ Valve Locked</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+                ✓ Ready for Clearance
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderProfileTab() {
+      if (!currentUser) return;
+      const container = document.getElementById('profile-fields-container');
+      container.innerHTML = `
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Full Name</span>
+          <span class="text-base font-bold text-slate-900 mt-1 block">${currentUser.name || 'Inspector'}</span>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Official Email / Gmail</span>
+          <span class="text-sm font-mono font-semibold text-emerald-800 mt-1 block">${currentUser.email}</span>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Contact Phone</span>
+          <span class="text-sm font-mono font-bold text-slate-900 mt-1 block">${currentUser.phone || '+91 98450 11001'}</span>
+        </div>
+        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+          <span class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">📍 Assigned PIN Code</span>
+          <span class="text-lg font-mono font-extrabold text-emerald-950 mt-1 block">${currentUser.assignedPin || '570001'}</span>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Assigned Ward / Locality</span>
+          <span class="text-sm font-bold text-slate-900 mt-1 block">${currentUser.assignedArea || 'Mysuru Zone Area'}</span>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Designation</span>
+          <span class="text-sm font-bold text-slate-900 mt-1 block">${currentUser.designation || 'Ward Health Inspector'}</span>
+        </div>
+      `;
+    }
+
+    function switchInspectorTab(tabId) {
+      document.querySelectorAll('.panel-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const targetPanel = document.getElementById('panel-' + tabId);
+      const targetBtn = document.getElementById('btn-tab-' + tabId);
+
+      if (targetPanel) targetPanel.classList.add('active');
+      if (targetBtn) targetBtn.classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openVerifyModal(appId) {
+      const app = applicationsList.find(a => a.id === appId);
+      if (!app) return;
+
+      const modalContainer = document.getElementById('modal-container');
+      const backdrop = document.getElementById('modal-backdrop');
+
+      modalContainer.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Conduct On-Site Field Audit</h3>
+            <p class="text-xs text-slate-500 font-mono">App ID: ${app.id} · PIN: ${app.pincode || app.pin || '570001'}</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        </div>
+
+        <div class="space-y-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Site Location & Premise</label>
+            <p class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-800">${app.address || 'Mysuru Site'}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Verified Tonnage (MT)</label>
+              <input id="audit-tonnage" type="number" value="${app.tonnage || 10}" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Audit Decision</label>
+              <select id="audit-decision" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-emerald-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="Approved">Approve for Clearance</option>
+                <option value="Action Required">Action / Resurvey Required</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Inspector Verification Notes</label>
+            <textarea id="audit-notes" rows="2" placeholder="e.g. Site access verified for 10-ton tipper. Dust barrier sheets required..." class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">Cancel</button>
+          <button onclick="submitAudit('${app.id}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">Submit Audit & Clearance</button>
+        </div>
+      `;
+
+      backdrop.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.add('hidden');
+    }
+
+    function submitAudit(appId) {
+      const app = applicationsList.find(a => a.id === appId);
+      if (app) {
+        const decision = document.getElementById('audit-decision').value;
+        const tonnage = document.getElementById('audit-tonnage').value;
+        const notes = document.getElementById('audit-notes').value;
+
+        app.status = decision;
+        app.tonnage = tonnage;
+        app.inspectorNotes = notes;
+        app.auditedBy = currentUser.name || 'Inspector';
+        app.auditedAt = new Date().toISOString();
+
+        localStorage.setItem('civic_applications', JSON.stringify(applicationsList));
+        closeModal();
+        loadInspectorData();
+        showToast('Field audit recorded for ' + appId + ' (' + decision + ')!', 'success');
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const item = document.createElement('div');
+      item.className = 'toast px-4 py-3 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2.5 border ' + 
+        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-rose-600 text-white border-rose-500');
+      item.innerHTML = '<span>' + (type === 'success' ? '✓' : '⚠️') + '</span> <span>' + msg + '</span>';
+      container.appendChild(item);
+      setTimeout(() => item.remove(), 3500);
+    }
+
+    function handleSignOut() {
+      localStorage.removeItem('current_user');
+      sessionStorage.removeItem('current_user');
+      showToast('Signed out successfully.', 'success');
+      setTimeout(() => {
+        window.location.href = 'auth.html?tab=signin';
+      }, 400);
+    }
+
+    initInspectorSession();
+    loadInspectorData();
+  </script>
+</body>
+</html>

@@ -558,8 +558,11 @@
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
               <h2 class="text-lg font-bold text-slate-900">Inspectors & Field Officers Roster</h2>
-              <p class="text-xs text-slate-500">Squad officers assigned to physically verify demolition sites and C&D debris tonnage.</p>
+              <p class="text-xs text-slate-500">Create inspector accounts and assign specific PIN codes / areas. When citizens apply with that PIN code, the request auto-routes exclusively to that assigned inspector desk.</p>
             </div>
+            <button onclick="openCreateInspectorModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-1.5">
+              <span>+ Create Inspector Account</span>
+            </button>
           </div>
 
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -567,10 +570,13 @@
               <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                 <tr>
                   <th class="px-4 py-3">Inspector ID</th>
-                  <th class="px-4 py-3">Officer Name</th>
+                  <th class="px-4 py-3">Officer Name & Designation</th>
+                  <th class="px-4 py-3">Official Gmail / Email</th>
                   <th class="px-4 py-3">Contact Phone</th>
-                  <th class="px-4 py-3">Assigned Wards / Areas</th>
+                  <th class="px-4 py-3">📍 Assigned PIN Code & Area</th>
+                  <th class="px-4 py-3">Linked Applications</th>
                   <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Action</th>
                 </tr>
               </thead>
               <tbody id="table-inspectors" class="divide-y divide-slate-100 font-medium text-slate-800"></tbody>
@@ -1336,27 +1342,186 @@
       `).join('');
     }
 
+    function openCreateInspectorModal() {
+      const modalContainer = document.getElementById('modal-container');
+      const backdrop = document.getElementById('modal-backdrop');
+      const defaultPin = currentAuthorityKey === 'mcc' ? '570001' : (currentAuthorityKey === 'gp' ? '570026' : '570018');
+      const defaultArea = currentAuthorityKey === 'mcc' ? 'Ward 14 (Palace & Devaraja Market)' : (currentAuthorityKey === 'gp' ? 'GP Ward 01 (Bogadi Rural)' : 'TP Ward 01 (Hootagalli Town)');
+
+      modalContainer.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <span>👷</span> Create New Inspector Account
+            </h3>
+            <p class="text-xs text-slate-500">Create login credentials and link designated PIN code for automated request routing.</p>
+          </div>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        </div>
+
+        <form onsubmit="handleCreateInspector(event)" class="space-y-3.5 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Inspector Full Name</label>
+              <input id="new-ins-name" type="text" required placeholder="e.g. Ramesh Kumar" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Official Mobile Phone</label>
+              <input id="new-ins-phone" type="tel" required placeholder="9845011005" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
+              <input id="new-ins-email" type="email" required placeholder="ramesh.inspector@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 font-semibold text-sm text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+            <div>
+              <label class="block font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
+              <input id="new-ins-password" type="text" required placeholder="e.g. ramesh123" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-400 font-mono text-sm font-bold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">📍 Assigned PIN Code</label>
+              <input id="new-ins-pin" type="text" required value="${defaultPin}" placeholder="e.g. 570001" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <span class="text-[10px] text-emerald-700 font-semibold mt-0.5 block">Customer requests with this PIN will route to this inspector.</span>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Designation</label>
+              <input id="new-ins-desig" type="text" required value="Ward Health Inspector" placeholder="Ward Health Inspector" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Assigned Ward / Locality Name</label>
+            <input id="new-ins-area" type="text" required value="${defaultArea}" placeholder="e.g. Ward 14 (Palace & Devaraja Market)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+            <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">Cancel</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer">
+              <span>✓ Create Inspector & Grant Login</span>
+            </button>
+          </div>
+        </form>
+      `;
+
+      backdrop.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.add('hidden');
+    }
+
+    async function handleCreateInspector(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-ins-name').value.trim();
+      const email = document.getElementById('new-ins-email').value.trim().toLowerCase();
+      const phone = document.getElementById('new-ins-phone').value.trim();
+      const password = document.getElementById('new-ins-password').value.trim();
+      const assignedPin = document.getElementById('new-ins-pin').value.trim();
+      const assignedArea = document.getElementById('new-ins-area').value.trim();
+      const designation = document.getElementById('new-ins-desig').value.trim();
+
+      const newInspector = {
+        id: 'u_ins_' + Date.now(),
+        name,
+        email,
+        phone,
+        password,
+        role: 'inspector',
+        authority: 'Ward Inspector (PIN: ' + assignedPin + ')',
+        assignedPin,
+        assignedArea,
+        designation,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newInspector)
+        });
+      } catch(err) {}
+
+      // Save to localStorage
+      const users = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+      if (!users.find(u => (u.email || '').toLowerCase() === email)) {
+        users.push(newInspector);
+        localStorage.setItem('civic_registered_users', JSON.stringify(users));
+      }
+
+      const inspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
+      if (!inspectors.find(i => (i.email || '').toLowerCase() === email)) {
+        inspectors.push(newInspector);
+        localStorage.setItem('civic_inspectors', JSON.stringify(inspectors));
+      }
+
+      closeModal();
+      await loadData();
+      showToast('🎉 Inspector account created for ' + name + ' (PIN: ' + assignedPin + ')! They can now log in using their Gmail and Password.', 'success');
+    }
+
     function renderInspectorsTable() {
       const tbody = document.getElementById('table-inspectors');
-      const inspectors = [
-        { id: 'INS-01', name: 'Rajesh Kumar', phone: '+91 98450 11001', wards: 'Zone 1 & 2 (Ward 1-15)', status: 'Active (On Duty)' },
-        { id: 'INS-02', name: 'S. Nanjappa', phone: '+91 98450 11002', wards: 'Zone 3 & 4 (Ward 16-30)', status: 'Active (On Duty)' },
-        { id: 'INS-03', name: 'M. Anand', phone: '+91 98450 11003', wards: 'Zone 5 & 6 (Ward 31-45)', status: 'On Field Inspection' }
-      ];
+      
+      const registeredInspectors = registeredUsers.filter(u => (u.role || '').toLowerCase() === 'inspector' || (u.authority || '').toLowerCase().includes('inspector'));
+      const customInspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
 
-      tbody.innerHTML = inspectors.map(ins => `
-        <tr class="hover:bg-slate-50/80 transition">
-          <td class="px-4 py-3 font-mono font-bold text-emerald-800">${ins.id}</td>
-          <td class="px-4 py-3 font-bold text-slate-900">${ins.name}</td>
-          <td class="px-4 py-3 font-mono text-slate-700">${ins.phone}</td>
-          <td class="px-4 py-3 text-slate-600">${ins.wards}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
-              ${ins.status}
-            </span>
-          </td>
-        </tr>
-      `).join('');
+      const mergedInspectors = [...customInspectors];
+      registeredInspectors.forEach(ri => {
+        if (!mergedInspectors.find(m => (m.email || '').toLowerCase() === (ri.email || '').toLowerCase())) {
+          mergedInspectors.push(ri);
+        }
+      });
+
+      if (mergedInspectors.length === 0) {
+        mergedInspectors.push(
+          { id: 'INS-01', name: 'Rajesh Kumar', email: 'inspector.mcc@gmail.com', phone: '+91 98450 11001', assignedPin: '570001', assignedArea: 'Ward 14 (Palace & Devaraja Market)', designation: 'Ward Health Inspector', status: 'Active (On Duty)' },
+          { id: 'INS-02', name: 'S. Nanjappa', email: 'nanjappa.gp@gmail.com', phone: '+91 98450 11002', assignedPin: '570026', assignedArea: 'GP Ward 01 (Bogadi Rural)', designation: 'Panchayat Health Inspector', status: 'Active (On Duty)' },
+          { id: 'INS-03', name: 'M. Anand', email: 'anand.tp@gmail.com', phone: '+91 98450 11003', assignedPin: '570018', assignedArea: 'TP Ward 01 (Hootagalli Town)', designation: 'Town Municipal Inspector', status: 'Active (On Duty)' }
+        );
+      }
+
+      tbody.innerHTML = mergedInspectors.map((ins, idx) => {
+        const pin = ins.assignedPin || ins.pin || '570001';
+        const linkedCount = applicationsList.filter(a => {
+          const appPin = String(a.pincode || a.pin || '').trim();
+          return appPin === pin || pin.includes(appPin);
+        }).length;
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="px-4 py-3 font-mono font-bold text-emerald-800">${ins.id || 'INS-' + String(idx+1).padStart(2,'0')}</td>
+            <td class="px-4 py-3">
+              <span class="font-bold text-slate-900 block">${ins.name}</span>
+              <span class="text-[11px] text-slate-500 block">${ins.designation || 'Field Officer'}</span>
+            </td>
+            <td class="px-4 py-3 font-mono font-semibold text-emerald-800">${ins.email}</td>
+            <td class="px-4 py-3 font-mono text-slate-700">${ins.phone || '+91 98450 11001'}</td>
+            <td class="px-4 py-3">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-950 font-mono font-bold text-xs border border-emerald-200 block w-fit">
+                📍 PIN: ${pin}
+              </span>
+              <span class="text-[11px] text-slate-600 block mt-0.5">${ins.assignedArea || 'Mysuru Zone Area'}</span>
+            </td>
+            <td class="px-4 py-3 font-mono font-bold text-emerald-700">
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[11px]">${linkedCount} Linked Request(s)</span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">
+                ✓ Active (Can Log In)
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <button onclick="switchOfficerTab('applications')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer">View Queue &rarr;</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderInspectionsTable() {

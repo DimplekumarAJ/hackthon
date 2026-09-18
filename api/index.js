@@ -293,17 +293,19 @@ module.exports = async (req, res) => {
         return;
       }
 
-      // First registered non-system user becomes Super Admin; subsequent become Customers
-      const nonSystemCount = allRegistered.filter(u => !SYSTEM_ACCOUNTS.find(sa => sa.email.toLowerCase() === u.email.toLowerCase())).length;
-      const isFirst = (nonSystemCount === 0);
+      const isInspector = payload.role === 'inspector' || (payload.authority && payload.authority.toLowerCase().includes('inspector'));
+      const isFirst = (nonSystemCount === 0) && !isInspector;
       const newUser = {
         id: 'u_' + Date.now(),
         name: name || 'User',
         email,
         phone,
         password,
-        role: isFirst ? 'admin' : (payload.role || 'citizen'),
-        authority: isFirst ? 'Super Admin' : (payload.authority || 'Customer'),
+        role: isInspector ? 'inspector' : (isFirst ? 'admin' : (payload.role || 'citizen')),
+        authority: isInspector ? (payload.authority || 'Ward Inspector (PIN: ' + (payload.assignedPin || payload.pin || '570001') + ')') : (isFirst ? 'Super Admin' : (payload.authority || 'Customer')),
+        assignedPin: (payload.assignedPin || payload.pin || '').trim(),
+        assignedArea: (payload.assignedArea || payload.area || '').trim(),
+        designation: (payload.designation || 'Ward Health Inspector').trim(),
         createdAt: new Date().toISOString()
       };
 
@@ -337,7 +339,7 @@ module.exports = async (req, res) => {
     });
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(combined.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, authority: u.authority }))));
+    res.end(JSON.stringify(combined.map(u => ({ id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, authority: u.authority, assignedPin: u.assignedPin || u.pin || '', assignedArea: u.assignedArea || '', designation: u.designation || '' }))));
     return;
   }
 
