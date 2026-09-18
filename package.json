@@ -1,0 +1,13 @@
+{
+  "name": "smart-civic-cd-routing-mysuru",
+  "version": "1.0.0",
+  "description": "Smart Civic Construction & Demolition (C&D) Waste Routing & Governance Platform — Mysuru",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'Build complete'"
+  },
+  "keywords": ["civic", "mysuru", "waste-routing", "c&d", "governance"],
+  "author": "Mysuru Civic Tech",
+  "license": "MIT"
+}
