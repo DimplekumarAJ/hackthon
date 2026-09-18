@@ -399,14 +399,106 @@ const server = http.createServer(async (req, res) => {
         req.on('data', chunk => body += chunk);
         req.on('end', () => {
           const item = JSON.parse(body || '{}');
-          item.id = 'APP-CD-2026-' + Math.floor(100 + Math.random() * 900);
+          item.id = item.id || ('#MCC' + new Date().getFullYear() + Math.floor(100000 + Math.random() * 900000));
+          const pin = String(item.pincode || item.pin || '570001').trim();
+          item.pin = pin;
+          item.pincode = pin;
           item.status = item.status || 'Pending Inspection';
-          db.applications.unshift(item);
-          db.stats.totalApplications += 1;
-          db.stats.pendingInspections += 1;
+          item.lat = item.lat || 12.2958;
+          item.lng = item.lng || 76.6394;
+          item.gpsLocation = item.gpsLocation || `${item.lat}° N, ${item.lng}° E`;
+          item.mapUrl = item.mapUrl || `https://www.google.com/maps?q=${item.lat},${item.lng}`;
+          item.photos = item.photos || (item.photo ? [item.photo] : []);
+          item.photo = item.photo || (item.photos && item.photos[0]) || null;
+          item.submittedAt = item.submittedAt || new Date().toISOString();
+
+          // Auto-route by PIN code to designated Authority & Inspector
+          if (pin.startsWith('570026') || pin.startsWith('571130') || pin.startsWith('570028') || pin.startsWith('571311')) {
+            item.authorityKey = 'gp';
+            item.authority = item.authority || 'Bogadi Gram Panchayat';
+            item.assignedInspectorName = item.assignedInspectorName || 'S. Nanjappa';
+            item.assignedInspectorEmail = item.assignedInspectorEmail || 'nanjappa.gp@gmail.com';
+            item.assignedOfficerEmail = 'gp@gmail.com';
+          } else if (pin.startsWith('570018') || pin.startsWith('570017') || pin.startsWith('570027') || pin.startsWith('571607')) {
+            item.authorityKey = 'tp';
+            item.authority = item.authority || 'Hootagalli Town Panchayat';
+            item.assignedInspectorName = item.assignedInspectorName || 'M. Anand';
+            item.assignedInspectorEmail = item.assignedInspectorEmail || 'anand.tp@gmail.com';
+            item.assignedOfficerEmail = 'tp@gmail.com';
+          } else {
+            item.authorityKey = 'mcc';
+            item.authority = item.authority || 'Mysuru Municipal Corporation (MCC Urban)';
+            item.assignedInspectorName = item.assignedInspectorName || 'Rajesh Kumar';
+            item.assignedInspectorEmail = item.assignedInspectorEmail || 'inspector.mcc@gmail.com';
+            item.assignedOfficerEmail = 'mcc@gmail.com';
+          }
+
+          // Check if custom inspector was registered for this PIN
+          const customInspectors = (db.registeredUsers || []).filter(u => u.role === 'inspector');
+          const matchedCustom = customInspectors.find(ins => {
+            const insPin = String(ins.assignedPin || ins.pin || '').trim();
+            return insPin === pin || insPin.includes(pin);
+          });
+          if (matchedCustom) {
+            item.assignedInspectorName = matchedCustom.name;
+            item.assignedInspectorEmail = matchedCustom.email;
+          }
+
+          // Update applications collection
+          const existingAppIdx = db.applications.findIndex(a => a.id === item.id);
+          if (existingAppIdx >= 0) {
+            db.applications[existingAppIdx] = { ...db.applications[existingAppIdx], ...item };
+          } else {
+            db.applications.unshift(item);
+          }
+
+          // Auto-create/sync inspection record
+          if (!db.inspections) db.inspections = [];
+          const inspId = 'INSP-' + (item.id.replace(/[^0-9]/g, '').slice(-4) || Math.floor(100 + Math.random() * 900));
+          const inspectionRecord = {
+            id: inspId,
+            caseId: item.id,
+            applicationId: item.id,
+            applicantName: item.applicantName || 'Citizen',
+            phone: item.phone || '',
+            siteAddress: item.address || 'Mysuru Site',
+            address: item.address || 'Mysuru Site',
+            pin: item.pin,
+            pincode: item.pincode,
+            gpsLocation: item.gpsLocation,
+            lat: item.lat,
+            lng: item.lng,
+            mapUrl: item.mapUrl,
+            inspector: item.assignedInspectorName,
+            assignedInspectorName: item.assignedInspectorName,
+            assignedInspectorEmail: item.assignedInspectorEmail,
+            authorityKey: item.authorityKey,
+            authority: item.authority,
+            date: item.issueDate || 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: 'Pending Verification',
+            photo: item.photo,
+            photos: item.photos,
+            propertyDetails: item.propertyId || 'Residential Site',
+            tonnage: '10 MT',
+            documents: 'Khatta & Site Blueprint Validated'
+          };
+          
+          const existingInspIdx = db.inspections.findIndex(i => i.caseId === item.id || i.applicationId === item.id);
+          if (existingInspIdx >= 0) {
+            db.inspections[existingInspIdx] = { ...db.inspections[existingInspIdx], ...inspectionRecord };
+          } else {
+            db.inspections.unshift(inspectionRecord);
+          }
+
+          // Update stats
+          db.stats.totalApplications = db.applications.length;
+          db.stats.pendingInspections = db.inspections.filter(i => i.status !== 'Approved' && i.status !== 'Completed').length;
+          db.stats.pendingDebris = db.applications.filter(a => a.status !== 'Approved').length;
+
           saveDB(db);
           res.writeHead(201, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true, item }));
+          res.end(JSON.stringify({ success: true, item, inspection: inspectionRecord }));
         });
         return;
       }

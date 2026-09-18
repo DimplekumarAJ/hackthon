@@ -1,15 +1,54 @@
 {
   "stats": {
-    "totalApplications": 0,
-    "pendingInspections": 0,
-    "pendingDebris": 0,
+    "totalApplications": 2,
+    "pendingInspections": 1,
+    "pendingDebris": 2,
     "completedCollections": 0,
     "activeOfficers": 3,
     "totalTonnageCollected": "0 MT",
     "recyclingEfficiency": "100%"
   },
   "hotspots": [],
-  "applications": [],
+  "applications": [
+    {
+      "id": "#MCC2026889911",
+      "pincode": "570026",
+      "lng": 76.592,
+      "address": "Site 12, Bogadi 2nd Stage",
+      "gpsLocation": "12.2850� N, 76.5920� E",
+      "photo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "applicantName": "Ravi Kumar",
+      "propertyId": "PROP-BOG-55",
+      "mapUrl": "https://www.google.com/maps?q=12.2850,76.5920",
+      "phone": "+91 98450 44556",
+      "lat": 12.285,
+      "pin": "570026",
+      "status": "Pending Inspection",
+      "photos": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      ],
+      "submittedAt": "2026-09-18T19:22:18.268Z",
+      "authorityKey": "gp",
+      "authority": "Bogadi Gram Panchayat",
+      "assignedInspectorName": "S. Nanjappa",
+      "assignedInspectorEmail": "nanjappa.gp@gmail.com",
+      "assignedOfficerEmail": "gp@gmail.com"
+    },
+    {
+      "id": "APP-CD-2026-858",
+      "pincode": "570026",
+      "lng": 76.592,
+      "address": "Site 12, Bogadi 2nd Stage",
+      "gpsLocation": "12.2850� N, 76.5920� E",
+      "photo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "applicantName": "Ravi Kumar",
+      "propertyId": "PROP-BOG-55",
+      "mapUrl": "https://www.google.com/maps?q=12.2850,76.5920",
+      "phone": "+91 98450 44556",
+      "lat": 12.285,
+      "status": "Pending Inspection"
+    }
+  ],
   "pinMappings": [
     {
       "pin": "570001",
@@ -72,7 +111,38 @@
     }
   ],
   "inspectors": [],
-  "inspections": [],
+  "inspections": [
+    {
+      "id": "INSP-9911",
+      "caseId": "#MCC2026889911",
+      "applicationId": "#MCC2026889911",
+      "applicantName": "Ravi Kumar",
+      "phone": "+91 98450 44556",
+      "siteAddress": "Site 12, Bogadi 2nd Stage",
+      "address": "Site 12, Bogadi 2nd Stage",
+      "pin": "570026",
+      "pincode": "570026",
+      "gpsLocation": "12.2850� N, 76.5920� E",
+      "lat": 12.285,
+      "lng": 76.592,
+      "mapUrl": "https://www.google.com/maps?q=12.2850,76.5920",
+      "inspector": "S. Nanjappa",
+      "assignedInspectorName": "S. Nanjappa",
+      "assignedInspectorEmail": "nanjappa.gp@gmail.com",
+      "authorityKey": "gp",
+      "authority": "Bogadi Gram Panchayat",
+      "date": "Today, 12:52 am",
+      "time": "12:52 am",
+      "status": "Pending Verification",
+      "photo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "photos": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      ],
+      "propertyDetails": "PROP-BOG-55",
+      "tonnage": "10 MT",
+      "documents": "Khatta & Site Blueprint Validated"
+    }
+  ],
   "demolitionRequests": [],
   "demolitionStatus": [],
   "certificates": [],
