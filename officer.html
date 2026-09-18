@@ -1845,13 +1845,30 @@
       `;
     }
 
-    function approveApplication(appId) {
+    async function approveApplication(appId) {
       const app = applicationsList.find(a => a.id === appId);
       if (app) {
         app.status = 'Approved';
+        
+        try {
+          await fetch('/api/applications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(app)
+          });
+        } catch(e) {}
+
         localStorage.setItem('civic_applications', JSON.stringify(applicationsList));
+        
+        const myRequests = JSON.parse(localStorage.getItem('cust_my_requests') || '[]');
+        const custIdx = myRequests.findIndex(r => r.id === appId);
+        if (custIdx >= 0) {
+          myRequests[custIdx] = { ...myRequests[custIdx], ...app };
+          localStorage.setItem('cust_my_requests', JSON.stringify(myRequests));
+        }
+
         renderAllTables();
-        showToast('Application #' + appId + ' approved! Permit clearance generated.', 'success');
+        showToast('Application #' + appId + ' approved! Permit clearance & Green Certificate generated.', 'success');
       }
     }
 
