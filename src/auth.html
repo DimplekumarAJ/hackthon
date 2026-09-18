@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Portal Access — Smart Civic Waste Routing Mysuru</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              dark: '#0f172a'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .bg-mesh {
+      background: radial-gradient(at 0% 0%, rgba(22, 163, 74, 0.25) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.95) 0px, transparent 50%),
+                  radial-gradient(at 50% 50%, rgba(2, 132, 199, 0.2) 0px, transparent 50%),
+                  #090d16;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased flex items-center justify-center p-0 sm:p-6 lg:p-10">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- MAIN SPLIT-SCREEN AUTH CONTAINER -->
+  <div class="w-full max-w-6xl min-h-[620px] bg-white sm:rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+    
+    <!-- LEFT SIDE: CIVIC BRANDING & HIGHLIGHTS (5 Cols) -->
+    <div class="lg:col-span-5 bg-mesh p-8 sm:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+      
+      <!-- Top Brand Logo -->
+      <div>
+        <a href="index.html" class="inline-flex items-center gap-3 group">
+          <div class="size-11 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition transform">
+            ♻️
+          </div>
+          <div>
+            <span class="block font-bold text-base tracking-tight text-white">Smart Civic Waste Routing</span>
+            <span class="block text-[11px] text-emerald-400 font-mono tracking-wide uppercase">Mysuru Governance Hub</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Middle Feature Callouts -->
+      <div class="my-8 space-y-5">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
+          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Jurisdiction-Aware Civic Engine
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+          "Citizens report the waste. The system figures out who is responsible."
+        </h2>
+
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Automated municipal routing connecting citizens with Mysuru City Corporation (MCC), Gram Panchayats, and Town Panchayats.
+        </p>
+
+        <!-- Mini Stats Cards -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+            <span class="block text-xl font-bold text-white font-mono">65 Wards</span>
+            <span class="block text-[11px] text-slate-400">MCC Urban Coverage</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+            <span class="block text-xl font-bold text-emerald-400 font-mono">4.2 Hours</span>
+            <span class="block text-[11px] text-slate-400">Average Ward SLA</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Return Link -->
+      <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+        <a href="index.html" class="inline-flex items-center gap-1.5 hover:text-white transition font-medium">
+          &larr; Return to Landing Page
+        </a>
+        <span class="font-mono text-[10px]">Mysuru · HackMysuru 2026</span>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: CLEAN MODERN AUTH FORM (7 Cols) -->
+    <div class="lg:col-span-7 p-6 sm:p-12 lg:p-14 flex flex-col justify-center bg-white">
+      
+      <div class="max-w-md w-full mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div>
+          <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Create Account</h1>
+          <p id="auth-subtitle" class="text-sm text-slate-500 mt-1">Get access to the civic waste reporting and operations portal.</p>
+        </div>
+
+        <!-- Custom Tab Switcher -->
+        <div class="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600">
+          <button id="tab-signup" onclick="setAuthTab('signup')" class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer">
+            Create Account
+          </button>
+          <button id="tab-signin" onclick="setAuthTab('signin')" class="py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer">
+            Sign In
+          </button>
+        </div>
+
+        <!-- 1. SIGN UP FORM -->
+        <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Your Full Name</label>
+            <input id="reg-name" type="text" required placeholder="e.g. Harsha Vardhan" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
+            <input id="reg-email" type="email" required placeholder="your.email@example.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Mobile Number</label>
+              <input id="reg-phone" type="tel" placeholder="9845012345" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Password</label>
+              <input id="reg-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>Register & Continue to Dashboard</span>
+            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </form>
+
+        <!-- 2. SIGN IN FORM -->
+        <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
+            <input id="login-email" type="text" required placeholder="your.email@example.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-700">Password</label>
+            </div>
+            <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"/>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>Sign In to Portal</span>
+            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+    }
+    function saveUsers(u) {
+      localStorage.setItem('civic_registered_users', JSON.stringify(u));
+    }
+
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const item = document.createElement('div');
+      item.className = 'toast px-4 py-3 rounded-2xl text-xs font-bold shadow-xl flex items-center gap-2.5 border ' + 
+        (type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' :
+         type === 'warning' ? 'bg-amber-500 text-white border-amber-400' :
+         'bg-rose-600 text-white border-rose-500');
+      item.innerHTML = '<span>' + (type === 'success' ? '✓' : type === 'warning' ? '⚠️' : '✕') + '</span> <span>' + msg + '</span>';
+      container.appendChild(item);
+      setTimeout(() => item.remove(), 4000);
+    }
+
+    function setAuthTab(tab) {
+      const formSignUp = document.getElementById('signup-form');
+      const formSignIn = document.getElementById('signin-form');
+      const btnSignUp = document.getElementById('tab-signup');
+      const btnSignIn = document.getElementById('tab-signin');
+      const title = document.getElementById('auth-title');
+      const sub = document.getElementById('auth-subtitle');
+
+      if (tab === 'signup') {
+        formSignUp.classList.remove('hidden');
+        formSignIn.classList.add('hidden');
+        btnSignUp.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
+        btnSignIn.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
+        title.innerText = 'Create Account';
+        sub.innerText = 'Get access to the civic waste reporting and operations portal.';
+      } else {
+        formSignIn.classList.remove('hidden');
+        formSignUp.classList.add('hidden');
+        btnSignIn.className = 'py-2.5 rounded-xl bg-white text-slate-900 shadow-sm transition-all cursor-pointer';
+        btnSignUp.className = 'py-2.5 rounded-xl hover:text-slate-900 transition-all cursor-pointer';
+        title.innerText = 'Welcome Back';
+        sub.innerText = 'Sign in to access your authority or citizen dashboard.';
+      }
+    }
+
+    function handleSignUp(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      const users = getUsers();
+      if (users.find(u => u.email === email)) {
+        showToast('An account with this email already exists. Please sign in.', 'error');
+        return;
+      }
+
+      // Backend logic: 1st person who creates an account becomes Super Admin! Subsequent signups are citizens.
+      const isFirst = users.length === 0;
+      const role = isFirst ? 'admin' : 'citizen';
+      const authority = isFirst ? 'MCC' : 'Citizen';
+
+      const newUser = {
+        id: 'u_' + Date.now(),
+        name,
+        email,
+        phone,
+        password,
+        role,
+        authority,
+        createdAt: new Date().toISOString()
+      };
+
+      users.push(newUser);
+      saveUsers(users);
+      sessionStorage.setItem('current_user', JSON.stringify(newUser));
+
+      showToast('Account registered successfully! Redirecting...', 'success');
+      
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 600);
+    }
+
+    function handleSignIn(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const password = document.getElementById('login-password').value;
+
+      const users = getUsers();
+      const user = users.find(u => (u.email === email || u.name.toLowerCase() === email) && u.password === password);
+
+      if (!user) {
+        showToast('Invalid email or password. Please check your credentials.', 'error');
+        return;
+      }
+
+      sessionStorage.setItem('current_user', JSON.stringify(user));
+      showToast('Welcome back, ' + user.name + '!', 'success');
+
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
+    }
+  </script>
+</body>
+</html>
