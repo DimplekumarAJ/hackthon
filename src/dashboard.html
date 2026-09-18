@@ -535,14 +535,9 @@
 
         <!-- DOWNSIDE: DIRECTORY TABLE OF CONFIGURED OFFICERS & CREDENTIALS -->
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <div class="border-b border-slate-100 pb-3 flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h3 class="text-base font-bold text-slate-900">Configured Department Officers & Login Credentials</h3>
-              <p class="text-xs text-slate-500">Official roster of Department Heads & Office Members. Officers log in with their Gmail & Password to open their dashboard.</p>
-            </div>
-            <button onclick="openAddOfficerModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-xs font-bold hover:bg-emerald-100 transition cursor-pointer flex items-center gap-1.5">
-              <span>➕ Add New Officer Member</span>
-            </button>
+          <div class="border-b border-slate-100 pb-3">
+            <h3 class="text-base font-bold text-slate-900">Configured Department Officers & Login Credentials</h3>
+            <p class="text-xs text-slate-500">Official roster of Department Heads & Officers. Officers log in with their Gmail & Password to open their dashboard.</p>
           </div>
 
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -1484,27 +1479,27 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Organization</label>
-              <input id="df-org" type="text" value="${d.organization}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-org" type="text" value="${d.organization || ''}" placeholder="Mysuru City Corporation (MCC)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Officer Name</label>
-              <input id="df-head" type="text" value="${d.headName}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-head" type="text" value="${d.customHead ? (d.headName || '') : ''}" placeholder="${d.headName || 'MCC Executive Officer'}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Designation</label>
-              <input id="df-desig" type="text" value="${d.designation}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-desig" type="text" value="${d.designation || ''}" placeholder="Executive Engineer / C&D Waste Incharge" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Employee / Officer ID</label>
-              <input id="df-empid" type="text" value="${d.empId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-empid" type="text" value="${d.empId || ''}" placeholder="MCC-ADM-101" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Phone</label>
-              <input id="df-phone" type="tel" value="${d.phone}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-phone" type="tel" value="${d.phone || ''}" placeholder="+91 98450 00002" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
-              <input id="df-email" type="email" value="${d.email || 'mcc@gmail.com'}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-email" type="email" value="${d.email || 'mcc@gmail.com'}" placeholder="mcc@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
@@ -1512,27 +1507,27 @@
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
-              <input id="df-address" type="text" value="${d.address}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-address" type="text" value="${d.address || ''}" placeholder="MCC Central Office, Sayyaji Rao Road, Mysuru - 570001" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Jurisdiction</label>
-              <input id="df-jurisdiction" type="text" value="${d.jurisdiction}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-jurisdiction" type="text" value="${d.jurisdiction || ''}" placeholder="Mysuru City (Urban Core)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Zones / Wards Covered</label>
-              <input id="df-zones" type="text" value="${d.zonesWardsCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-zones" type="text" value="${d.zonesWardsCovered || ''}" placeholder="65 Urban Wards (Zone 1 to Zone 9)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">📍 PIN Codes Covered</label>
-              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-pins" type="text" value="${d.pinCodes || ''}" placeholder="570001, 570002, 570004" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Login Username</label>
-              <input id="df-username" type="text" value="${d.username}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-username" type="text" value="${d.username || ''}" placeholder="mcc.admin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role</label>
-              <input id="df-role" type="text" value="${d.role}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-role" type="text" value="${d.role || ''}" placeholder="MCC Admin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Status</label>
@@ -1548,31 +1543,31 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Organization</label>
-              <input id="df-org" type="text" value="${d.organization}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-org" type="text" value="${d.organization || ''}" placeholder="Bogadi Gram Panchayat" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Gram Panchayat ID</label>
-              <input id="df-gpid" type="text" value="${d.gpId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-gpid" type="text" value="${d.gpId || ''}" placeholder="GP-KA-MYS-042" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Officer Name</label>
-              <input id="df-head" type="text" value="${d.headName}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-head" type="text" value="${d.customHead ? (d.headName || '') : ''}" placeholder="${d.headName || 'Gram Panchayat PDO'}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Designation</label>
-              <input id="df-desig" type="text" value="${d.designation}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-desig" type="text" value="${d.designation || ''}" placeholder="Panchayat Development Officer (PDO)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Employee / Officer ID</label>
-              <input id="df-empid" type="text" value="${d.empId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-empid" type="text" value="${d.empId || ''}" placeholder="GP-PDO-201" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Phone</label>
-              <input id="df-phone" type="tel" value="${d.phone}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-phone" type="tel" value="${d.phone || ''}" placeholder="+91 98450 00003" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
-              <input id="df-email" type="email" value="${d.email || 'gp@gmail.com'}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-email" type="email" value="${d.email || 'gp@gmail.com'}" placeholder="gp@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
@@ -1580,35 +1575,35 @@
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
-              <input id="df-address" type="text" value="${d.address}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-address" type="text" value="${d.address || ''}" placeholder="Gram Panchayat Bhavan, Bogadi Village, Mysuru - 570026" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Taluk</label>
-              <input id="df-taluk" type="text" value="${d.taluk}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-taluk" type="text" value="${d.taluk || ''}" placeholder="Mysuru Rural" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">District</label>
-              <input id="df-district" type="text" value="${d.district}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-district" type="text" value="${d.district || ''}" placeholder="Mysuru" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Villages Covered</label>
-              <input id="df-villages" type="text" value="${d.villagesCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-villages" type="text" value="${d.villagesCovered || ''}" placeholder="Bogadi, Maratikyathanahalli, Belavadi Rural" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Wards / Areas Covered</label>
-              <input id="df-wards" type="text" value="${d.wardsAreasCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-wards" type="text" value="${d.wardsAreasCovered || ''}" placeholder="GP Wards 1 to 4, Outer Ring Road Periphery" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">📍 PIN Codes Covered</label>
-              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-pins" type="text" value="${d.pinCodes || ''}" placeholder="570026, 571130, 570028" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Login Username</label>
-              <input id="df-username" type="text" value="${d.username}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-username" type="text" value="${d.username || ''}" placeholder="gp.admin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role</label>
-              <input id="df-role" type="text" value="${d.role}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-role" type="text" value="${d.role || ''}" placeholder="Panchayat Admin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Status</label>
@@ -1624,31 +1619,31 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Organization</label>
-              <input id="df-org" type="text" value="${d.organization}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-org" type="text" value="${d.organization || ''}" placeholder="Hootagalli Town Panchayat (CMC)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Town Panchayat ID</label>
-              <input id="df-tpid" type="text" value="${d.tpId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-tpid" type="text" value="${d.tpId || ''}" placeholder="TP-KA-MYS-018" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Head / Officer Name</label>
-              <input id="df-head" type="text" value="${d.headName}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-head" type="text" value="${d.customHead ? (d.headName || '') : ''}" placeholder="${d.headName || 'Town Panchayat Chief Officer'}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Designation</label>
-              <input id="df-desig" type="text" value="${d.designation}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-desig" type="text" value="${d.designation || ''}" placeholder="Chief Officer / Zonal Superintendent" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Employee / Officer ID</label>
-              <input id="df-empid" type="text" value="${d.empId}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-empid" type="text" value="${d.empId || ''}" placeholder="TP-CO-308" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Official Phone</label>
-              <input id="df-phone" type="tel" value="${d.phone}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-phone" type="tel" value="${d.phone || ''}" placeholder="+91 98450 00004" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Official Gmail / Email (For Login)</label>
-              <input id="df-email" type="email" value="${d.email || 'tp@gmail.com'}" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-email" type="email" value="${d.email || 'tp@gmail.com'}" placeholder="tp@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/40 border border-emerald-300 text-sm font-semibold text-emerald-950 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">🔑 Create Login Password</label>
@@ -1656,35 +1651,35 @@
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Office Address</label>
-              <input id="df-address" type="text" value="${d.address}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-address" type="text" value="${d.address || ''}" placeholder="Town Council Bhavan, Near Industrial Area, Hootagalli, Mysuru - 570018" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Taluk</label>
-              <input id="df-taluk" type="text" value="${d.taluk}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-taluk" type="text" value="${d.taluk || ''}" placeholder="Mysuru North" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">District</label>
-              <input id="df-district" type="text" value="${d.district}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-district" type="text" value="${d.district || ''}" placeholder="Mysuru" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Town / Locality Covered</label>
-              <input id="df-town" type="text" value="${d.townLocalityCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-town" type="text" value="${d.townLocalityCovered || ''}" placeholder="Hootagalli Town, Belagola KIADB, Koorgalli" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Wards / Areas Covered</label>
-              <input id="df-wards" type="text" value="${d.wardsAreasCovered}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-wards" type="text" value="${d.wardsAreasCovered || ''}" placeholder="TP Wards 1 to 8, Industrial Sectors 1-4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">📍 PIN Codes Covered</label>
-              <input id="df-pins" type="text" value="${d.pinCodes}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-pins" type="text" value="${d.pinCodes || ''}" placeholder="570018, 571607, 570016" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Login Username</label>
-              <input id="df-username" type="text" value="${d.username}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-username" type="text" value="${d.username || ''}" placeholder="tp.admin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Role</label>
-              <input id="df-role" type="text" value="${d.role}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
+              <input id="df-role" type="text" value="${d.role || ''}" placeholder="Town Panchayat Admin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"/>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Status</label>
@@ -1700,27 +1695,35 @@
 
     async function saveDepartmentConfig() {
       const d = departmentsState[currentSelectedDept];
-      if (document.getElementById('df-org')) d.organization = document.getElementById('df-org').value.trim();
-      if (document.getElementById('df-head')) d.headName = document.getElementById('df-head').value.trim();
-      if (document.getElementById('df-desig')) d.designation = document.getElementById('df-desig').value.trim();
-      if (document.getElementById('df-empid')) d.empId = document.getElementById('df-empid').value.trim();
-      if (document.getElementById('df-phone')) d.phone = document.getElementById('df-phone').value.trim();
-      if (document.getElementById('df-email')) d.email = document.getElementById('df-email').value.trim().toLowerCase();
-      if (document.getElementById('df-password')) d.password = document.getElementById('df-password').value.trim();
-      if (document.getElementById('df-address')) d.address = document.getElementById('df-address').value.trim();
-      if (document.getElementById('df-pins')) d.pinCodes = document.getElementById('df-pins').value.trim();
-      if (document.getElementById('df-username')) d.username = document.getElementById('df-username').value.trim();
-      if (document.getElementById('df-role')) d.role = document.getElementById('df-role').value.trim();
+      if (document.getElementById('df-org')) d.organization = document.getElementById('df-org').value.trim() || d.organization;
+      if (document.getElementById('df-head')) {
+        const hVal = document.getElementById('df-head').value.trim();
+        if (hVal) {
+          d.headName = hVal;
+          d.customHead = true;
+        } else if (!d.customHead) {
+          d.headName = DEFAULT_DEPARTMENTS_CONFIG[currentSelectedDept].headName;
+        }
+      }
+      if (document.getElementById('df-desig')) d.designation = document.getElementById('df-desig').value.trim() || d.designation;
+      if (document.getElementById('df-empid')) d.empId = document.getElementById('df-empid').value.trim() || d.empId;
+      if (document.getElementById('df-phone')) d.phone = document.getElementById('df-phone').value.trim() || d.phone;
+      if (document.getElementById('df-email')) d.email = (document.getElementById('df-email').value.trim() || d.email).toLowerCase();
+      if (document.getElementById('df-password')) d.password = document.getElementById('df-password').value.trim() || d.password;
+      if (document.getElementById('df-address')) d.address = document.getElementById('df-address').value.trim() || d.address;
+      if (document.getElementById('df-pins')) d.pinCodes = document.getElementById('df-pins').value.trim() || d.pinCodes;
+      if (document.getElementById('df-username')) d.username = document.getElementById('df-username').value.trim() || d.username;
+      if (document.getElementById('df-role')) d.role = document.getElementById('df-role').value.trim() || d.role;
       if (document.getElementById('df-status')) d.status = document.getElementById('df-status').value;
-      if (document.getElementById('df-gpid')) d.gpId = document.getElementById('df-gpid').value.trim();
-      if (document.getElementById('df-tpid')) d.tpId = document.getElementById('df-tpid').value.trim();
-      if (document.getElementById('df-jurisdiction')) d.jurisdiction = document.getElementById('df-jurisdiction').value.trim();
-      if (document.getElementById('df-zones')) d.zonesWardsCovered = document.getElementById('df-zones').value.trim();
-      if (document.getElementById('df-taluk')) d.taluk = document.getElementById('df-taluk').value.trim();
-      if (document.getElementById('df-district')) d.district = document.getElementById('df-district').value.trim();
-      if (document.getElementById('df-villages')) d.villagesCovered = document.getElementById('df-villages').value.trim();
-      if (document.getElementById('df-town')) d.townLocalityCovered = document.getElementById('df-town').value.trim();
-      if (document.getElementById('df-wards')) d.wardsAreasCovered = document.getElementById('df-wards').value.trim();
+      if (document.getElementById('df-gpid')) d.gpId = document.getElementById('df-gpid').value.trim() || d.gpId;
+      if (document.getElementById('df-tpid')) d.tpId = document.getElementById('df-tpid').value.trim() || d.tpId;
+      if (document.getElementById('df-jurisdiction')) d.jurisdiction = document.getElementById('df-jurisdiction').value.trim() || d.jurisdiction;
+      if (document.getElementById('df-zones')) d.zonesWardsCovered = document.getElementById('df-zones').value.trim() || d.zonesWardsCovered;
+      if (document.getElementById('df-taluk')) d.taluk = document.getElementById('df-taluk').value.trim() || d.taluk;
+      if (document.getElementById('df-district')) d.district = document.getElementById('df-district').value.trim() || d.district;
+      if (document.getElementById('df-villages')) d.villagesCovered = document.getElementById('df-villages').value.trim() || d.villagesCovered;
+      if (document.getElementById('df-town')) d.townLocalityCovered = document.getElementById('df-town').value.trim() || d.townLocalityCovered;
+      if (document.getElementById('df-wards')) d.wardsAreasCovered = document.getElementById('df-wards').value.trim() || d.wardsAreasCovered;
 
       departmentsState[currentSelectedDept] = d;
       try {
