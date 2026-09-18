@@ -90,5 +90,26 @@
     "smsGateway": "Active (Govt of Karnataka SMS Portal)",
     "effectiveJurisdictionShiftMode": "Dynamic Timestamp Rule"
   },
-  "registeredUsers": []
+  "registeredUsers": [
+    {
+      "id": "u_1789752175607",
+      "name": "Harsha",
+      "email": "harsha@gmail.com",
+      "phone": "+91 9876543210",
+      "password": "password123",
+      "role": "admin",
+      "authority": "Super Admin",
+      "createdAt": "2026-09-18T17:22:55.607Z"
+    },
+    {
+      "id": "u_1789752184029",
+      "name": "Rahul Sharma",
+      "email": "rahul@gmail.com",
+      "phone": "+91 9123456780",
+      "password": "password123",
+      "role": "citizen",
+      "authority": "Customer",
+      "createdAt": "2026-09-18T17:23:04.029Z"
+    }
+  ]
 }

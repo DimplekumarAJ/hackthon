@@ -93,7 +93,7 @@ function persistCloudUsers(users) {
 const SYSTEM_ACCOUNTS = [
   {
     id: 'u_admin_gmail',
-    name: 'Dr. Ramesh Rao (Super Admin)',
+    name: 'Super Administrator',
     email: 'admin@gmail.com',
     passwords: ['admin123', 'admin', '123456', 'admin1', 'admin@123', 'password'],
     password: 'admin123',
@@ -103,7 +103,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_admin',
-    name: 'Dr. Ramesh Rao (Super Admin)',
+    name: 'Super Administrator',
     email: 'admin@mysuru.gov.in',
     passwords: ['admin123', 'admin', '123456', 'admin1', 'admin@123', 'password'],
     password: 'admin123',
@@ -113,7 +113,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_superadmin_gmail',
-    name: 'Super Admin Mysuru',
+    name: 'Super Administrator',
     email: 'superadmin@gmail.com',
     passwords: ['admin123', 'admin', '123456', 'password'],
     password: 'admin123',
@@ -123,7 +123,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_mcc',
-    name: 'Sri. Suresh Kumar',
+    name: 'MCC Executive Officer',
     email: 'mcc.officer@mysuru.gov.in',
     passwords: ['mcc123', 'admin123', '123456', 'mcc'],
     password: 'mcc123',
@@ -133,7 +133,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_mcc_gmail',
-    name: 'MCC Officer Mysuru',
+    name: 'MCC Executive Officer',
     email: 'mcc@gmail.com',
     passwords: ['mcc123', 'admin123', '123456', 'mcc'],
     password: 'mcc123',
@@ -143,7 +143,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_gp',
-    name: 'Smt. Lakshmi Devi',
+    name: 'Gram Panchayat PDO',
     email: 'gp.officer@mysuru.gov.in',
     passwords: ['gp123', 'admin123', '123456', 'gp'],
     password: 'gp123',
@@ -153,7 +153,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_gp_gmail',
-    name: 'Gram Panchayat Officer',
+    name: 'Gram Panchayat PDO',
     email: 'gp@gmail.com',
     passwords: ['gp123', 'admin123', '123456', 'gp'],
     password: 'gp123',
@@ -163,7 +163,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_tp',
-    name: 'Sri. Venkatesh M',
+    name: 'Town Panchayat Chief Officer',
     email: 'tp.officer@mysuru.gov.in',
     passwords: ['tp123', 'admin123', '123456', 'tp'],
     password: 'tp123',
@@ -173,7 +173,7 @@ const SYSTEM_ACCOUNTS = [
   },
   {
     id: 'u_tp_gmail',
-    name: 'Town Panchayat Officer',
+    name: 'Town Panchayat Chief Officer',
     email: 'tp@gmail.com',
     passwords: ['tp123', 'admin123', '123456', 'tp'],
     password: 'tp123',
@@ -415,8 +415,27 @@ module.exports = async (req, res) => {
   }
 
   if (pathname.includes('/users')) {
+    let cloudUsers = [];
+    try {
+      cloudUsers = await fetchCloudUsers();
+    } catch(e) {}
+    const combined = [...(initialData.registeredUsers || [])];
+    cloudUsers.forEach(cu => {
+      if (!combined.find(r => (r.email || '').toLowerCase().trim() === (cu.email || '').toLowerCase().trim())) {
+        combined.push(cu);
+      }
+    });
+    const users = combined.map(u => ({
+      name: u.name,
+      role: u.authority || u.role || 'Customer',
+      phone: u.phone || 'N/A',
+      email: u.email,
+      area: u.department || (u.role === 'admin' ? 'Mysuru Municipal Authority' : 'Mysuru Citizen Portal'),
+      permissions: u.role === 'admin' ? 'Full System & Inspection Rights' : 'Lodge & Track Debris Clearances',
+      status: 'Active'
+    }));
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(initialData.users));
+    res.end(JSON.stringify(users));
     return;
   }
 

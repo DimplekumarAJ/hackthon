@@ -268,8 +268,8 @@
           👑
         </div>
         <div class="leading-tight">
-          <span id="admin-name" class="block text-xs font-bold text-white">Dr. Ramesh Rao</span>
-          <span id="admin-role-badge" class="block text-[10px] font-mono text-emerald-400">Super Admin (MCC)</span>
+          <span id="admin-name" class="block text-xs font-bold text-white">Administrator</span>
+          <span id="admin-role-badge" class="block text-[10px] font-mono text-emerald-400">Super Admin</span>
         </div>
       </div>
       <button onclick="handleAdminLogout()" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-white/5 transition cursor-pointer" title="Sign Out">
@@ -1253,37 +1253,54 @@
           }
         }
 
-        // Fetch Users (Renders real system users)
+        // Fetch Users (Renders real system users & registered customers)
         const resUsers = await fetch('/api/users');
+        let registeredUsers = [];
+        try {
+          registeredUsers = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+        } catch(e) {}
+
+        let usersList = [];
         if (resUsers.ok) {
-          const users = await resUsers.json();
-          const tableUsers = document.getElementById('table-users');
-          if (users.length === 0) {
-            // Render configured department heads as real system users
-            const deptUsers = [
-              { name: departmentsState.mcc.headName, role: 'MCC Admin', phone: departmentsState.mcc.phone, email: departmentsState.mcc.email, area: 'Mysuru City Urban', permissions: 'Full MCC Admin Rights', status: 'Active' },
-              { name: departmentsState.gp.headName, role: 'Gram Panchayat Admin', phone: departmentsState.gp.phone, email: departmentsState.gp.email, area: 'Bogadi Gram Panchayat', permissions: 'Panchayat Officer Rights', status: 'Active' },
-              { name: departmentsState.tp.headName, role: 'Town Panchayat Admin', phone: departmentsState.tp.phone, email: departmentsState.tp.email, area: 'Hootagalli Town Panchayat', permissions: 'Suburban Officer Rights', status: 'Active' }
-            ];
-            tableUsers.innerHTML = deptUsers.map(u => `
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3 font-bold text-slate-900">${u.name}</td>
-                <td class="px-4 py-3"><span class="badge-status badge-active">${u.role}</span></td>
-                <td class="px-4 py-3 font-mono text-slate-600">${u.phone}<br>${u.email}</td>
-                <td class="px-4 py-3 text-slate-700">${u.area}</td>
-                <td class="px-4 py-3 text-slate-500 text-[11px]">${u.permissions}</td>
-                <td class="px-4 py-3"><span class="badge-status badge-approved">${u.status}</span></td>
+          try {
+            usersList = await resUsers.json();
+          } catch(e) {}
+        }
+
+        // Merge any local registered users not in api list
+        registeredUsers.forEach(ru => {
+          if (!usersList.find(u => (u.email || '').toLowerCase().trim() === (ru.email || '').toLowerCase().trim())) {
+            usersList.push({
+              name: ru.name || 'User',
+              role: ru.authority || (ru.role === 'admin' ? 'Admin' : 'Customer'),
+              phone: ru.phone || 'N/A',
+              email: ru.email,
+              area: ru.department || (ru.role === 'admin' ? 'Mysuru Municipal Authority' : 'Mysuru Citizen Portal'),
+              permissions: ru.role === 'admin' ? 'Full System & Inspection Rights' : 'Lodge & Track Debris Clearances',
+              status: 'Active'
+            });
+          }
+        });
+
+        const tableUsers = document.getElementById('table-users');
+        if (tableUsers) {
+          if (usersList.length === 0) {
+            tableUsers.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">
+                  No registered users yet. Newly registered customer and admin accounts will appear here automatically.
+                </td>
               </tr>
-            `).join('');
+            `;
           } else {
-            tableUsers.innerHTML = users.map(u => `
+            tableUsers.innerHTML = usersList.map(u => `
               <tr class="hover:bg-slate-50">
                 <td class="px-4 py-3 font-bold text-slate-900">${u.name}</td>
-                <td class="px-4 py-3"><span class="badge-status badge-active">${u.role}</span></td>
-                <td class="px-4 py-3 font-mono text-slate-600">${u.phone}<br>${u.email}</td>
+                <td class="px-4 py-3"><span class="badge-status ${u.role && u.role.toLowerCase().includes('admin') ? 'badge-approved' : 'badge-active'}">${u.role}</span></td>
+                <td class="px-4 py-3 font-mono text-slate-600">${u.phone}<br><span class="text-emerald-700 font-medium">${u.email}</span></td>
                 <td class="px-4 py-3 text-slate-700">${u.area}</td>
                 <td class="px-4 py-3 text-slate-500 text-[11px]">${u.permissions}</td>
-                <td class="px-4 py-3"><span class="badge-status badge-approved">${u.status}</span></td>
+                <td class="px-4 py-3"><span class="badge-status badge-approved">${u.status || 'Active'}</span></td>
               </tr>
             `).join('');
           }
@@ -1349,7 +1366,7 @@
         rolePill: 'Role: MCC Admin',
         badgeColor: 'bg-emerald-100 text-emerald-800',
         organization: 'Mysuru City Corporation (MCC)',
-        headName: 'Dr. Ramesh Rao / Sri. Suresh Kumar',
+        headName: 'MCC Executive Officer',
         designation: 'Executive Engineer / C&D Waste Incharge',
         empId: 'MCC-ADM-101',
         phone: '+91 98450 00002',
@@ -1371,7 +1388,7 @@
         badgeColor: 'bg-amber-100 text-amber-800',
         organization: 'Bogadi Gram Panchayat',
         gpId: 'GP-KA-MYS-042',
-        headName: 'Smt. Lakshmi Devi',
+        headName: 'Gram Panchayat PDO',
         designation: 'Panchayat Development Officer (PDO)',
         empId: 'GP-PDO-201',
         phone: '+91 98450 00003',
@@ -1395,7 +1412,7 @@
         badgeColor: 'bg-blue-100 text-blue-800',
         organization: 'Hootagalli Town Panchayat (CMC)',
         tpId: 'TP-KA-MYS-018',
-        headName: 'Sri. Venkatesh M',
+        headName: 'Town Panchayat Chief Officer',
         designation: 'Chief Officer / Zonal Superintendent',
         empId: 'TP-CO-308',
         phone: '+91 98450 00004',
@@ -1414,7 +1431,21 @@
     };
 
     let currentSelectedDept = 'mcc';
-    let departmentsState = JSON.parse(localStorage.getItem('civic_departments_config') || JSON.stringify(DEFAULT_DEPARTMENTS_CONFIG));
+    let rawDeptConfig = localStorage.getItem('civic_departments_config');
+    let departmentsState = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS_CONFIG));
+    if (rawDeptConfig) {
+      try {
+        const parsed = JSON.parse(rawDeptConfig);
+        ['mcc', 'gp', 'tp'].forEach(k => {
+          if (parsed[k]) {
+            if (parsed[k].headName && (parsed[k].headName.includes('Ramesh Rao') || parsed[k].headName.includes('Lakshmi Devi') || parsed[k].headName.includes('Venkatesh M'))) {
+              parsed[k].headName = DEFAULT_DEPARTMENTS_CONFIG[k].headName;
+            }
+          }
+        });
+        departmentsState = { ...DEFAULT_DEPARTMENTS_CONFIG, ...parsed };
+      } catch(e) {}
+    }
     let additionalOfficers = JSON.parse(localStorage.getItem('civic_additional_officers') || '[]');
 
     function selectDepartment(key) {
