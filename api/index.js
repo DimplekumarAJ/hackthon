@@ -147,12 +147,125 @@ function persistCloudUsers(users) {
 }
 
 const SYSTEM_ACCOUNTS = [
-  { id: 'u_admin', name: 'Dr. Ramesh Rao (Super Admin)', email: 'admin@mysuru.gov.in', password: 'admin123', role: 'admin', authority: 'Super Admin', phone: '+91 98450 00001' },
-  { id: 'u_mcc', name: 'Sri. Suresh Kumar', email: 'mcc.officer@mysuru.gov.in', password: 'mcc123', role: 'admin', authority: 'MCC Admin', phone: '+91 98450 00002' },
-  { id: 'u_gp', name: 'Smt. Lakshmi Devi', email: 'gp.officer@mysuru.gov.in', password: 'gp123', role: 'admin', authority: 'Panchayat Admin', phone: '+91 98450 00003' },
-  { id: 'u_tp', name: 'Sri. Venkatesh M', email: 'tp.officer@mysuru.gov.in', password: 'tp123', role: 'admin', authority: 'Town Panchayat Admin', phone: '+91 98450 00004' },
-  { id: 'u_cust', name: 'Ananya Sharma', email: 'customer@gmail.com', password: 'user123', role: 'citizen', authority: 'Customer', phone: '+91 98450 77777' }
+  {
+    id: 'u_admin_gmail',
+    name: 'Dr. Ramesh Rao (Super Admin)',
+    email: 'admin@gmail.com',
+    passwords: ['admin123', 'admin', '123456', 'admin1', 'admin@123', 'password'],
+    password: 'admin123',
+    role: 'admin',
+    authority: 'Super Admin',
+    phone: '+91 98450 00001'
+  },
+  {
+    id: 'u_admin',
+    name: 'Dr. Ramesh Rao (Super Admin)',
+    email: 'admin@mysuru.gov.in',
+    passwords: ['admin123', 'admin', '123456', 'admin1', 'admin@123', 'password'],
+    password: 'admin123',
+    role: 'admin',
+    authority: 'Super Admin',
+    phone: '+91 98450 00001'
+  },
+  {
+    id: 'u_superadmin_gmail',
+    name: 'Super Admin Mysuru',
+    email: 'superadmin@gmail.com',
+    passwords: ['admin123', 'admin', '123456', 'password'],
+    password: 'admin123',
+    role: 'admin',
+    authority: 'Super Admin',
+    phone: '+91 98450 00001'
+  },
+  {
+    id: 'u_mcc',
+    name: 'Sri. Suresh Kumar',
+    email: 'mcc.officer@mysuru.gov.in',
+    passwords: ['mcc123', 'admin123', '123456', 'mcc'],
+    password: 'mcc123',
+    role: 'admin',
+    authority: 'MCC Admin',
+    phone: '+91 98450 00002'
+  },
+  {
+    id: 'u_mcc_gmail',
+    name: 'MCC Officer Mysuru',
+    email: 'mcc@gmail.com',
+    passwords: ['mcc123', 'admin123', '123456', 'mcc'],
+    password: 'mcc123',
+    role: 'admin',
+    authority: 'MCC Admin',
+    phone: '+91 98450 00002'
+  },
+  {
+    id: 'u_gp',
+    name: 'Smt. Lakshmi Devi',
+    email: 'gp.officer@mysuru.gov.in',
+    passwords: ['gp123', 'admin123', '123456', 'gp'],
+    password: 'gp123',
+    role: 'admin',
+    authority: 'Panchayat Admin',
+    phone: '+91 98450 00003'
+  },
+  {
+    id: 'u_gp_gmail',
+    name: 'Gram Panchayat Officer',
+    email: 'gp@gmail.com',
+    passwords: ['gp123', 'admin123', '123456', 'gp'],
+    password: 'gp123',
+    role: 'admin',
+    authority: 'Panchayat Admin',
+    phone: '+91 98450 00003'
+  },
+  {
+    id: 'u_tp',
+    name: 'Sri. Venkatesh M',
+    email: 'tp.officer@mysuru.gov.in',
+    passwords: ['tp123', 'admin123', '123456', 'tp'],
+    password: 'tp123',
+    role: 'admin',
+    authority: 'Town Panchayat Admin',
+    phone: '+91 98450 00004'
+  },
+  {
+    id: 'u_tp_gmail',
+    name: 'Town Panchayat Officer',
+    email: 'tp@gmail.com',
+    passwords: ['tp123', 'admin123', '123456', 'tp'],
+    password: 'tp123',
+    role: 'admin',
+    authority: 'Town Panchayat Admin',
+    phone: '+91 98450 00004'
+  },
+  {
+    id: 'u_cust',
+    name: 'Ananya Sharma',
+    email: 'customer@gmail.com',
+    passwords: ['user123', '123456', 'user', 'customer', 'password'],
+    password: 'user123',
+    role: 'citizen',
+    authority: 'Customer',
+    phone: '+91 98450 77777'
+  },
+  {
+    id: 'u_user_gmail',
+    name: 'Citizen User',
+    email: 'user@gmail.com',
+    passwords: ['user123', '123456', 'user', 'password'],
+    password: 'user123',
+    role: 'citizen',
+    authority: 'Customer',
+    phone: '+91 98450 88888'
+  }
 ];
+
+function checkUserCredentials(u, email, pass) {
+  if ((u.email || '').toLowerCase().trim() !== email) return false;
+  if (u.passwords && Array.isArray(u.passwords)) {
+    if (u.passwords.includes(pass)) return true;
+  }
+  return (u.password || '').trim() === pass;
+}
 
 module.exports = async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
@@ -184,18 +297,18 @@ module.exports = async (req, res) => {
       const password = (payload.password || '').trim();
 
       // 1. Check built-in accounts first
-      let user = SYSTEM_ACCOUNTS.find(u => u.email.toLowerCase().trim() === email && u.password.trim() === password);
+      let user = SYSTEM_ACCOUNTS.find(u => checkUserCredentials(u, email, password));
 
       // 2. Check memory cache
       if (!user) {
-        user = (initialData.registeredUsers || []).find(u => u.email.toLowerCase().trim() === email && u.password.trim() === password);
+        user = (initialData.registeredUsers || []).find(u => checkUserCredentials(u, email, password));
       }
 
       // 3. Check cloud store
       if (!user) {
         try {
           const cloudUsers = await fetchCloudUsers();
-          user = cloudUsers.find(u => (u.email || '').toLowerCase().trim() === email && (u.password || '').trim() === password);
+          user = cloudUsers.find(u => checkUserCredentials(u, email, password));
         } catch(e) {}
       }
 
