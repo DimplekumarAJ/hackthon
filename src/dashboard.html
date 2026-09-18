@@ -579,7 +579,7 @@
             </div>
             <div>
               <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Officers</p>
-              <h4 id="stat-total-officers" class="text-2xl font-extrabold text-slate-900 mt-0.5">8 Active</h4>
+              <h4 id="stat-total-officers" class="text-2xl font-extrabold text-slate-900 mt-0.5">3 Active</h4>
             </div>
           </div>
           <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
@@ -588,7 +588,7 @@
             </div>
             <div>
               <p class="text-xs font-bold uppercase tracking-wider text-slate-500">MCC Officers</p>
-              <h4 id="stat-mcc-officers" class="text-2xl font-extrabold text-emerald-800 mt-0.5">3 Assigned</h4>
+              <h4 id="stat-mcc-officers" class="text-2xl font-extrabold text-emerald-800 mt-0.5">1 Assigned</h4>
             </div>
           </div>
           <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
@@ -597,7 +597,7 @@
             </div>
             <div>
               <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Gram Panchayat</p>
-              <h4 id="stat-gp-officers" class="text-2xl font-extrabold text-amber-800 mt-0.5">3 Assigned</h4>
+              <h4 id="stat-gp-officers" class="text-2xl font-extrabold text-amber-800 mt-0.5">1 Assigned</h4>
             </div>
           </div>
           <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex items-center gap-4">
@@ -606,7 +606,7 @@
             </div>
             <div>
               <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Town Panchayat</p>
-              <h4 id="stat-tp-officers" class="text-2xl font-extrabold text-blue-800 mt-0.5">2 Assigned</h4>
+              <h4 id="stat-tp-officers" class="text-2xl font-extrabold text-blue-800 mt-0.5">1 Assigned</h4>
             </div>
           </div>
         </div>
@@ -1929,94 +1929,22 @@
       const tbody = document.getElementById('table-inspectors');
       if (!tbody) return;
 
-      // Base department heads
+      // Real configured department accounts
       const baseOfficers = [
-        { ...departmentsState.mcc, type: 'mcc', activeCases: '8 Cases Active', dutyZone: 'MCC Urban Zone 1-4' },
-        { ...departmentsState.gp, type: 'gp', activeCases: '4 Cases Active', dutyZone: 'Bogadi Rural Cluster' },
-        { ...departmentsState.tp, type: 'tp', activeCases: '5 Cases Active', dutyZone: 'Hootagalli Industrial' }
+        { ...departmentsState.mcc, type: 'mcc', activeCases: '0 Active Cases', dutyZone: departmentsState.mcc.jurisdiction || 'MCC Urban Zones' },
+        { ...departmentsState.gp, type: 'gp', activeCases: '0 Active Cases', dutyZone: departmentsState.gp.jurisdiction || 'Bogadi Rural Cluster' },
+        { ...departmentsState.tp, type: 'tp', activeCases: '0 Active Cases', dutyZone: departmentsState.tp.jurisdiction || 'Hootagalli Industrial' }
       ];
 
-      // Default pre-seeded field inspectors
-      const defaultFieldSquad = [
-        {
-          type: 'mcc',
-          icon: '🏛️',
-          organization: 'Mysuru City Corporation (MCC)',
-          headName: 'Sri. Ravi Kumar N',
-          designation: 'Senior Ward Sanitary Inspector',
-          empId: 'MCC-INSP-104',
-          email: 'ravi.mcc@gmail.com',
-          password: 'mcc123',
-          phone: '+91 98450 11002',
-          jurisdiction: 'Zone 3 & 4 (Kuvempunagar, Saraswathipuram)',
-          pinCodes: '570009, 570023',
-          activeCases: '6 Cases Active',
-          dutyZone: 'Zone 3 Field Squad',
-          role: 'MCC Ward Inspector',
-          status: 'Active'
-        },
-        {
-          type: 'mcc',
-          icon: '🏛️',
-          organization: 'Mysuru City Corporation (MCC)',
-          headName: 'Sri. Anand Prakash',
-          designation: 'Field Inspection Officer (Debris Audit)',
-          empId: 'MCC-INSP-108',
-          email: 'anand.mcc@gmail.com',
-          password: 'mcc123',
-          phone: '+91 98450 11005',
-          jurisdiction: 'Zone 1 & 2 (Central Market, Sayyaji Rao Rd)',
-          pinCodes: '570001, 570004',
-          activeCases: '3 Cases Active',
-          dutyZone: 'Zone 1 Enforcement',
-          role: 'MCC Ward Inspector',
-          status: 'Active'
-        },
-        {
-          type: 'gp',
-          icon: '🏡',
-          organization: 'Bogadi Gram Panchayat',
-          headName: 'Sri. Ningappa Gowda',
-          designation: 'Panchayat Field Village Assistant',
-          empId: 'GP-VA-204',
-          email: 'ningappa.gp@gmail.com',
-          password: 'gp123',
-          phone: '+91 98450 22004',
-          jurisdiction: 'Maratikyathanahalli & Belavadi Outskirts',
-          pinCodes: '570026, 571130',
-          activeCases: '2 Cases Active',
-          dutyZone: 'Rural Ward 2 & 3',
-          role: 'Panchayat Inspector',
-          status: 'Active'
-        },
-        {
-          type: 'tp',
-          icon: '🏭',
-          organization: 'Hootagalli Town Panchayat (CMC)',
-          headName: 'Smt. Shailaja R',
-          designation: 'Town Sanitary Supervisor',
-          empId: 'TP-SS-305',
-          email: 'shailaja.tp@gmail.com',
-          password: 'tp123',
-          phone: '+91 98450 33008',
-          jurisdiction: 'Koorgalli & Belagola Industrial Belt',
-          pinCodes: '570018, 571607',
-          activeCases: '4 Cases Active',
-          dutyZone: 'Industrial Sector 2',
-          role: 'Town Panchayat Inspector',
-          status: 'Active'
-        }
-      ];
-
-      // Custom officers added by Super Admin via "+ Add Office Member"
+      // Custom officers created via "+ Add Office Member"
       const customSquad = additionalOfficers.map(off => ({
         ...off,
-        activeCases: '1 Case Assigned',
+        activeCases: '0 Active Cases',
         dutyZone: off.jurisdiction || 'Assigned Ward'
       }));
 
-      // Combine all
-      const allOfficers = [...baseOfficers, ...defaultFieldSquad, ...customSquad];
+      // Combine only created/configured accounts (no mock/fake squad)
+      const allOfficers = [...baseOfficers, ...customSquad];
 
       // Update Department Summary Counters
       const mccCount = allOfficers.filter(o => o.type === 'mcc').length;
