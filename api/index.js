@@ -287,14 +287,16 @@ module.exports = async (req, res) => {
         }
       });
 
-      if (allRegistered.find(u => u.email.toLowerCase().trim() === email) || SYSTEM_ACCOUNTS.find(u => u.email.toLowerCase().trim() === email)) {
+      const isInspector = payload.role === 'inspector' || (payload.authority && payload.authority.toLowerCase().includes('inspector'));
+      const existingRegisteredIdx = allRegistered.findIndex(u => (u.email || '').toLowerCase().trim() === email);
+
+      if (existingRegisteredIdx >= 0 && !isInspector) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, message: 'Email already exists' }));
         return;
       }
 
-      const isInspector = payload.role === 'inspector' || (payload.authority && payload.authority.toLowerCase().includes('inspector'));
-      const isFirst = (nonSystemCount === 0) && !isInspector;
+      const isFirst = (allRegistered.length === 0) && !isInspector;
       const newUser = {
         id: 'u_' + Date.now(),
         name: name || 'User',
@@ -302,6 +304,7 @@ module.exports = async (req, res) => {
         phone,
         password,
         role: isInspector ? 'inspector' : (isFirst ? 'admin' : (payload.role || 'citizen')),
+        department: (payload.department || '').trim(),
         authority: isInspector ? (payload.authority || 'Ward Inspector (PIN: ' + (payload.assignedPin || payload.pin || '570001') + ')') : (isFirst ? 'Super Admin' : (payload.authority || 'Customer')),
         assignedPin: (payload.assignedPin || payload.pin || '').trim(),
         assignedArea: (payload.assignedArea || payload.area || '').trim(),
@@ -309,8 +312,20 @@ module.exports = async (req, res) => {
         createdAt: new Date().toISOString()
       };
 
-      initialData.registeredUsers.push(newUser);
-      cloudUsers.push(newUser);
+      if (!initialData.registeredUsers) initialData.registeredUsers = [];
+      const localIdx = initialData.registeredUsers.findIndex(u => (u.email || '').toLowerCase().trim() === email);
+      if (localIdx >= 0) {
+        initialData.registeredUsers[localIdx] = newUser;
+      } else {
+        initialData.registeredUsers.push(newUser);
+      }
+
+      const cloudIdx = cloudUsers.findIndex(u => (u.email || '').toLowerCase().trim() === email);
+      if (cloudIdx >= 0) {
+        cloudUsers[cloudIdx] = newUser;
+      } else {
+        cloudUsers.push(newUser);
+      }
 
       // Persist to cloud store asynchronously
       persistCloudUsers(cloudUsers).catch(() => {});

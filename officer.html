@@ -851,6 +851,13 @@
     </div>
   </main>
 
+  <!-- Modal Container for Inspector Creation & Photo Previews -->
+  <div id="modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="modal-container" class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
+      <!-- Dynamically Injected Modal Content -->
+    </div>
+  </div>
+
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT CONTROLLER                                                     -->
   <!-- ========================================================================= -->
@@ -1499,20 +1506,26 @@
 
       // Save to localStorage
       const users = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-      if (!users.find(u => (u.email || '').toLowerCase() === email)) {
+      const userIdx = users.findIndex(u => (u.email || '').toLowerCase() === email);
+      if (userIdx >= 0) {
+        users[userIdx] = newInspector;
+      } else {
         users.push(newInspector);
-        localStorage.setItem('civic_registered_users', JSON.stringify(users));
       }
+      localStorage.setItem('civic_registered_users', JSON.stringify(users));
 
       const inspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
-      if (!inspectors.find(i => (i.email || '').toLowerCase() === email)) {
+      const insIdx = inspectors.findIndex(i => (i.email || '').toLowerCase() === email);
+      if (insIdx >= 0) {
+        inspectors[insIdx] = newInspector;
+      } else {
         inspectors.push(newInspector);
-        localStorage.setItem('civic_inspectors', JSON.stringify(inspectors));
       }
+      localStorage.setItem('civic_inspectors', JSON.stringify(inspectors));
 
       closeModal();
       await loadData();
-      showToast('🎉 Inspector account created for ' + name + ' (PIN: ' + assignedPin + ')! They can now log in using their Gmail and Password.', 'success');
+      showToast('🎉 Inspector account created for ' + name + ' (' + email + ', PIN: ' + assignedPin + ')! They can now log in immediately.', 'success');
     }
 
     function renderInspectorsTable() {

@@ -110,6 +110,20 @@
       "role": "citizen",
       "authority": "Customer",
       "createdAt": "2026-09-18T17:23:04.029Z"
+    },
+    {
+      "id": "u_1789756401751",
+      "name": "Ramesh Kumar",
+      "email": "ramesh.inspector@gmail.com",
+      "phone": "9845011005",
+      "password": "ramesh123",
+      "role": "inspector",
+      "department": "",
+      "authority": "Ward Inspector (PIN: 570001)",
+      "assignedPin": "570001",
+      "assignedArea": "Ward 14 Palace Area",
+      "designation": "Ward Health Inspector",
+      "createdAt": "2026-09-18T18:33:21.751Z"
     }
   ]
 }

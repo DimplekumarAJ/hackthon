@@ -342,10 +342,16 @@
     function getAllUsers() {
       try {
         const stored = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
+        const storedInspectors = JSON.parse(localStorage.getItem('civic_inspectors') || '[]');
         const merged = [...SYSTEM_ACCOUNTS];
         stored.forEach(su => {
           if (!merged.find(m => (m.email || '').toLowerCase().trim() === (su.email || '').toLowerCase().trim())) {
             merged.push(su);
+          }
+        });
+        storedInspectors.forEach(si => {
+          if (!merged.find(m => (m.email || '').toLowerCase().trim() === (si.email || '').toLowerCase().trim())) {
+            merged.push(si);
           }
         });
         return merged;
