@@ -467,33 +467,28 @@
 
       let user = null;
 
-      // 1. Check local & built-in accounts (Instant)
-      const allUsers = getAllUsers();
-      user = allUsers.find(u => checkUserCredentials(u, emailInput, passwordInput));
-
-      // 2. If not matched locally, query server / cloud backend
-      if (!user) {
-        try {
-          const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: emailInput, password: passwordInput })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && data.user) {
-              user = data.user;
-              const registered = JSON.parse(localStorage.getItem('civic_registered_users') || '[]');
-              if (!registered.find(r => (r.email || '').toLowerCase().trim() === user.email.toLowerCase().trim())) {
-                registered.push(user);
-                localStorage.setItem('civic_registered_users', JSON.stringify(registered));
-              }
-            }
+      // 1. Authenticate with Supabase Database Backend (Enables instant multi-device login)
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailInput, password: passwordInput })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            user = data.user;
           }
-        } catch(err) {}
+        }
+      } catch(err) {}
+
+      // 2. Local fallback if offline
+      if (!user) {
+        const allUsers = getAllUsers();
+        user = allUsers.find(u => checkUserCredentials(u, emailInput, passwordInput));
       }
 
-      // If fake / invalid email or password
+      // If invalid credentials
       if (!user) {
         showToast('Invalid email or password. Please check your credentials.', 'error');
         return;

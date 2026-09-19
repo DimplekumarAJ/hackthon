@@ -265,12 +265,25 @@ const server = http.createServer(async (req, res) => {
         // 1. Check built-in accounts
         let user = SYSTEM_ACCOUNTS.find(u => checkUserCredentials(u, email, password));
 
-        // 2. Check local database
+        // 2. Check Supabase users table (Real-time from any device)
+        if (!user && supabase) {
+          try {
+            const { data: suUser } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+            if (suUser) {
+              const mappedUser = mapDbToUser(suUser);
+              if (checkUserCredentials(mappedUser, email, password)) {
+                user = mappedUser;
+              }
+            }
+          } catch(e) {}
+        }
+
+        // 3. Check local database
         if (!user) {
           user = (db.registeredUsers || []).find(u => checkUserCredentials(u, email, password));
         }
 
-        // 3. Check cloud store
+        // 4. Check cloud store
         if (!user) {
           try {
             const cloudUsers = await fetchCloudUsers();
@@ -300,6 +313,20 @@ const server = http.createServer(async (req, res) => {
         const phone = (payload.phone || '').trim();
         const password = (payload.password || '').trim();
 
+        const isInspector = payload.role === 'inspector' || (payload.authority && payload.authority.toLowerCase().includes('inspector'));
+
+        // Check if user already exists in Supabase
+        if (supabase) {
+          try {
+            const { data: existingSu } = await supabase.from('users').select('id, email').eq('email', email).maybeSingle();
+            if (existingSu && !isInspector) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: false, message: 'An account with this email already exists in the database. Please sign in.' }));
+              return;
+            }
+          } catch(e) {}
+        }
+
         let cloudUsers = [];
         try {
           cloudUsers = await fetchCloudUsers();
@@ -312,7 +339,6 @@ const server = http.createServer(async (req, res) => {
           }
         });
 
-        const isInspector = payload.role === 'inspector' || (payload.authority && payload.authority.toLowerCase().includes('inspector'));
         const existingRegisteredIdx = allRegistered.findIndex(u => (u.email || '').toLowerCase().trim() === email);
 
         if (existingRegisteredIdx >= 0 && !isInspector) {
@@ -323,17 +349,20 @@ const server = http.createServer(async (req, res) => {
 
         const isFirst = (allRegistered.length === 0) && !isInspector;
         const newUser = {
-          id: 'u_' + Date.now(),
+          id: payload.id || ('u_' + Date.now()),
           name: name || 'User',
           email,
           phone,
           password,
           role: isInspector ? 'inspector' : (isFirst ? 'admin' : (payload.role || 'citizen')),
           department: (payload.department || '').trim(),
+          departmentName: (payload.departmentName || payload.department_name || '').trim(),
           authority: isInspector ? (payload.authority || 'Ward Inspector (PIN: ' + (payload.assignedPin || payload.pin || '570001') + ')') : (isFirst ? 'Super Admin' : (payload.authority || 'Customer')),
           assignedPin: (payload.assignedPin || payload.pin || '').trim(),
           assignedArea: (payload.assignedArea || payload.area || '').trim(),
           designation: (payload.designation || 'Ward Health Inspector').trim(),
+          createdBy: (payload.createdBy || payload.created_by || '').trim(),
+          status: 'Active',
           createdAt: new Date().toISOString()
         };
 
@@ -349,7 +378,7 @@ const server = http.createServer(async (req, res) => {
         // Supabase DB Persistence
         if (supabase) {
           try {
-            supabase.from('users').upsert(mapUserToDb(newUser)).catch(() => {});
+            await supabase.from('users').upsert(mapUserToDb(newUser));
           } catch(e) {}
         }
 
