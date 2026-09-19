@@ -87,126 +87,13 @@ function persistCloudUsers(users) {
       res.on('end', () => resolve(true));
     });
     req.on('error', () => resolve(false));
-    req.write(payload);
-    req.end();
-  });
-}
+};
 
-const SYSTEM_ACCOUNTS = [
-  {
-    id: 'u_admin_gmail',
-    name: 'Super Administrator',
-    email: 'admin@gmail.com',
-    passwords: ['admin123', 'admin', '123456', 'admin1', 'admin@123', 'password'],
-    password: 'admin123',
-    role: 'admin',
-    authority: 'Super Admin',
-    phone: '+91 98450 00001'
-  },
-  {
-    id: 'u_admin',
-    name: 'Super Administrator',
-    email: 'admin@mysuru.gov.in',
-    passwords: ['admin123', 'admin', '123456', 'admin1', 'admin@123', 'password'],
-    password: 'admin123',
-    role: 'admin',
-    authority: 'Super Admin',
-    phone: '+91 98450 00001'
-  },
-  {
-    id: 'u_superadmin_gmail',
-    name: 'Super Administrator',
-    email: 'superadmin@gmail.com',
-    passwords: ['admin123', 'admin', '123456', 'password'],
-    password: 'admin123',
-    role: 'admin',
-    authority: 'Super Admin',
-    phone: '+91 98450 00001'
-  },
-  {
-    id: 'u_mcc',
-    name: 'MCC Executive Officer',
-    email: 'mcc.officer@mysuru.gov.in',
-    passwords: ['mcc123', 'admin123', '123456', 'mcc'],
-    password: 'mcc123',
-    role: 'admin',
-    authority: 'MCC Admin',
-    phone: '+91 98450 00002'
-  },
-  {
-    id: 'u_mcc_gmail',
-    name: 'MCC Executive Officer',
-    email: 'mcc@gmail.com',
-    passwords: ['mcc123', 'admin123', '123456', 'mcc'],
-    password: 'mcc123',
-    role: 'admin',
-    authority: 'MCC Admin',
-    phone: '+91 98450 00002'
-  },
-  {
-    id: 'u_gp',
-    name: 'Gram Panchayat PDO',
-    email: 'gp.officer@mysuru.gov.in',
-    passwords: ['gp123', 'admin123', '123456', 'gp'],
-    password: 'gp123',
-    role: 'admin',
-    authority: 'Panchayat Admin',
-    phone: '+91 98450 00003'
-  },
-  {
-    id: 'u_gp_gmail',
-    name: 'Gram Panchayat PDO',
-    email: 'gp@gmail.com',
-    passwords: ['gp123', 'admin123', '123456', 'gp'],
-    password: 'gp123',
-    role: 'admin',
-    authority: 'Panchayat Admin',
-    phone: '+91 98450 00003'
-  },
-  {
-    id: 'u_tp',
-    name: 'Town Panchayat Chief Officer',
-    email: 'tp.officer@mysuru.gov.in',
-    passwords: ['tp123', 'admin123', '123456', 'tp'],
-    password: 'tp123',
-    role: 'admin',
-    authority: 'Town Panchayat Admin',
-    phone: '+91 98450 00004'
-  },
-  {
-    id: 'u_tp_gmail',
-    name: 'Town Panchayat Chief Officer',
-    email: 'tp@gmail.com',
-    passwords: ['tp123', 'admin123', '123456', 'tp'],
-    password: 'tp123',
-    role: 'admin',
-    authority: 'Town Panchayat Admin',
-    phone: '+91 98450 00004'
-  },
-  {
-    id: 'u_cust',
-    name: 'Ananya Sharma',
-    email: 'customer@gmail.com',
-    passwords: ['user123', '123456', 'user', 'customer', 'password'],
-    password: 'user123',
-    role: 'citizen',
-    authority: 'Customer',
-    phone: '+91 98450 77777'
-  },
-  {
-    id: 'u_user_gmail',
-    name: 'Citizen User',
-    email: 'user@gmail.com',
-    passwords: ['user123', '123456', 'user', 'password'],
-    password: 'user123',
-    role: 'citizen',
-    authority: 'Customer',
-    phone: '+91 98450 88888'
-  }
-];
+// Clean start: All accounts and data stored dynamically on Supabase
+const SYSTEM_ACCOUNTS = [];
 
 function checkUserCredentials(u, email, pass) {
-  if ((u.email || '').toLowerCase().trim() !== email) return false;
+  if ((u.email || '').toLowerCase().trim() !== email.toLowerCase().trim()) return false;
   if (u.passwords && Array.isArray(u.passwords)) {
     if (u.passwords.includes(pass)) return true;
   }
@@ -324,7 +211,21 @@ module.exports = async (req, res) => {
         return;
       }
 
-      const isFirst = (allRegistered.length === 0) && !isInspector;
+      // Dynamically check if this is the very 1st user in Supabase
+      let isFirst = false;
+      if (!isInspector && !payload.role) {
+        if (supabase) {
+          try {
+            const { count } = await supabase.from('users').select('*', { count: 'exact', head: true });
+            isFirst = (count === 0 || count === null);
+          } catch(e) {
+            isFirst = (allRegistered.length === 0);
+          }
+        } else {
+          isFirst = (allRegistered.length === 0);
+        }
+      }
+
       const newUser = {
         id: payload.id || ('u_' + Date.now()),
         name: name || 'User',
@@ -334,10 +235,10 @@ module.exports = async (req, res) => {
         role: isInspector ? 'inspector' : (isFirst ? 'admin' : (payload.role || 'citizen')),
         department: (payload.department || '').trim(),
         departmentName: (payload.departmentName || payload.department_name || '').trim(),
-        authority: isInspector ? (payload.authority || 'Ward Inspector (PIN: ' + (payload.assignedPin || payload.pin || '570001') + ')') : (isFirst ? 'Super Admin' : (payload.authority || 'Customer')),
+        authority: isInspector ? (payload.authority || ('Ward Inspector (PIN: ' + (payload.assignedPin || payload.pin || '570001') + ')')) : (isFirst ? 'Super Admin' : (payload.authority || (payload.role === 'officer' ? 'Officer' : 'Customer'))),
         assignedPin: (payload.assignedPin || payload.pin || '').trim(),
         assignedArea: (payload.assignedArea || payload.area || '').trim(),
-        designation: (payload.designation || 'Ward Health Inspector').trim(),
+        designation: isFirst ? 'Super Administrator' : (payload.designation || (isInspector ? 'Ward Health Inspector' : (payload.role === 'officer' ? 'Executive Officer' : 'Citizen'))),
         createdBy: (payload.createdBy || payload.created_by || '').trim(),
         status: 'Active',
         createdAt: new Date().toISOString()
