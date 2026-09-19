@@ -1,8 +1,10 @@
+require('dotenv').config();
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const { supabase, mapAppToDb, mapDbToApp, mapUserToDb, mapDbToUser } = require('./lib/supabase');
 
 const PORT = process.env.PORT || 8000;
 const DATA_FILE = path.join(__dirname, 'database.json');
@@ -344,6 +346,13 @@ const server = http.createServer(async (req, res) => {
         }
         saveDB(db);
 
+        // Supabase DB Persistence
+        if (supabase) {
+          try {
+            supabase.from('users').upsert(mapUserToDb(newUser)).catch(() => {});
+          } catch(e) {}
+        }
+
         const cloudIdx = cloudUsers.findIndex(u => (u.email || '').toLowerCase().trim() === email);
         if (cloudIdx >= 0) {
           cloudUsers[cloudIdx] = newUser;
@@ -364,6 +373,22 @@ const server = http.createServer(async (req, res) => {
         cloudUsers = await fetchCloudUsers();
       } catch(e) {}
       const combined = [...SYSTEM_ACCOUNTS];
+
+      // Fetch from Supabase
+      if (supabase) {
+        try {
+          const { data: suUsers } = await supabase.from('users').select('*');
+          if (Array.isArray(suUsers)) {
+            suUsers.forEach(row => {
+              const u = mapDbToUser(row);
+              if (!combined.find(c => c.email.toLowerCase() === u.email.toLowerCase())) {
+                combined.push(u);
+              }
+            });
+          }
+        } catch(e) {}
+      }
+
       cloudUsers.forEach(u => {
         if (!combined.find(c => c.email.toLowerCase() === u.email.toLowerCase())) {
           combined.push(u);
@@ -390,6 +415,14 @@ const server = http.createServer(async (req, res) => {
     // 2. Applications
     if (pathname === '/api/applications') {
       if (method === 'GET') {
+        if (supabase) {
+          try {
+            const { data: suApps } = await supabase.from('applications').select('*').order('created_at', { ascending: false });
+            if (Array.isArray(suApps) && suApps.length > 0) {
+              db.applications = suApps.map(mapDbToApp);
+            }
+          } catch(e) {}
+        }
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(db.applications));
         return;
@@ -397,7 +430,7 @@ const server = http.createServer(async (req, res) => {
       if (method === 'POST') {
         let body = '';
         req.on('data', chunk => body += chunk);
-        req.on('end', () => {
+        req.on('end', async () => {
           const item = JSON.parse(body || '{}');
           item.id = item.id || ('#MCC' + new Date().getFullYear() + Math.floor(100000 + Math.random() * 900000));
           
@@ -449,6 +482,13 @@ const server = http.createServer(async (req, res) => {
           if (matchedCustom) {
             mergedItem.assignedInspectorName = matchedCustom.name;
             mergedItem.assignedInspectorEmail = matchedCustom.email;
+          }
+
+          // Upsert to Supabase
+          if (supabase) {
+            try {
+              await supabase.from('applications').upsert(mapAppToDb(mergedItem));
+            } catch(e) {}
           }
 
           // Update applications collection
