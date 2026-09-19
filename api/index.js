@@ -87,7 +87,10 @@ function persistCloudUsers(users) {
       res.on('end', () => resolve(true));
     });
     req.on('error', () => resolve(false));
-};
+    req.write(payload);
+    req.end();
+  });
+}
 
 // Clean start: All accounts and data stored dynamically on Supabase
 const SYSTEM_ACCOUNTS = [];
