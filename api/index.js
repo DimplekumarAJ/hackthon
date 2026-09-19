@@ -104,27 +104,34 @@ function checkUserCredentials(u, email, pass) {
 }
 
 module.exports = async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname;
-  const method = req.method;
+  try {
+    const parsedUrl = url.parse(req.url || '/', true);
+    const pathname = parsedUrl.pathname || req.url || '';
+    const method = req.method || 'GET';
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (method === 'OPTIONS') {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
+    if (method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
 
-  const getBody = (cb) => {
-    let body = '';
-    req.on('data', chunk => { body += chunk.toString(); });
-    req.on('end', () => {
-      try { cb(JSON.parse(body || '{}')); } catch(e) { cb({}); }
-    });
-  };
+    const getBody = (cb) => {
+      if (req.body && typeof req.body === 'object') {
+        return cb(req.body);
+      }
+      if (typeof req.body === 'string' && req.body.length > 0) {
+        try { return cb(JSON.parse(req.body)); } catch(e) { return cb({}); }
+      }
+      let body = '';
+      req.on('data', chunk => { body += chunk.toString(); });
+      req.on('end', () => {
+        try { cb(JSON.parse(body || '{}')); } catch(e) { cb({}); }
+      });
+    };
 
   // Auth endpoints
   if (pathname.includes('/auth/login') && method === 'POST') {
@@ -536,6 +543,15 @@ module.exports = async (req, res) => {
     return;
   }
 
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'API Online', version: '2.0.0', project: 'Smart Civic C&D Routing Mysuru' }));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'API Online', version: '2.0.0', project: 'Smart Civic C&D Routing Mysuru' }));
+  } catch (err) {
+    console.error('Serverless API error:', err);
+    try {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message || 'Server Error', stack: err.stack }));
+    } catch(e) {
+      res.end();
+    }
+  }
 };
