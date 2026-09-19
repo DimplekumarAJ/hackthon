@@ -1743,9 +1743,12 @@
         password: d.password || 'admin123',
         passwords: [d.password, 'admin123', 'admin'],
         phone: d.phone,
-        role: 'admin',
-        authority: d.role || 'MCC Admin',
+        role: 'officer',
+        authority: d.role || (d.organization + ' Officer'),
         department: d.organization,
+        departmentName: d.organization,
+        assignedPin: d.pinCodes || '',
+        designation: d.designation || 'Officer',
         createdAt: new Date().toISOString()
       };
 
@@ -1906,9 +1909,12 @@
         password: password.trim(),
         passwords: [password.trim(), 'admin123', 'admin'],
         phone: phone.trim(),
-        role: 'admin',
+        role: 'officer',
         authority: roleName,
         department: orgName,
+        departmentName: orgName,
+        assignedPin: deptKey === 'mcc' ? '570001, 570002' : (deptKey === 'gp' ? '570026' : '570018'),
+        designation: desig,
         createdAt: new Date().toISOString()
       };
 

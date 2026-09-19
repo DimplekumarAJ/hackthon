@@ -396,24 +396,30 @@
         const auth = (user.authority || '').toLowerCase();
         const email = (user.email || '').toLowerCase();
 
-        // 1. Super Admin Governance Console (Admin only)
-        const isSuperAdmin = role === 'admin' || role === 'super_admin' || auth === 'super admin' || auth.includes('super admin') || auth.includes('admin') || email === 'admin@gmail.com' || email === 'superadmin@gmail.com' || email === 'admin@mysuru.gov.in';
+        // 1. Field Inspector Desk (For assigned PIN code inspectors)
+        const isInspector = (role === 'inspector' || role.includes('inspector') || auth.includes('inspector') || email.includes('inspector'));
 
-        // 2. Field Inspector Desk (For assigned PIN code inspectors)
-        const isInspector = !isSuperAdmin && (role === 'inspector' || role.includes('inspector') || auth.includes('inspector'));
+        // 2. Dedicated Officer Dashboard (For MCC, Gram Panchayat, and Town Panchayat Officers)
+        const isOfficer = !isInspector && (
+          role === 'officer' || role.includes('dept') ||
+          auth.includes('panchayat') || auth.includes('town') || auth.includes('mcc') ||
+          email === 'mcc@gmail.com' || email === 'gp@gmail.com' || email === 'tp@gmail.com' ||
+          email.includes('officer') || (auth.includes('officer') && !auth.includes('super admin'))
+        );
 
-        // 3. Dedicated Officer Dashboard (For MCC, Gram Panchayat, and Town Panchayat Officers)
-        const isOfficer = !isSuperAdmin && !isInspector && (email === 'mcc@gmail.com' || email === 'gp@gmail.com' || email === 'tp@gmail.com' ||
-                          email.includes('officer@mysuru.gov.in') ||
-                          auth.includes('mcc') || auth.includes('panchayat') || auth.includes('town') ||
-                          role === 'officer' || role.includes('dept'));
+        // 3. Super Admin Governance Console (Admin only)
+        const isSuperAdmin = !isInspector && !isOfficer && (
+          role === 'admin' || role === 'super_admin' ||
+          auth === 'super admin' || auth.includes('super admin') ||
+          email === 'admin@gmail.com' || email === 'superadmin@gmail.com' || email === 'admin@mysuru.gov.in'
+        );
 
-        if (isSuperAdmin) {
-          window.location.href = 'dashboard.html';
-        } else if (isInspector) {
+        if (isInspector) {
           window.location.href = 'inspector.html';
         } else if (isOfficer) {
           window.location.href = 'officer.html';
+        } else if (isSuperAdmin) {
+          window.location.href = 'dashboard.html';
         } else {
           // Customers / Citizens open Customer Portal (citizen.html)
           window.location.href = 'citizen.html';
